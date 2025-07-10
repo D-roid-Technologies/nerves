@@ -37,7 +37,7 @@ const Navbar = ({
   };
 
   return (
-    <>
+    <>  
       <nav className={styles.navbar}>
         <div className={styles.navbarContainer}>
           {/* Left Links */}
