@@ -1,0 +1,9 @@
+.parent {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: 1fr;
+  grid-column-gap: 25px;
+  grid-row-gap: 0px;
+  margin: 50px auto;
+  width: 92%;
+}
