@@ -37,7 +37,7 @@ const Navbar = ({
   };
 
   return (
-    <>  
+    <>
       <nav className={styles.navbar}>
         <div className={styles.navbarContainer}>
           {/* Left Links */}
@@ -84,6 +84,45 @@ const Navbar = ({
               </svg>
             </button>
 
+            <button className={styles.searchIcon}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="30"
+                height="30"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1 "
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M10.268 21a2 2 0 0 0 3.464 0" />
+                <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" />
+              </svg>
+            </button>
+            {/* Cart Icon */}
+            <a href="/cart" className={styles.cartIcon} aria-label="Cart">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="30"
+                height="30"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                // class="lucide lucide-shopping-cart-icon lucide-shopping-cart"
+                className={styles.cartIcon}
+              >
+                <circle cx="8" cy="21" r="1" />
+                <circle cx="19" cy="21" r="1" />
+                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+              </svg>
+              {cartItemCount > 0 && (
+                <span className={styles.cartBadge}>{cartItemCount}</span>
+              )}
+            </a>
             {/* User Dropdown */}
             <div className={styles.userContainer}>
               <div className={styles.userDropdown}>
@@ -167,30 +206,6 @@ const Navbar = ({
                 )}
               </div>
             </div>
-
-            {/* Cart Icon */}
-            <a href="/cart" className={styles.cartIcon} aria-label="Cart">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="30"
-                height="30"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                // class="lucide lucide-shopping-cart-icon lucide-shopping-cart"
-                className={styles.cartIcon}
-              >
-                <circle cx="8" cy="21" r="1" />
-                <circle cx="19" cy="21" r="1" />
-                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
-              </svg>
-              {cartItemCount > 0 && (
-                <span className={styles.cartBadge}>{cartItemCount}</span>
-              )}
-            </a>
           </div>
         </div>
       </nav>
