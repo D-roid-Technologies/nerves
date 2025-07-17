@@ -21,10 +21,10 @@ function Homecard() {
           description="Your description text"
           buttons={[
             { text: "SHOP NOW", onClick: () => console.log("Shop clicked") },
-            {
-              text: "LEARN MORE",
-              onClick: () => console.log("Learn more clicked"),
-            },
+            // {
+            //   text: "LEARN MORE",
+            //   onClick: () => console.log("Learn more clicked"),
+            // },
           ]}
           alt="Description for screen readers"
         />
@@ -34,10 +34,10 @@ function Homecard() {
           description="Your description text"
           buttons={[
             { text: "SHOP NOW", onClick: () => console.log("Shop clicked") },
-            {
-              text: "LEARN MORE",
-              onClick: () => console.log("Learn more clicked"),
-            },
+            // {
+            //   text: "LEARN MORE",
+            //   onClick: () => console.log("Learn more clicked"),
+            // },
           ]}
           alt="Description for screen readers"
         />
