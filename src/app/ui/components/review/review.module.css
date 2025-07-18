@@ -3,7 +3,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 30px;
   background-color: #ddcac297;
   /* margin-bottom: 20px; */
   /* border-radius: 8px; */
@@ -14,8 +14,8 @@
   margin-top: 20px;
 }
 .reviewContainer p {
-  font-size: 2.4rem;
-  font-weight: 400;
+  font-size: 2.75rem;
+  font-weight: 500;
   color: #333;
   font-family: "Playfair Display", serif !important;
   margin-top: -1px;
