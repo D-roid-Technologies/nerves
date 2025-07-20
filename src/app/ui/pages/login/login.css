@@ -1,0 +1,87 @@
+/* Reuse the background image */
+.login-background {
+  width: 100%;
+  min-height: 100vh;
+  background: url("https://www.usnews.com/object/image/00000162-f3a3-d0d5-a57f-fbf33c300000/3-vestrahorn-iceland.jpg?update-time=1745871301820&size=responsive640")
+    center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.login-container {
+  width: 92%;
+  max-width: 400px;
+  padding: 40px 30px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.login-container h1 {
+  font-size: 2.5rem;
+  font-weight: 400;
+  margin-bottom: 30px;
+  color: #1a1a1a;
+  font-family: "Playfair Display", serif;
+  text-align: center;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.form-group input {
+  padding: 12px 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 15px;
+  transition: border 0.2s ease;
+}
+
+.form-group input:focus {
+  border-color: #333;
+  outline: none;
+}
+
+.login-button {
+  padding: 14px 20px;
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.login-button:hover {
+  background: #333;
+}
+
+@media (max-width: 600px) {
+  .login-container {
+    width: 95%;
+    padding: 30px 20px;
+  }
+
+  .login-container h1 {
+    font-size: 2rem;
+  }
+}

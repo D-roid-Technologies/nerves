@@ -1,7 +1,7 @@
 import React from "react";
 import "./catergories.css";
 
-function Categories() {
+const Categories: React.FunctionComponent = () => {
   return (
     <div className="grid-main-container">
       <h1>Shop By Categories</h1>

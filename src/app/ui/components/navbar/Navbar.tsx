@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { useSelector } from "react-redux";
+import { clearUser } from "../../../redux/slice/user";
+import { RootState, store } from "../../../redux/store";
 import styles from "./navbar.module.css";
 
 // Optional: If using Icon wrapper
@@ -11,15 +14,12 @@ interface NavbarProps {
   onLogout: () => void;
 }
 
-const Navbar = ({
-  isLoggedIn,
-  username,
-  cartItemCount,
-  onLogout,
-}: NavbarProps) => {
+const Navbar = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const user = useSelector((state: RootState) => state.user);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,9 +119,9 @@ const Navbar = ({
                 <circle cx="19" cy="21" r="1" />
                 <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
               </svg>
-              {cartItemCount > 0 && (
+              {/* {cartItemCount > 0 && (
                 <span className={styles.cartBadge}>{cartItemCount}</span>
-              )}
+              )} */}
             </a>
             {/* User Dropdown */}
             <div className={styles.userContainer}>
@@ -154,9 +154,8 @@ const Navbar = ({
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
-                    className={`${styles.chevron} ${
-                      showDropdown ? styles.rotate : ""
-                    }`}
+                    className={`${styles.chevron} ${showDropdown ? styles.rotate : ""
+                      }`}
                   >
                     <path
                       strokeLinecap="round"
@@ -168,10 +167,10 @@ const Navbar = ({
                 </button>
                 {showDropdown && (
                   <div className={styles.dropdownMenu}>
-                    {isLoggedIn ? (
+                    {user.isLoggedIn ? (
                       <>
                         <div className={styles.dropdownHeader}>
-                          Welcome, {username}
+                          Welcome, {user.firstName}
                         </div>
                         <a href="/account" className={styles.dropdownItem}>
                           My Account
@@ -182,7 +181,8 @@ const Navbar = ({
                         <a
                           className={styles.dropdownItem}
                           onClick={() => {
-                            onLogout();
+                            store.dispatch(clearUser())
+                            // onLogout();
                             setShowDropdown(false);
                           }}
                         >
