@@ -5,8 +5,8 @@ import About from "../ui/pages/about/About";
 import NotFound from "../ui/pages/notFound/NotFound";
 import SignUp from "../ui/pages/signup/Signup";
 import Login from "../ui/pages/login/Login";
-
-// Import your page components here
+import ProductPage from "../ui/pages/productPage/ProductPage";
+import ProductDetailsPage from "../ui/components/ProductDetailsPage/ProductDetailsPage";
 
 const Index: React.FunctionComponent = () => {
   return (
@@ -15,8 +15,11 @@ const Index: React.FunctionComponent = () => {
       <Route path="/about" element={<About />} />
       <Route path="/register" element={<SignUp />} />
       <Route path="/login" element={<Login />} />
-
-      {/* notfound route */}
+      <Route path="/products" element={<ProductPage />} />
+      <Route
+        path="/products/:category/:productTitle"
+        element={<ProductDetailsPage />}
+      />
       <Route path="/notfound" element={<NotFound />} />
       <Route path="*" element={<NotFound />} />
     </Routes>

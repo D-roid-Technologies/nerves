@@ -20,6 +20,12 @@ const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const user = useSelector((state: RootState) => state.user);
+  const cart = useSelector((state: RootState) => state.cart);
+
+  const cartItemCount = cart.items.reduce(
+    (total, item) => total + item.quantity,
+    0
+  );
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,6 +41,12 @@ const Navbar = () => {
   const toggleDropdown = () => {
     setShowDropdown(!showDropdown);
   };
+
+  // Toggles the cart open/close state in Redux
+  const dispatch = store.dispatch;
+  function toggleCart() {
+    dispatch({ type: "cart/toggleCart" });
+  }
 
   return (
     <>
@@ -83,7 +95,6 @@ const Navbar = () => {
                 <circle cx="11" cy="11" r="8" />
               </svg>
             </button>
-
             <button className={styles.searchIcon}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -101,7 +112,13 @@ const Navbar = () => {
               </svg>
             </button>
             {/* Cart Icon */}
-            <a href="/cart" className={styles.cartIcon} aria-label="Cart">
+            {/* Update the cart icon part in your Navbar component */}
+            <button
+              type="button"
+              className={styles.cartIcon}
+              aria-label="Cart"
+              onClick={() => dispatch({ type: "cart/toggleCart" })}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="30"
@@ -109,20 +126,19 @@ const Navbar = () => {
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="1"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                // class="lucide lucide-shopping-cart-icon lucide-shopping-cart"
+                strokeWidth="1"
+                strokeLinecap="round"
+                strokeLinejoin="round"
                 className={styles.cartIcon}
               >
                 <circle cx="8" cy="21" r="1" />
                 <circle cx="19" cy="21" r="1" />
                 <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
               </svg>
-              {/* {cartItemCount > 0 && (
+              {cartItemCount > 0 && (
                 <span className={styles.cartBadge}>{cartItemCount}</span>
-              )} */}
-            </a>
+              )}
+            </button>
             {/* User Dropdown */}
             <div className={styles.userContainer}>
               <div className={styles.userDropdown}>
@@ -154,8 +170,9 @@ const Navbar = () => {
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
-                    className={`${styles.chevron} ${showDropdown ? styles.rotate : ""
-                      }`}
+                    className={`${styles.chevron} ${
+                      showDropdown ? styles.rotate : ""
+                    }`}
                   >
                     <path
                       strokeLinecap="round"
@@ -181,7 +198,7 @@ const Navbar = () => {
                         <a
                           className={styles.dropdownItem}
                           onClick={() => {
-                            store.dispatch(clearUser())
+                            store.dispatch(clearUser());
                             // onLogout();
                             setShowDropdown(false);
                           }}
