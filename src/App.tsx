@@ -5,6 +5,8 @@ import "./App.css";
 import { store } from "./app/redux/store";
 import Index from "./app/routes/Index";
 import Navbar from "./app/ui/components/navbar/Navbar";
+import CartDrawer from "./app/ui/components/cartDrawer/CartDrawer";
+import Overlay from "./app/ui/components/Overlay/Overlay";
 
 function App() {
   return (
@@ -12,6 +14,8 @@ function App() {
       <BrowserRouter>
         <Navbar />
         <Index />
+        <CartDrawer />
+        <Overlay />
       </BrowserRouter>
     </Provider>
   );

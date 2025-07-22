@@ -20,7 +20,7 @@ const Categories: React.FunctionComponent = () => {
 
         <div className="grid-item item-2">
           <a href="/headphones" className="item-link">
-            View All
+            SH
           </a>
           <div className="item-content">
             <h2 className="item-title">Sunglasses</h2>
