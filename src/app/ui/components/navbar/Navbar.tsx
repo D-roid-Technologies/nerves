@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { clearUser } from "../../../redux/slice/user";
 import { RootState, store } from "../../../redux/store";
 import styles from "./navbar.module.css";
@@ -47,6 +48,8 @@ const Navbar = () => {
   function toggleCart() {
     dispatch({ type: "cart/toggleCart" });
   }
+
+  const navigate = useNavigate()
 
   return (
     <>
@@ -170,9 +173,8 @@ const Navbar = () => {
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
-                    className={`${styles.chevron} ${
-                      showDropdown ? styles.rotate : ""
-                    }`}
+                    className={`${styles.chevron} ${showDropdown ? styles.rotate : ""
+                      }`}
                   >
                     <path
                       strokeLinecap="round"
@@ -201,6 +203,7 @@ const Navbar = () => {
                             store.dispatch(clearUser());
                             // onLogout();
                             setShowDropdown(false);
+                            navigate("/products")
                           }}
                         >
                           Sign Out
