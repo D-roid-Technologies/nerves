@@ -9,14 +9,31 @@ interface UserState {
     isLoggedIn: boolean;
 }
 
-// 2️⃣ Initial state with type
-const initialState: UserState = {
-    firstName: '',
-    middleName: '',
-    lastName: '',
-    email: '',
-    isLoggedIn: false,
+// Helper to load user from localStorage
+const loadUserFromLocalStorage = (): UserState => {
+    try {
+        const serializedUser = localStorage.getItem('user');
+        if (!serializedUser) return {
+            firstName: '',
+            middleName: '',
+            lastName: '',
+            email: '',
+            isLoggedIn: false,
+        };
+        return JSON.parse(serializedUser) as UserState;
+    } catch {
+        return {
+            firstName: '',
+            middleName: '',
+            lastName: '',
+            email: '',
+            isLoggedIn: false,
+        };
+    }
 };
+
+// 2️⃣ Initial state loaded from localStorage
+const initialState: UserState = loadUserFromLocalStorage();
 
 // 3️⃣ Define the payload shape for setUser
 interface SetUserPayload {
@@ -31,19 +48,25 @@ export const userSlice = createSlice({
     initialState,
     reducers: {
         // Typed payload
-        setUser: (state: { firstName: any; middleName: any; lastName: any; email: any; isLoggedIn: boolean; }, action: PayloadAction<SetUserPayload>) => {
+        setUser: (state, action: PayloadAction<SetUserPayload>) => {
             state.firstName = action.payload.firstName;
             state.middleName = action.payload.middleName || '';
             state.lastName = action.payload.lastName;
             state.email = action.payload.email;
             state.isLoggedIn = true;
+
+            // Save to localStorage
+            localStorage.setItem('user', JSON.stringify(state));
         },
-        clearUser: (state: { firstName: string; middleName: string; lastName: string; email: string; isLoggedIn: boolean; }) => {
+        clearUser: (state) => {
             state.firstName = '';
             state.middleName = '';
             state.lastName = '';
             state.email = '';
             state.isLoggedIn = false;
+
+            // Remove from localStorage
+            localStorage.removeItem('user');
         },
     },
 });

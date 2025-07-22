@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import { addToCart } from "../../../redux/slice/cart";
 import "./ProductDetailsPage.css";
 import { Link } from "react-router-dom";
+import toast, { Toaster } from "react-hot-toast";
 
 interface Product {
   id: number;
@@ -506,6 +507,10 @@ const ProductDetailsPage = () => {
       dispatch(
         addToCart(product, quantity) // Note: passing two arguments now
       );
+      toast.success(`Added ${product.name} to your cart.`, {
+        style: { background: "#4BB543", color: "#fff" },
+        duration: 5000,
+      });
     }
   };
 
@@ -550,6 +555,7 @@ const ProductDetailsPage = () => {
 
   return (
     <div className="product-details-page">
+      <Toaster position="top-center" reverseOrder={false} />
       <button
         className="back-button"
         onClick={() => navigate(`/products`)}
@@ -566,9 +572,8 @@ const ProductDetailsPage = () => {
             {productImages.map((img, index) => (
               <button
                 key={index}
-                className={`thumbnail-btn ${
-                  selectedImage === index ? "active" : ""
-                }`}
+                className={`thumbnail-btn ${selectedImage === index ? "active" : ""
+                  }`}
                 onClick={() => setSelectedImage(index)}
                 aria-label={`View product image ${index + 1}`}
               >
@@ -645,7 +650,7 @@ const ProductDetailsPage = () => {
                 <span className="discount-percentage">
                   {Math.round(
                     ((product.price - product.discountPrice) / product.price) *
-                      100
+                    100
                   )}
                   % OFF
                 </span>
@@ -830,9 +835,8 @@ const ProductDetailsPage = () => {
             .map((relatedProduct) => (
               <article key={relatedProduct.id} className="related-product-card">
                 <Link
-                  to={`/products/${relatedProduct.category.toLowerCase()}/${
-                    relatedProduct.slug
-                  }`}
+                  to={`/products/${relatedProduct.category.toLowerCase()}/${relatedProduct.slug
+                    }`}
                   className="related-product-link"
                 >
                   <img

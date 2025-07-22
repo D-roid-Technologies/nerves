@@ -1,4 +1,3 @@
-// components/CartDrawer/CartDrawer.tsx
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../../redux/store";
@@ -9,104 +8,122 @@ import {
   clearCart,
 } from "../../../redux/slice/cart";
 import styles from "./CartDrawer.module.css";
+import { Toaster, toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
-const CartDrawer = () => {
+const CartDrawer: React.FunctionComponent = () => {
   const dispatch = useDispatch();
   const { items, isOpen } = useSelector((state: RootState) => state.cart);
+  const isUserLoggedIn = useSelector((state: RootState) => state.user.isLoggedIn);
+  const navigate = useNavigate();
 
   const totalPrice = items.reduce(
     (sum, item) => sum + item.product.price * item.quantity,
     0
   );
 
-  if (!isOpen) return null;
-
   return (
-    <div className={styles.cartDrawer}>
-      <div className={styles.cartHeader}>
-        <h2>Your Cart</h2>
-        <button
-          className={styles.closeButton}
-          onClick={() => dispatch(toggleCart())}
-        >
-          &times;
-        </button>
-      </div>
+    <>
+      {/* Always render Toaster so toast can show anytime */}
+      <Toaster position="top-center" reverseOrder={false} />
 
-      <div className={styles.cartItems}>
-        {items.length === 0 ? (
-          <p className={styles.emptyCart}>Your cart is empty</p>
-        ) : (
-          items.map((item) => (
-            <div key={item.product.id} className={styles.cartItem}>
-              <img
-                src={item.product.image}
-                alt={item.product.name}
-                className={styles.productImage}
-              />
-              <div className={styles.productInfo}>
-                <h3>{item.product.name}</h3>
-                <p>${item.product.price}</p>
-                <div className={styles.quantityControls}>
+      {/* Only show the drawer if open */}
+      {isOpen && (
+        <div className={styles.cartDrawer}>
+          <div className={styles.cartHeader}>
+            <h2>Your Cart</h2>
+            <button
+              className={styles.closeButton}
+              onClick={() => dispatch(toggleCart())}
+            >
+              &times;
+            </button>
+          </div>
+
+          <div className={styles.cartItems}>
+            {items.length === 0 ? (
+              <p className={styles.emptyCart}>Your cart is empty</p>
+            ) : (
+              items.map((item) => (
+                <div key={item.product.id} className={styles.cartItem}>
+                  <img
+                    src={item.product.image}
+                    alt={item.product.name}
+                    className={styles.productImage}
+                  />
+                  <div className={styles.productInfo}>
+                    <h3>{item.product.name}</h3>
+                    <p>${item.product.price}</p>
+                    <div className={styles.quantityControls}>
+                      <button
+                        onClick={() =>
+                          dispatch(
+                            updateQuantity({
+                              id: item.product.id,
+                              quantity: item.quantity - 1,
+                            })
+                          )
+                        }
+                        disabled={item.quantity <= 1}
+                      >
+                        -
+                      </button>
+                      <span>{item.quantity}</span>
+                      <button
+                        onClick={() =>
+                          dispatch(
+                            updateQuantity({
+                              id: item.product.id,
+                              quantity: item.quantity + 1,
+                            })
+                          )
+                        }
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
                   <button
-                    onClick={() =>
-                      dispatch(
-                        updateQuantity({
-                          id: item.product.id,
-                          quantity: item.quantity - 1,
-                        })
-                      )
-                    }
-                    disabled={item.quantity <= 1}
+                    className={styles.removeButton}
+                    onClick={() => dispatch(removeFromCart(item.product.id))}
                   >
-                    -
-                  </button>
-                  <span>{item.quantity}</span>
-                  <button
-                    onClick={() =>
-                      dispatch(
-                        updateQuantity({
-                          id: item.product.id,
-                          quantity: item.quantity + 1,
-                        })
-                      )
-                    }
-                  >
-                    +
+                    &times;
                   </button>
                 </div>
+              ))
+            )}
+          </div>
+
+          {items.length > 0 && (
+            <div className={styles.cartFooter}>
+              <div className={styles.total}>
+                <span>Total:</span>
+                <span>${totalPrice.toFixed(2)}</span>
               </div>
               <button
-                className={styles.removeButton}
-                onClick={() => dispatch(removeFromCart(item.product.id))}
+                className={styles.checkoutButton}
+                onClick={() => {
+                  if (isUserLoggedIn === true) {
+                    toast.success("Proceeding to checkout", {
+                      style: { background: "#4BB543", color: "#fff" },
+                    });
+                    dispatch(toggleCart());
+                  } else {
+                    toast.error("Please log back to your account.", {
+                      style: { background: "red", color: "#fff" },
+                    });
+                    dispatch(toggleCart());
+                    navigate("/login")
+                  }
+                }}
               >
-                &times;
+                Proceed to Checkout
               </button>
             </div>
-          ))
-        )}
-      </div>
-
-      {items.length > 0 && (
-        <div className={styles.cartFooter}>
-          <div className={styles.total}>
-            <span>Total:</span>
-            <span>${totalPrice.toFixed(2)}</span>
-          </div>
-          <button
-            className={styles.checkoutButton}
-            onClick={() => {
-              // Handle checkout logic
-              alert("Proceeding to checkout!");
-              dispatch(clearCart());
-              dispatch(toggleCart());
-            }}
-          >
-            Proceed to Checkout
-          </button>
+          )}
         </div>
       )}
-    </div>
+    </>
   );
 };
 

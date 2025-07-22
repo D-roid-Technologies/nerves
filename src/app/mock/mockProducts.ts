@@ -9,13 +9,11 @@ export const mockProducts: Product[] = [
     discountPrice: 199.99,
     rating: 4.5,
     reviewCount: 128,
-    image:
-      "https://images.unsplash.com/photo-1542496658-e33a6d0d50f6?q=80&w=1170&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?q=80&w=1170&auto=format&fit=crop",
     category: "watches",
     isNew: true,
     isFeatured: true,
-    description:
-      "Premium quality leather watch with exceptional craftsmanship. Designed for comfort and style, this watch is perfect for everyday use.",
+    description: "Premium quality leather watch with exceptional craftsmanship.",
     details: [
       "Genuine leather strap",
       "Stainless steel case",
@@ -32,13 +30,11 @@ export const mockProducts: Product[] = [
     discountPrice: 99.99,
     rating: 4.8,
     reviewCount: 305,
-    image:
-      "https://images.unsplash.com/photo-1606813902612-b4239e2f2ac9?q=80&w=1170&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1600180758890-6b94519a264d?q=80&w=1170&auto=format&fit=crop",
     category: "shoes",
     isNew: false,
     isFeatured: true,
-    description:
-      "Timeless white sneakers made from premium materials for all-day comfort and style.",
+    description: "Timeless white sneakers made from premium materials.",
     details: [
       "100% organic cotton canvas",
       "Vulcanized rubber sole",
@@ -55,8 +51,7 @@ export const mockProducts: Product[] = [
     discountPrice: 69.99,
     rating: 4.3,
     reviewCount: 210,
-    image:
-      "https://images.unsplash.com/photo-1593032465171-8e6f07efb25b?q=80&w=1170&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1618354691877-b9e3b21bdad9?q=80&w=1170&auto=format&fit=crop",
     category: "clothing",
     isNew: true,
     isFeatured: false,
@@ -76,18 +71,12 @@ export const mockProducts: Product[] = [
     discountPrice: 129.99,
     rating: 4.7,
     reviewCount: 98,
-    image:
-      "https://images.unsplash.com/photo-1618354691390-0185b280f519?q=80&w=1170&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1618354691390-0185b280f519?q=80&w=1170&auto=format&fit=crop",
     category: "fragrance",
     isNew: true,
     isFeatured: true,
     description: "Elegant and long-lasting fragrance for special occasions.",
-    details: [
-      "100ml bottle",
-      "Eau de parfum concentration",
-      "Lasts 8+ hours",
-      "Elegant packaging",
-    ],
+    details: ["100ml bottle", "Eau de parfum", "Lasts 8+ hours", "Elegant packaging"],
   },
   {
     id: 5,
@@ -97,18 +86,12 @@ export const mockProducts: Product[] = [
     discountPrice: 49.99,
     rating: 4.2,
     reviewCount: 76,
-    image:
-      "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?q=80&w=1170&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1598511724071-cd2893cd0401?q=80&w=1170&auto=format&fit=crop",
     category: "accessories",
     isNew: false,
     isFeatured: false,
     description: "UV-protected sunglasses with polarized lenses.",
-    details: [
-      "100% UV protection",
-      "Polarized lenses",
-      "Lightweight frame",
-      "Includes protective case",
-    ],
+    details: ["100% UV protection", "Polarized lenses", "Lightweight frame", "Includes protective case"],
   },
   {
     id: 6,
@@ -118,19 +101,12 @@ export const mockProducts: Product[] = [
     discountPrice: 69.99,
     rating: 4.6,
     reviewCount: 320,
-    image:
-      "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?q=80&w=1170&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?q=80&w=1170&auto=format&fit=crop",
     category: "electronics",
     isNew: true,
     isFeatured: true,
-    description:
-      "Wireless earbuds with crystal clear sound and long battery life.",
-    details: [
-      "True wireless stereo",
-      "24-hour battery life",
-      "IPX5 water resistant",
-      "Touch controls",
-    ],
+    description: "Wireless earbuds with crystal clear sound and long battery life.",
+    details: ["True wireless stereo", "24-hour battery life", "IPX5 water resistant", "Touch controls"],
   },
   {
     id: 7,
@@ -140,13 +116,11 @@ export const mockProducts: Product[] = [
     discountPrice: 249.99,
     rating: 4.9,
     reviewCount: 145,
-    image:
-      "https://images.unsplash.com/photo-1598300053181-8466b437c0f1?q=80&w=1170&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1601979031925-997b7daef6aa?q=80&w=1170&auto=format&fit=crop",
     category: "furniture",
     isNew: true,
     isFeatured: true,
-    description:
-      "Ergonomic office chair with lumbar support and adjustable height.",
+    description: "Ergonomic office chair with lumbar support and adjustable height.",
     details: [
       "Breathable mesh back",
       "Adjustable armrests",
@@ -162,8 +136,7 @@ export const mockProducts: Product[] = [
     discountPrice: 149.99,
     rating: 4.4,
     reviewCount: 88,
-    image:
-      "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=1170&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1528701800489-20cbe5d91a3e?q=80&w=1170&auto=format&fit=crop",
     category: "bags",
     isNew: false,
     isFeatured: false,
@@ -183,8 +156,7 @@ export const mockProducts: Product[] = [
     discountPrice: 79.99,
     rating: 4.5,
     reviewCount: 200,
-    image:
-      "https://images.unsplash.com/photo-1603791452906-c0e7c74be3c5?q=80&w=1170&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1621261787708-6b1b7b3f0f40?q=80&w=1170&auto=format&fit=crop",
     category: "wearables",
     isNew: true,
     isFeatured: true,

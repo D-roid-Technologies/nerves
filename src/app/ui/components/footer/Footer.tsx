@@ -93,9 +93,9 @@ const Footer: React.FC = () => {
     <footer className="footer">
       <div className="footer-container">
         <div className="footer-brand">
-          <h2 className="footer-logo">D'roid Technologies Ltd</h2>
+          <h2 className="footer-logo">Nerve Systems Network Ltd</h2>
           <p className="footer-description">
-            Making the world better using code.
+            All you need when you need it.
           </p>
           <div className="footer-social">
             {socialLinks.map((link, index) => (
@@ -132,7 +132,7 @@ const Footer: React.FC = () => {
 
       <div className="footer-bottom">
         <p className="copyright">
-          &copy; {new Date().getFullYear()} D'roid Technologies Ltd. All rights
+          &copy; {new Date().getFullYear()} Nerve Systems Network Ltd. All rights
           reserved.
         </p>
       </div>
