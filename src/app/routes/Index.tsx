@@ -9,6 +9,8 @@ import ProductPage from "../ui/pages/productPage/ProductPage";
 import ProductDetailsPage from "../ui/components/ProductDetailsPage/ProductDetailsPage";
 import Collections from "../ui/pages/collections/Collections";
 import MyAccountPage from "../ui/pages/account/Account";
+import Checkout from "../ui/components/checkout-alt/Checkout";
+// import CheckoutPage from "../ui/components/checkout/Checkoutpage";
 
 const Index: React.FunctionComponent = () => {
   return (
@@ -26,6 +28,8 @@ const Index: React.FunctionComponent = () => {
         path="/products/:category/:productTitle"
         element={<ProductDetailsPage />}
       />
+      {/* <Route path="/checkout" element={<Checkout />} /> */}
+      <Route path="/checkout" element={<Checkout />} />
       <Route path="/notfound" element={<NotFound />} />
       <Route path="*" element={<NotFound />} />
     </Routes>

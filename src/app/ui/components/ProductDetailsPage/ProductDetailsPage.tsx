@@ -505,7 +505,7 @@ const ProductDetailsPage = () => {
   const handleAddToCart = () => {
     if (product) {
       dispatch(
-        addToCart(product, quantity) // Note: passing two arguments now
+        addToCart(product, quantity)
       );
       toast.success(`Added ${product.name} to your cart.`, {
         style: { background: "#4BB543", color: "#fff" },
