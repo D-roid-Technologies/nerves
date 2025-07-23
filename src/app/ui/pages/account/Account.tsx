@@ -8,10 +8,14 @@ import {
   MessageSquare,
   Edit,
   Image as ImageIcon,
+  SettingsIcon,
+  User,
+  Plus,
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import styles from "./account.module.css";
+import { useNavigate } from "react-router-dom";
 
 const mockUser = {
   firstName: "John",
@@ -27,6 +31,7 @@ const mockUser = {
     confirmed: 1,
     returned: 0,
     reviewed: 4,
+    viewallorder: 6,
   },
   reviews: [
     {
@@ -69,10 +74,18 @@ interface OrderStatusProps {
 
 export default function MyAccountPage() {
   const user = useSelector((state: RootState) => state.user);
-
+  const navigate = useNavigate();
   return (
     <div className={styles["account-container"]}>
-      <h1 className={styles["account-h1"]}>My Account</h1>
+      <div className="settings-header">
+        <div className="header-content">
+          <User className="header-icon" />
+          <div>
+            <h1>My Account</h1>
+            <p>See all account infos</p>
+          </div>
+        </div>
+      </div>
 
       <div className={styles["account-section"]}>
         <div className={styles["account-profile-header"]}>
@@ -134,6 +147,11 @@ export default function MyAccountPage() {
           <OrderStatus
             label="Confirmed"
             count={mockUser.orders.confirmed}
+            Icon={CheckCircle}
+          />
+          <OrderStatus
+            label="View All Orders"
+            count={mockUser.orders.viewallorder}
             Icon={CheckCircle}
           />
           <OrderStatus
@@ -221,6 +239,21 @@ export default function MyAccountPage() {
             <p>You haven't sold any items yet</p>
           </div>
         )}
+      </div>
+      <div className={styles["account-section"]}>
+        <h2 className={styles["account-h2"]}>Create Items</h2>
+
+        <div className={styles["account-empty-state"]}>
+          <Package className={styles["account-empty-icon"]} />
+          <p>You haven't created any items yet</p>
+          <button
+            className={styles["account-edit-btn"]}
+            onClick={() => navigate("/create")}
+          >
+            <Plus size={16} style={{ marginRight: "8px" }} />
+            Create Item
+          </button>
+        </div>
       </div>
     </div>
   );

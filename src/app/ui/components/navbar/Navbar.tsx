@@ -143,7 +143,7 @@ const Navbar = () => {
                     height="30"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="currentColor"
+                    stroke={user.isLoggedIn ? "orange" : "currentColor"}
                     strokeWidth="1"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -158,7 +158,7 @@ const Navbar = () => {
                     height="16"
                     fill="none"
                     viewBox="0 0 24 24"
-                    stroke="currentColor"
+                      stroke={user.isLoggedIn ? "orange" : "currentColor"}
                     className={`${styles.chevron} ${
                       showDropdown ? styles.rotate : ""
                     }`}
@@ -183,6 +183,12 @@ const Navbar = () => {
                         </Link>
                         <Link to="/orders" className={styles.dropdownItem}>
                           My Orders
+                        </Link>
+                        <Link to="/create" className={styles.dropdownItem}>
+                          Create Items
+                        </Link>
+                        <Link to="/settings" className={styles.dropdownItem}>
+                          Settings
                         </Link>
                         <button
                           className={styles.dropdownItem}
