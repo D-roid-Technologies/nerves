@@ -1,19 +1,9 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { clearUser } from "../../../redux/slice/user";
 import { RootState, store } from "../../../redux/store";
 import styles from "./navbar.module.css";
-
-// Optional: If using Icon wrapper
-// import { Icon } from "../Icon";
-
-interface NavbarProps {
-  isLoggedIn: boolean;
-  username?: string;
-  cartItemCount: number;
-  onLogout: () => void;
-}
 
 const Navbar = () => {
   const [showSearch, setShowSearch] = useState(false);
@@ -43,13 +33,12 @@ const Navbar = () => {
     setShowDropdown(!showDropdown);
   };
 
-  // Toggles the cart open/close state in Redux
   const dispatch = store.dispatch;
   function toggleCart() {
     dispatch({ type: "cart/toggleCart" });
   }
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   return (
     <>
@@ -58,19 +47,19 @@ const Navbar = () => {
           {/* Left Links */}
           <ul className={styles.navLinks}>
             <li>
-              <a href="/shop">Shop</a>
+              <Link to="/products">Shop</Link>
             </li>
             <li>
-              <a href="/collections">Collections</a>
+              <Link to="/collections">Collections</Link>
             </li>
             <li>
-              <a href="/about">About</a>
+              <Link to="/about">About</Link>
             </li>
           </ul>
 
           {/* Logo */}
           <div className={styles.logo}>
-            <a href="/">NERVES</a>
+            <Link to="/">NERVES</Link>
           </div>
 
           {/* Right Actions */}
@@ -88,10 +77,9 @@ const Navbar = () => {
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="1"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                //   class="lucide lucide-search-icon lucide-search"
+                strokeWidth="1"
+                strokeLinecap="round"
+                strokeLinejoin="round"
                 className={styles.searchIcon}
               >
                 <path d="m21 21-4.34-4.34" />
@@ -106,16 +94,15 @@ const Navbar = () => {
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="1 "
-                stroke-linecap="round"
-                stroke-linejoin="round"
+                strokeWidth="1"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
                 <path d="M10.268 21a2 2 0 0 0 3.464 0" />
                 <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" />
               </svg>
             </button>
             {/* Cart Icon */}
-            {/* Update the cart icon part in your Navbar component */}
             <button
               type="button"
               className={styles.cartIcon}
@@ -156,11 +143,10 @@ const Navbar = () => {
                     height="30"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="currentColor"
-                    stroke-width="1"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    // class="lucide lucide-user-icon lucide-user"
+                    stroke={user.isLoggedIn ? "orange" : "currentColor"}
+                    strokeWidth="1"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                     className={styles.userIcon}
                   >
                     <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
@@ -172,9 +158,10 @@ const Navbar = () => {
                     height="16"
                     fill="none"
                     viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    className={`${styles.chevron} ${showDropdown ? styles.rotate : ""
-                      }`}
+                      stroke={user.isLoggedIn ? "orange" : "currentColor"}
+                    className={`${styles.chevron} ${
+                      showDropdown ? styles.rotate : ""
+                    }`}
                   >
                     <path
                       strokeLinecap="round"
@@ -191,35 +178,40 @@ const Navbar = () => {
                         <div className={styles.dropdownHeader}>
                           Welcome, {user.firstName}
                         </div>
-                        <a href="/account" className={styles.dropdownItem}>
+                        <Link to="/account" className={styles.dropdownItem}>
                           My Account
-                        </a>
-                        <a href="/orders" className={styles.dropdownItem}>
+                        </Link>
+                        <Link to="/orders" className={styles.dropdownItem}>
                           My Orders
-                        </a>
-                        <a
+                        </Link>
+                        <Link to="/create" className={styles.dropdownItem}>
+                          Create Items
+                        </Link>
+                        <Link to="/settings" className={styles.dropdownItem}>
+                          Settings
+                        </Link>
+                        <button
                           className={styles.dropdownItem}
                           onClick={() => {
                             store.dispatch(clearUser());
-                            // onLogout();
                             setShowDropdown(false);
-                            navigate("/products")
+                            navigate("/products");
                           }}
                         >
                           Sign Out
-                        </a>
+                        </button>
                       </>
                     ) : (
                       <>
-                        <a href="/login" className={styles.dropdownItem}>
+                        <Link to="/login" className={styles.dropdownItem}>
                           Sign In
-                        </a>
-                        <a href="/register" className={styles.dropdownItem}>
+                        </Link>
+                        <Link to="/register" className={styles.dropdownItem}>
                           Create Account
-                        </a>
-                        <a href="/guest" className={styles.dropdownItem}>
+                        </Link>
+                        <Link to="/guest" className={styles.dropdownItem}>
                           Continue as Guest
-                        </a>
+                        </Link>
                       </>
                     )}
                   </div>
@@ -276,10 +268,9 @@ const Navbar = () => {
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  stroke-width="1"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  //   class="lucide lucide-search-icon lucide-search"
+                  strokeWidth="1"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                   className={styles.searchIcon}
                 >
                   <path d="m21 21-4.34-4.34" />

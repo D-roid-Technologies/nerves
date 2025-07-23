@@ -14,7 +14,9 @@ import { useNavigate } from "react-router-dom";
 const CartDrawer: React.FunctionComponent = () => {
   const dispatch = useDispatch();
   const { items, isOpen } = useSelector((state: RootState) => state.cart);
-  const isUserLoggedIn = useSelector((state: RootState) => state.user.isLoggedIn);
+  const isUserLoggedIn = useSelector(
+    (state: RootState) => state.user.isLoggedIn
+  );
   const navigate = useNavigate();
 
   const totalPrice = items.reduce(
@@ -108,12 +110,13 @@ const CartDrawer: React.FunctionComponent = () => {
                       style: { background: "#4BB543", color: "#fff" },
                     });
                     dispatch(toggleCart());
+                    navigate("/checkout"); // Add this line to navigate to checkout
                   } else {
-                    toast.error("Please log back to your account.", {
+                    toast.error("Please log in to your account.", {
                       style: { background: "red", color: "#fff" },
                     });
                     dispatch(toggleCart());
-                    navigate("/login")
+                    navigate("/login");
                   }
                 }}
               >
