@@ -6,6 +6,8 @@ import {
   Package,
   RefreshCcw,
   MessageSquare,
+  Edit,
+  Image as ImageIcon,
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
@@ -15,6 +17,8 @@ const mockUser = {
   firstName: "John",
   lastName: "Doe",
   email: "john.doe@example.com",
+  phone: "+1 (555) 123-4567",
+  joinDate: "January 2023",
   orders: {
     paid: 5,
     sealed: 3,
@@ -29,13 +33,16 @@ const mockUser = {
       id: 1,
       item: "Wireless Headphones",
       rating: 4,
-      comment: "Great sound quality!",
+      comment:
+        "Great sound quality! The battery life is impressive and they're very comfortable for long listening sessions.",
+      date: "2 weeks ago",
     },
     {
       id: 2,
       item: "Bluetooth Speaker",
       rating: 5,
-      comment: "Excellent bass and clarity.",
+      comment: "Excellent bass and clarity. Perfect for outdoor gatherings.",
+      date: "1 month ago",
     },
   ],
   sales: [
@@ -43,11 +50,13 @@ const mockUser = {
       id: 1,
       item: "Used iPhone 12",
       status: "Sold",
+      price: "$450",
     },
     {
       id: 2,
       item: "Gaming Laptop",
       status: "Sold",
+      price: "$1200",
     },
   ],
 };
@@ -68,18 +77,39 @@ export default function MyAccountPage() {
       <div className={styles["account-section"]}>
         <div className={styles["account-profile-header"]}>
           <h2 className={styles["account-h2"]}>Profile Information</h2>
-          <button className={styles["account-edit-btn"]}>Edit Profile</button>
+          <button className={styles["account-edit-btn"]}>
+            <Edit size={16} style={{ marginRight: "8px" }} />
+            Edit Profile
+          </button>
         </div>
         <div className={styles["account-profile-details"]}>
-          <p>
-            {user.firstName} {user.lastName}
-          </p>
-          <p>{user.email}</p>
+          <div className={styles["account-profile-detail"]}>
+            <span className={styles["account-detail-label"]}>Name</span>
+            <span className={styles["account-detail-value"]}>
+              {user.firstName} {user.lastName}
+            </span>
+          </div>
+          <div className={styles["account-profile-detail"]}>
+            <span className={styles["account-detail-label"]}>Email</span>
+            <span className={styles["account-detail-value"]}>{user.email}</span>
+          </div>
+          <div className={styles["account-profile-detail"]}>
+            <span className={styles["account-detail-label"]}>Phone</span>
+            <span className={styles["account-detail-value"]}>
+              {mockUser.phone}
+            </span>
+          </div>
+          <div className={styles["account-profile-detail"]}>
+            <span className={styles["account-detail-label"]}>Member Since</span>
+            <span className={styles["account-detail-value"]}>
+              {mockUser.joinDate}
+            </span>
+          </div>
         </div>
       </div>
 
       <div className={styles["account-section"]}>
-        <h2 className={styles["account-h2"]}>Orders Overview</h2>
+        <h2 className={styles["account-h2"]}>Order Status</h2>
         <div className={styles["account-orders-grid"]}>
           <OrderStatus
             label="Paid"
@@ -128,22 +158,34 @@ export default function MyAccountPage() {
                 key={review.id}
                 className={`${styles["account-list-item"]} ${styles["account-review-item"]}`}
               >
-                <h3 className={styles["account-review-title"]}>
-                  {review.item}
-                </h3>
+                <div className={styles["account-review-header"]}>
+                  <h3 className={styles["account-review-title"]}>
+                    {review.item}
+                  </h3>
+                  <span className={styles["account-review-date"]}>
+                    {review.date}
+                  </span>
+                </div>
                 <div className={styles["account-review-stars"]}>
-                  {[...Array(review.rating)].map((_, i) => (
-                    <Star key={i} className={styles["account-review-star"]} />
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={styles["account-review-star"]}
+                      fill={i < review.rating ? "currentColor" : "none"}
+                    />
                   ))}
                 </div>
                 <p className={styles["account-review-comment"]}>
-                  "{review.comment}"
+                  {review.comment}
                 </p>
               </div>
             ))}
           </div>
         ) : (
-          <p className={styles["account-empty-state"]}>No reviews yet.</p>
+          <div className={styles["account-empty-state"]}>
+            <MessageSquare className={styles["account-empty-icon"]} />
+            <p>You haven't reviewed any products yet</p>
+          </div>
         )}
       </div>
 
@@ -156,7 +198,17 @@ export default function MyAccountPage() {
                 key={sale.id}
                 className={`${styles["account-list-item"]} ${styles["account-sale-item"]}`}
               >
-                <span>{sale.item}</span>
+                <div className={styles["account-sale-info"]}>
+                  <div className={styles["account-sale-image"]}>
+                    <ImageIcon size={24} color="#9ca3af" />
+                  </div>
+                  <div>
+                    <div>{sale.item}</div>
+                    <div style={{ fontSize: "0.875rem", color: "#6b7280" }}>
+                      {sale.price}
+                    </div>
+                  </div>
+                </div>
                 <span className={styles["account-sale-status"]}>
                   {sale.status}
                 </span>
@@ -164,7 +216,10 @@ export default function MyAccountPage() {
             ))}
           </div>
         ) : (
-          <p className={styles["account-empty-state"]}>No items sold yet.</p>
+          <div className={styles["account-empty-state"]}>
+            <Package className={styles["account-empty-icon"]} />
+            <p>You haven't sold any items yet</p>
+          </div>
         )}
       </div>
     </div>
@@ -177,7 +232,9 @@ function OrderStatus({ label, count, Icon }: OrderStatusProps) {
       <Icon className={styles["account-order-status-icon"]} />
       <div className={styles["account-order-status-text"]}>
         <span className={styles["account-order-status-label"]}>{label}</span>
-        <span className={styles["account-order-status-count"]}>{count}</span>
+        <span className={styles["account-order-status-count"]}>
+          {count} orders
+        </span>
       </div>
     </div>
   );

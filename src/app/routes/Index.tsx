@@ -10,6 +10,7 @@ import ProductDetailsPage from "../ui/components/ProductDetailsPage/ProductDetai
 import Collections from "../ui/pages/collections/Collections";
 import MyAccountPage from "../ui/pages/account/Account";
 import Checkout from "../ui/components/checkout-alt/Checkout";
+import CreateItemPage from "../ui/pages/createitemPage/CreateItemPage";
 // import CheckoutPage from "../ui/components/checkout/Checkoutpage";
 
 const Index: React.FunctionComponent = () => {
@@ -23,6 +24,7 @@ const Index: React.FunctionComponent = () => {
       <Route path="/shop" element={<ProductPage />} />
       <Route path="/guest" element={<ProductPage />} />
       <Route path="/account" element={<MyAccountPage />} />
+      <Route path="/create" element={<CreateItemPage />} />
       <Route path="/collections" element={<Collections />} />
       <Route
         path="/products/:category/:productTitle"
