@@ -170,3 +170,8 @@
     font-size: 14px;
   }
 }
+@media (max-width: 480px) {
+  .grid-main-container h1 {
+    font-size: 2rem;
+  }
+}

@@ -28,10 +28,11 @@ const Index: React.FunctionComponent = () => {
       <Route path="/create" element={<CreateItemPage />} />
       <Route path="/settings" element={<SettingsPage />} />
       <Route path="/collections" element={<Collections />} />
-      <Route
+      {/* <Route
         path="/products/:category/:productTitle"
         element={<ProductDetailsPage />}
-      />
+      /> */}
+      <Route path="/products/:productTitle" element={<ProductDetailsPage />} />
       {/* <Route path="/checkout" element={<Checkout />} /> */}
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/notfound" element={<NotFound />} />
