@@ -44,9 +44,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   return (
     <Link
-      to={`/products/${product.category.toLowerCase()}/${product.name
-        .toLowerCase()
-        .replace(/\s+/g, "-")}`}
+      to={`/products/${product.name.toLowerCase().replace(/\s+/g, "-")}`}
       className="product-card"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -69,11 +67,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         >
           <Heart size={18} fill={isWishlisted ? "currentColor" : "none"} />
         </button>
-        {/* {isHovered && (
-          <button className="quick-add-btn" onClick={handleAddToCart}>
-            Add to Cart
-          </button>
-        )} */}
       </div>
       <div className="product-info">
         <h3 className="product-name">{product.name}</h3>

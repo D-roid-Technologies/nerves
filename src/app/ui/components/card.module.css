@@ -1,3 +1,4 @@
+/* card.module.css - Enhanced responsive card styles */
 .card {
   background-color: #f4d6e11b;
   border-radius: 0;
@@ -6,6 +7,9 @@
   box-shadow: none;
   border-top-left-radius: 15px;
   border-top-right-radius: 15px;
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
 }
 
 .card:hover {
@@ -17,6 +21,7 @@
   width: 100%;
   aspect-ratio: 4 / 3;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .image {
@@ -24,7 +29,6 @@
   height: 100%;
   object-fit: cover;
   display: block;
-
   border-top-left-radius: 15px;
   border-top-right-radius: 15px;
 }
@@ -32,6 +36,10 @@
 .content {
   padding: 2rem;
   text-align: center;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .title {
@@ -40,7 +48,6 @@
   color: #1a1a1a;
   font-family: "Playfair Display", serif !important;
   margin: 0 0 1rem 0;
-  font-family: serif;
   line-height: 1.2;
 }
 
@@ -49,6 +56,7 @@
   font-size: 0.875rem;
   margin: 0 0 1.5rem 0;
   line-height: 1.4;
+  flex-grow: 1;
 }
 
 .buttonContainer {
@@ -56,6 +64,7 @@
   flex-direction: column;
   gap: 0.75rem;
   align-items: center;
+  margin-top: auto;
 }
 
 .button {
@@ -72,6 +81,8 @@
   text-transform: uppercase;
   min-width: 140px;
   font-family: inherit;
+  width: 100%;
+  max-width: 200px;
 }
 
 .button:hover {
@@ -88,27 +99,139 @@
   transform: translateY(1px);
 }
 
-/* Responsive button layout for cards with multiple buttons */
-@media (min-width: 640px) {
+/* Large screens - side by side buttons */
+@media (min-width: 1200px) {
   .buttonContainer.twoButtons {
     flex-direction: row;
     justify-content: center;
+    gap: 1rem;
+  }
+  
+  .buttonContainer.twoButtons .button {
+    width: auto;
+    max-width: none;
+    min-width: 120px;
   }
 }
 
-/* Mobile optimizations */
-@media (max-width: 480px) {
+/* Desktop and large tablets */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .content {
+    padding: 1.75rem;
+  }
+  
+  .title {
+    font-size: 1.4rem;
+  }
+  
+  .description {
+    font-size: 0.8125rem;
+  }
+}
+
+/* Tablet portrait */
+@media (max-width: 768px) {
   .content {
     padding: 1.5rem;
   }
-
+  
   .title {
-    font-size: 1.25rem;
+    font-size: 1.3rem;
+    margin-bottom: 0.75rem;
   }
-
+  
+  .description {
+    font-size: 0.8125rem;
+    margin-bottom: 1.25rem;
+  }
+  
   .button {
     padding: 0.625rem 1.5rem;
-    min-width: 120px;
     font-size: 0.8125rem;
+    min-width: 120px;
+  }
+}
+
+/* Mobile landscape */
+@media (max-width: 640px) {
+  .imageContainer {
+    aspect-ratio: 16 / 9; /* Wider aspect ratio for mobile */
+  }
+  
+  .content {
+    padding: 1.25rem;
+  }
+  
+  .title {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .description {
+    font-size: 0.8125rem;
+    margin-bottom: 1rem;
+  }
+  
+  .buttonContainer {
+    gap: 0.5rem;
+  }
+  
+  .button {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.75rem;
+    min-width: 100px;
+    max-width: 180px;
+  }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+  .content {
+    padding: 1rem;
+  }
+  
+  .title {
+    font-size: 1.125rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .description {
+    font-size: 0.75rem;
+    margin-bottom: 1rem;
+    line-height: 1.3;
+  }
+  
+  .button {
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+    min-width: 90px;
+    max-width: 160px;
+    letter-spacing: 0.25px;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 360px) {
+  .imageContainer {
+    aspect-ratio: 3 / 2;
+  }
+  
+  .content {
+    padding: 0.875rem;
+  }
+  
+  .title {
+    font-size: 1rem;
+  }
+  
+  .description {
+    font-size: 0.7125rem;
+  }
+  
+  .button {
+    padding: 0.5rem 0.875rem;
+    font-size: 0.6875rem;
+    min-width: 80px;
+    max-width: 140px;
   }
 }

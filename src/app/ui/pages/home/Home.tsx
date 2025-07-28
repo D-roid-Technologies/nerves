@@ -16,9 +16,6 @@ function Home() {
         <Catergories />
         <Review />
         <NewProduct />
-        <br />
-        <br />
-        <br />
         <Footer />
       </div>
     </>
