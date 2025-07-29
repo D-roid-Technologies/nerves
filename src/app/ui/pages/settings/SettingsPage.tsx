@@ -1,5 +1,4 @@
 import type React from "react";
-
 import { useState } from "react";
 import { toast } from "react-hot-toast";
 import {
@@ -18,7 +17,7 @@ import {
   MapPin,
   Phone,
   Building,
-  SettingsIcon,
+  Settings as SettingsIcon,
   Moon,
   Sun,
   Monitor,
@@ -205,7 +204,6 @@ const SettingsPage = () => {
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
         toast.error("Image size should be less than 5MB");
-        
         return;
       }
       const reader = new FileReader();
@@ -239,7 +237,6 @@ const SettingsPage = () => {
 
     setIsLoading(true);
     try {
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1500));
       toast.success("Password updated successfully");
       setPasswords({
@@ -257,10 +254,7 @@ const SettingsPage = () => {
   const handleSaveSettings = async (section: string) => {
     setIsLoading(true);
     try {
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Log settings to console for backend integration
       console.log(`=== ${section.toUpperCase()} SETTINGS ===`);
       switch (section) {
         case "profile":
@@ -281,7 +275,6 @@ const SettingsPage = () => {
           break;
       }
       console.log("========================");
-
       toast.success(`${section} settings saved successfully`);
     } catch (error) {
       toast.error(`Failed to save ${section} settings`);
@@ -328,7 +321,7 @@ const SettingsPage = () => {
               <div className="avatar-container">
                 {profile.avatar ? (
                   <img
-                    src={profile.avatar || "/placeholder.svg"}
+                    src={profile.avatar}
                     alt="Avatar"
                     className="avatar-image"
                   />

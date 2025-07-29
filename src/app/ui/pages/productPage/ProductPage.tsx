@@ -2,6 +2,11 @@ import React, { useState, useEffect } from "react";
 import { Filter, Search, ChevronDown, ChevronUp, Star } from "lucide-react";
 import ProductCard from "../../components/productCard/ProductCard";
 import Pagination from "../../components/pagination/Pagination";
+import Catergories from "../../components/catergories/Catergories";
+import NewProduct from "../../components/newProduct/NewProduct";
+import Review from "../../components/review/Review";
+import Footer from "../../components/footer/Footer";
+
 import "./ProductPage.css";
 
 interface Product {
@@ -49,7 +54,7 @@ const ProductPage = () => {
           category: product.category,
           reviewCount: Math.floor(Math.random() * 1000),
           image: product.thumbnail,
-          isNew: product.stock > 50, 
+          isNew: product.stock > 50,
         }));
 
         setProducts(transformed);
@@ -63,7 +68,6 @@ const ProductPage = () => {
 
     fetchProducts();
   }, []);
-  
 
   const applySearch = () => {
     setIsFiltering(true);
@@ -161,8 +165,8 @@ const ProductPage = () => {
   return (
     <div className="product-page">
       <div className="product-hero">
-        <h1>Our Products</h1>
-        <p>Discover our premium collection</p>
+        <h1>Welcome To Nerves</h1>
+        <p>Discover our premium products</p>
         <div className="search-container">
           <div className="search-bar">
             <Search size={18} color="#666" />
@@ -211,7 +215,7 @@ const ProductPage = () => {
             </ul>
           </div>
 
-          <div className="filter-section">
+          {/* <div className="filter-section">
             <h3>Price Range</h3>
             <div className="price-range">
               <input
@@ -234,9 +238,9 @@ const ProductPage = () => {
                 <span>${filters.priceRange[1]}</span>
               </div>
             </div>
-          </div>
+          </div> */}
 
-          <div className="filter-section">
+          {/* <div className="filter-section">
             <h3>
               Rating
               {filters.rating > 0 && (
@@ -270,7 +274,7 @@ const ProductPage = () => {
                 </button>
               ))}
             </div>
-          </div>
+          </div> */}
         </div>
 
         <div className="product-listing">
@@ -522,16 +526,22 @@ const ProductPage = () => {
                 ))}
               </div>
 
-              {totalPages > 1 && (
+              {/* {totalPages > 1 && (
                 <Pagination
                   currentPage={currentPage}
                   totalPages={totalPages}
                   onPageChange={handlePageChange}
                 />
-              )}
+              )} */}
             </>
           )}
         </div>
+      </div>
+      <div style={{ marginTop: "-60px" }}>
+        <Catergories />
+        <Review />
+        <NewProduct />
+        <Footer />
       </div>
     </div>
   );

@@ -17,6 +17,7 @@ function Home() {
         <Review />
         <NewProduct />
         <Footer />
+        <Footer />
       </div>
     </>
   );
