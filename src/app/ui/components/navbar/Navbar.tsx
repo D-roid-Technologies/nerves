@@ -96,7 +96,7 @@ const Navbar = () => {
 
           {/* Logo */}
           <div className={styles.logo}>
-            <Link to="/">NERVES</Link>
+            <a href="">NERVES</a>
           </div>
 
           {/* Right Actions */}

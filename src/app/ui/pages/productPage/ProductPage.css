@@ -1,9 +1,4 @@
-/* ProductPage.css */
-
 .product-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
   box-sizing: border-box;
 }
 
@@ -13,8 +8,9 @@
   color: white;
   padding: 60px 20px;
   text-align: center;
+  background-attachment: fixed;
   margin-bottom: 30px;
-  border-radius: 8px;
+  /* width: 100%; */
   position: relative;
 }
 
@@ -55,7 +51,8 @@
 .product-container {
   display: flex;
   gap: 30px;
-  margin-bottom: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 /* Desktop Filters */
@@ -64,7 +61,7 @@
   padding: 20px;
   background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  /* box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); */
 }
 
 .filter-section {

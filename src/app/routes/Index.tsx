@@ -17,9 +17,10 @@ import SettingsPage from "../ui/pages/settings/SettingsPage";
 const Index: React.FunctionComponent = () => {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
+      <Route path="/" element={<ProductPage />} />
       <Route path="/about" element={<About />} />
       <Route path="/register" element={<SignUp />} />
+      <Route path="/home" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/products" element={<ProductPage />} />
       <Route path="/shop" element={<ProductPage />} />
