@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Filter, Search, ChevronDown, ChevronUp, Star, X } from "lucide-react";
+import { Filter, Search, ChevronDown, ChevronUp, Star } from "lucide-react";
 import ProductCard from "../../components/productCard/ProductCard";
 import Pagination from "../../components/pagination/Pagination";
 import Catergories from "../../components/catergories/Catergories";
@@ -22,7 +22,7 @@ interface Product {
   isFeatured: boolean;
 }
 
-const ProductPage = () => {
+const ProductPageAlt = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,7 +38,6 @@ const ProductPage = () => {
   });
   const [isFiltering, setIsFiltering] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-  const [hasSearched, setHasSearched] = useState(false);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -48,7 +47,7 @@ const ProductPage = () => {
 
         const transformed = data.products.map((product: any) => ({
           id: product.id,
-          name: product.title,
+          name: product.title, // ← mapping title to name
           price: product.price,
           discountPrice: product.price * (1 - product.discountPercentage / 100),
           rating: product.rating,
@@ -56,7 +55,6 @@ const ProductPage = () => {
           reviewCount: Math.floor(Math.random() * 1000),
           image: product.thumbnail,
           isNew: product.stock > 50,
-          isFeatured: Math.random() > 0.7,
         }));
 
         setProducts(transformed);
@@ -85,9 +83,6 @@ const ProductPage = () => {
             product.discountPrice?.toString().includes(query) ||
             product.price.toString().includes(query)
         );
-        setHasSearched(true);
-      } else {
-        setHasSearched(false);
       }
 
       // Apply other filters
@@ -132,7 +127,7 @@ const ProductPage = () => {
       setFilteredProducts(result);
       setCurrentPage(1);
       setIsFiltering(false);
-    }, 500);
+    }, 500); // Simulate search delay
   };
 
   useEffect(() => {
@@ -143,15 +138,6 @@ const ProductPage = () => {
     if (e.key === "Enter") {
       applySearch();
     }
-  };
-  const refreshPage = () => {
-    window.location.reload();
-  };
-  const clearSearch = () => {
-    refreshPage();
-    setSearchQuery("");
-    setHasSearched(false);
-    applySearch();
   };
 
   const indexOfLastProduct = currentPage * productsPerPage;
@@ -178,8 +164,8 @@ const ProductPage = () => {
 
   return (
     <div className="product-page">
-      <div className="product-hero">
-        <h1>Welcome To Nerves</h1>
+      <div className="product-hero-alt product-hero">
+        <h1>Our Product</h1>
         <p>Discover our premium products</p>
         <div className="search-container">
           <div className="search-bar">
@@ -191,18 +177,12 @@ const ProductPage = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={handleSearchKeyPress}
             />
-            {searchQuery && (
-              <button className="clear-search" onClick={clearSearch}>
-                <X size={18} color="#666" />
-              </button>
-            )}
           </div>
         </div>
       </div>
-
       <div className="product-container">
         {/* Desktop Filters Sidebar */}
-        {/* <div className="product-filters">
+        <div className="product-filters">
           <div className="filter-section">
             <h3>
               Categories
@@ -234,7 +214,7 @@ const ProductPage = () => {
             </ul>
           </div>
 
-          <div className="filter-section">
+          {/* <div className="filter-section">
             <h3>Price Range</h3>
             <div className="price-range">
               <input
@@ -257,9 +237,9 @@ const ProductPage = () => {
                 <span>${filters.priceRange[1]}</span>
               </div>
             </div>
-          </div>
+          </div> */}
 
-          <div className="filter-section">
+          {/* <div className="filter-section">
             <h3>
               Rating
               {filters.rating > 0 && (
@@ -293,21 +273,10 @@ const ProductPage = () => {
                 </button>
               ))}
             </div>
-          </div>
-        </div> */}
+          </div> */}
+        </div>
 
         <div className="product-listing">
-          {hasSearched && searchQuery && (
-            <div className="search-results-header">
-              <h3>
-                Showing results for "{searchQuery}"
-                <button onClick={clearSearch} className="clear-all-filters">
-                  Clear search
-                </button>
-              </h3>
-            </div>
-          )}
-
           {/* Mobile Filter Navbar */}
           <div className="mobile-filter-nav">
             <div className="filter-nav-inner">
@@ -509,6 +478,7 @@ const ProductPage = () => {
           </div>
 
           {loading ? (
+            // <div className="loading-spinner">Loading...</div>
             <div className="skeleton-grid">
               {[...Array(8)].map((_, index) => (
                 <div key={index} className="skeleton-card">
@@ -555,25 +525,20 @@ const ProductPage = () => {
                 ))}
               </div>
 
-              {totalPages > 1 && (
+              {/* {totalPages > 1 && (
                 <Pagination
                   currentPage={currentPage}
                   totalPages={totalPages}
                   onPageChange={handlePageChange}
                 />
-              )}
+              )} */}
             </>
           )}
         </div>
       </div>
-      <div style={{ marginTop: "-60px" }}>
-        <Catergories />
-        <Review />
-        <NewProduct />
-        <Footer />
-      </div>
+      <Footer />
     </div>
   );
 };
 
-export default ProductPage;
+export default ProductPageAlt;
