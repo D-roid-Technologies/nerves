@@ -75,14 +75,35 @@ interface OrderStatusProps {
 export default function MyAccountPage() {
   const user = useSelector((state: RootState) => state.user);
   const navigate = useNavigate();
+
+  const earlyBirdReg = () => {
+    navigate("/early-bird-registration");
+  };
   return (
     <div className={styles["account-container"]}>
       <div className="settings-header">
-        <div className="header-content">
-          <User className="header-icon" />
+        <div
+          className="header-content"
+          style={{ justifyContent: "space-between" }}
+        >
+          {/* <User className="header-icon" /> */}
+          <div className={styles["account-header"]}>
+            <div>
+              <User className="header-icon" />
+            </div>
+            <div>
+              <h1>My Account</h1>
+              <p>See all account infos</p>
+            </div>
+          </div>
           <div>
-            <h1>My Account</h1>
-            <p>See all account infos</p>
+            <button
+              onClick={earlyBirdReg}
+              className={styles["account-edit-btn"]}
+            >
+              {/* <Edit size={16} style={{ marginRight: "8px" }} /> */}
+              Early Bird Registration
+            </button>
           </div>
         </div>
       </div>

@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { setUser } from "../../../redux/slice/user";
 import { store } from "../../../redux/store";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "./signup.css";
 
 const SignUp: React.FunctionComponent = () => {
@@ -34,43 +36,100 @@ const SignUp: React.FunctionComponent = () => {
     const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{6,}$/;
 
     if (!nameRegex.test(formData.firstName)) {
-      alert(
-        "First name must contain only letters and be at least 2 characters."
+      toast.error(
+        "First name must contain only letters and be at least 2 characters.",
+        {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        }
       );
       setIsLoading(false);
       return;
     }
 
     if (formData.middleName && !nameRegex.test(formData.middleName)) {
-      alert("Middle name must contain only letters.");
+      toast.error("Middle name must contain only letters.", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
       setIsLoading(false);
       return;
     }
 
     if (!nameRegex.test(formData.lastName)) {
-      alert(
-        "Last name must contain only letters and be at least 2 characters."
+      toast.error(
+        "Last name must contain only letters and be at least 2 characters.",
+        {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        }
       );
       setIsLoading(false);
       return;
     }
 
     if (!emailRegex.test(formData.email)) {
-      alert("Please enter a valid email address.");
+      toast.error("Please enter a valid email address.", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
       setIsLoading(false);
       return;
     }
 
     if (!passwordRegex.test(formData.password)) {
-      alert(
-        "Password must be at least 6 characters, with at least one uppercase letter and one number."
+      toast.error(
+        "Password must be at least 6 characters, with at least one uppercase letter and one number.",
+        {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        }
       );
       setIsLoading(false);
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match.");
+      toast.error("Passwords do not match.", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
       setIsLoading(false);
       return;
     }
@@ -79,13 +138,32 @@ const SignUp: React.FunctionComponent = () => {
     setTimeout(() => {
       store.dispatch(setUser(formData));
       setIsLoading(false);
-      navigate("/");
+      toast.success("Account created successfully! Redirecting...", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
+      setTimeout(() => navigate("/"), 2000);
     }, 2000);
   };
 
   const handleSocialSignup = (provider: string) => {
+    toast.info(`Signing up with ${provider}`, {
+      position: "top-right",
+      autoClose: 3000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+    });
     console.log(`Signup with ${provider}`);
-    // Add your social signup logic here
   };
 
   const handleLoginRedirect = () => {
@@ -143,6 +221,18 @@ const SignUp: React.FunctionComponent = () => {
 
   return (
     <div className="signup-background">
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
       <div className="signup-container">
         <h1>Create Your Account</h1>
 

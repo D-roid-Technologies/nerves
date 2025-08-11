@@ -15,6 +15,7 @@ import SettingsPage from "../ui/pages/settings/SettingsPage";
 import CategoriesPage from "../ui/pages/catergories/CategoriesPage";
 import ProductPageAlt from "../ui/pages/productPage/ProductPageAlt";
 import ScrollToTop from "../ui/components/srollToTop/ScrollToTop";
+import EarlyBirdRegistration from "../ui/pages/EarlyBirdRegistration/EarlyBirdRegistration";
 // import CheckoutPage from "../ui/components/checkout/Checkoutpage";
 
 const Index: React.FunctionComponent = () => {
@@ -35,6 +36,8 @@ const Index: React.FunctionComponent = () => {
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/catergories" element={<CategoriesPage />} />
         <Route path="/collections" element={<Collections />} />
+        <Route path="/early-bird-registration" element={<EarlyBirdRegistration />} />
+
         {/* <Route
         path="/products/:category/:productTitle"
         element={<ProductDetailsPage />}
