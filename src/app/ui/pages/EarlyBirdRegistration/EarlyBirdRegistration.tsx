@@ -213,7 +213,7 @@ const EarlyBirdRegistration: React.FunctionComponent = () => {
             </div>
             <div className={styles["form-group"]}>
               <label htmlFor="company" className={styles["form-label"]}>
-                Company
+                Company Name
               </label>
               <input
                 type="text"
@@ -222,7 +222,8 @@ const EarlyBirdRegistration: React.FunctionComponent = () => {
                 value={formData.company}
                 onChange={handleChange}
                 className={styles["form-input"]}
-                placeholder="Enter your company"
+                placeholder="Enter your company Name
+"
               />
             </div>
           </div>
