@@ -1,5 +1,6 @@
 import React from "react";
 import "./catergories.css";
+import { Link } from "react-router-dom";
 
 const Categories: React.FunctionComponent = () => {
   return (
@@ -7,9 +8,9 @@ const Categories: React.FunctionComponent = () => {
       <h1>Shop By Categories</h1>
       <div className="grid-container">
         <div className="grid-item item-1">
-          <a href="/watches" className="item-link">
+          <Link to="/catergories" className="item-link">
             Shop Now
-          </a>
+          </Link>
           <div className="item-content">
             <h2 className="item-title">Watches</h2>
             {/* <p className="item-subtitle">
@@ -19,9 +20,9 @@ const Categories: React.FunctionComponent = () => {
         </div>
 
         <div className="grid-item item-2">
-          <a href="/headphones" className="item-link">
+          <Link to="/catergories" className="item-link">
             Shop Now
-          </a>
+          </Link>
           <div className="item-content">
             <h2 className="item-title">Sunglasses</h2>
             {/* <p className="item-subtitle">Immersive sound experience</p> */}
@@ -29,9 +30,9 @@ const Categories: React.FunctionComponent = () => {
         </div>
 
         <div className="grid-item item-3">
-          <a href="/sunglasses" className="item-link">
+          <Link to="/catergories" className="item-link">
             Shop Now
-          </a>
+          </Link>
           <div className="item-content">
             <h2 className="item-title">Bracelets</h2>
             {/* <p className="item-subtitle">See the world in style</p> */}
@@ -39,9 +40,9 @@ const Categories: React.FunctionComponent = () => {
         </div>
 
         <div className="grid-item item-4">
-          <a href="/cameras" className="item-link">
+          <Link to="/catergories" className="item-link">
             Shop Now
-          </a>
+          </Link>
           <div className="item-content">
             <h2 className="item-title">Necklaces</h2>
             {/* <p className="item-subtitle">Capture your perfect moments</p> */}
@@ -50,6 +51,6 @@ const Categories: React.FunctionComponent = () => {
       </div>
     </div>
   );
-}
+};
 
 export default Categories;
