@@ -5,7 +5,7 @@ const AboutUs: React.FunctionComponent = () => {
   return (
     <div className="about-page">
       <div className="about-hero">
-        <h1>About Us</h1>
+        <h1>About NSN</h1>
         <p>Discover our story, mission, and vision for the future.</p>
       </div>
 
