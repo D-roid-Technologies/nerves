@@ -1,13 +1,14 @@
 /* Reuse the background image */
 .signup-background {
   width: auto;
-  min-height: 100vh;
-  background: url("https://www.usnews.com/object/image/00000162-f3a3-d0d5-a57f-fbf33c300000/3-vestrahorn-iceland.jpg?update-time=1745871301820&size=responsive640")
-    center/cover no-repeat;
+  min-height: 85vh;
+  /* background: url("https://www.usnews.com/object/image/00000162-f3a3-d0d5-a57f-fbf33c300000/3-vestrahorn-iceland.jpg?update-time=1745871301820&size=responsive640")
+    center/cover no-repeat; */
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
+  background-color: wheat;
 }
 
 .signup-container {

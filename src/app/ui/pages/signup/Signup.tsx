@@ -247,14 +247,14 @@ const SignUp: React.FunctionComponent = () => {
               <GoogleIcon />
               <span>Google</span>
             </button>
-            <button
+            {/* <button
               type="button"
               className="social-button apple"
               onClick={() => handleSocialSignup("Apple")}
             >
               <AppleIcon />
               <span>Apple</span>
-            </button>
+            </button> */}
             <button
               type="button"
               className="social-button facebook"
@@ -263,24 +263,24 @@ const SignUp: React.FunctionComponent = () => {
               <FacebookIcon />
               <span>Facebook</span>
             </button>
-            <button
+            {/* <button
               type="button"
               className="social-button github"
               onClick={() => handleSocialSignup("GitHub")}
             >
               <GitHubIcon />
               <span>GitHub</span>
-            </button>
+            </button> */}
           </div>
 
           {/* Divider */}
-          <div className="divider">
+          {/* <div className="divider">
             <span>or sign up with email</span>
-          </div>
+          </div> */}
         </div>
 
         {/* Signup Form */}
-        <form className="signup-form" onSubmit={handleSubmit}>
+        {/* <form className="signup-form" onSubmit={handleSubmit}>
           <div className="name-fields">
             <div className="form-group">
               <label htmlFor="firstName">First Name</label>
@@ -426,7 +426,6 @@ const SignUp: React.FunctionComponent = () => {
             </div>
           </div>
 
-          {/* Signup Button */}
           <button
             type="submit"
             className={`signup-button ${isLoading ? "loading" : ""}`}
@@ -441,9 +440,8 @@ const SignUp: React.FunctionComponent = () => {
               "Sign Up"
             )}
           </button>
-        </form>
+        </form> */}
 
-        {/* Login Redirect */}
         <div className="login-redirect">
           <p>
             Already have an account?{" "}
@@ -457,7 +455,6 @@ const SignUp: React.FunctionComponent = () => {
           </p>
         </div>
 
-        {/* Footer Links */}
         <div className="footer-links">
           <button type="button" onClick={() => console.log("Terms clicked")}>
             Terms of Service

@@ -108,14 +108,14 @@ const Login: React.FunctionComponent = () => {
               <GoogleIcon />
               <span>Google</span>
             </button>
-            <button
+            {/* <button
               type="button"
               className="social-button apple"
               onClick={() => handleSocialLogin("Apple")}
             >
               <AppleIcon />
               <span>Apple</span>
-            </button>
+            </button> */}
             <button
               type="button"
               className="social-button facebook"
@@ -124,24 +124,24 @@ const Login: React.FunctionComponent = () => {
               <FacebookIcon />
               <span>Facebook</span>
             </button>
-            <button
+            {/* <button
               type="button"
               className="social-button github"
               onClick={() => handleSocialLogin("GitHub")}
             >
               <GitHubIcon />
               <span>GitHub</span>
-            </button>
+            </button> */}
           </div>
 
           {/* Divider */}
-          <div className="divider">
+          {/* <div className="divider">
             <span>or continue with email</span>
-          </div>
+          </div> */}
         </div>
 
         {/* Login Form */}
-        <form className="login-form" onSubmit={handleSubmit}>
+        {/* <form className="login-form" onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="email">Email Address</label>
             <input
@@ -199,7 +199,6 @@ const Login: React.FunctionComponent = () => {
             </div>
           </div>
 
-          {/* Forgot Password Link */}
           <div className="forgot-password">
             <button
               type="button"
@@ -210,7 +209,6 @@ const Login: React.FunctionComponent = () => {
             </button>
           </div>
 
-          {/* Login Button */}
           <button
             type="submit"
             className={`login-button ${isLoading ? "loading" : ""}`}
@@ -225,7 +223,7 @@ const Login: React.FunctionComponent = () => {
               "Sign In"
             )}
           </button>
-        </form>
+        </form> */}
 
         {/* Sign Up Link */}
         <div className="signup-section">
