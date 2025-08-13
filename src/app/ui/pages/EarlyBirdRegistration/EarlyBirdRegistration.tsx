@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -11,6 +11,7 @@ const EarlyBirdRegistration: React.FunctionComponent = () => {
     email: "",
     phone: "",
     company: "",
+    profilePicture: null as File | null,
   });
 
   const [timeLeft, setTimeLeft] = useState({
@@ -20,7 +21,9 @@ const EarlyBirdRegistration: React.FunctionComponent = () => {
     seconds: 0,
   });
 
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -53,6 +56,42 @@ const EarlyBirdRegistration: React.FunctionComponent = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+
+      if (!file.type.match("image.*")) {
+        toast.error("Please select an image file (JPEG, PNG)");
+        return;
+      }
+
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error("Image size should be less than 2MB");
+        return;
+      }
+
+      setFormData((prev) => ({ ...prev, profilePicture: file }));
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+
+  const removeImage = () => {
+    setFormData((prev) => ({ ...prev, profilePicture: null }));
+    setPreviewImage(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -71,7 +110,12 @@ const EarlyBirdRegistration: React.FunctionComponent = () => {
       return;
     }
 
+    // Simulate form submission with image upload
     setTimeout(() => {
+      console.log("Form data with image:", {
+        ...formData,
+        profilePicture: formData.profilePicture?.name,
+      });
       toast.success("Early bird registration successful!");
       setIsLoading(false);
     }, 2000);
@@ -82,9 +126,10 @@ const EarlyBirdRegistration: React.FunctionComponent = () => {
       <ToastContainer
         position="top-right"
         autoClose={5000}
-        hideProgressBar={false}
+        hideProgressBar={true}
         newestOnTop={false}
         closeOnClick
+        theme="colored"
         rtl={false}
         pauseOnFocusLoss
         draggable
@@ -147,6 +192,51 @@ const EarlyBirdRegistration: React.FunctionComponent = () => {
         </div>
 
         <form className={styles["registration-form"]} onSubmit={handleSubmit}>
+          {/* Profile Picture Upload */}
+          <div className={styles["form-group"]}>
+            <label className={styles["form-label"]}>Profile Picture</label>
+            <div className={styles["image-upload-container"]}>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImageChange}
+                accept="image/*"
+                className={styles["file-input"]}
+                required
+              />
+
+              {previewImage ? (
+                <div className={styles["image-preview-container"]}>
+                  <img
+                    src={previewImage}
+                    alt="Preview"
+                    className={styles["image-preview"]}
+                  />
+                  <button
+                    type="button"
+                    onClick={removeImage}
+                    className={styles["remove-image-button"]}
+                  >
+                    ×
+                  </button>
+                </div>
+              ) : (
+                <div
+                  className={styles["upload-area"]}
+                  onClick={triggerFileInput}
+                >
+                  <span className={styles["upload-icon"]}>+</span>
+                  <span className={styles["upload-text"]}>
+                    Click to upload profile picture
+                  </span>
+                  <span className={styles["upload-hint"]}>
+                    JPEG or PNG, max 2MB
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
           <div className={styles["form-row"]}>
             <div className={styles["form-group"]}>
               <label htmlFor="firstName" className={styles["form-label"]}>
@@ -222,8 +312,7 @@ const EarlyBirdRegistration: React.FunctionComponent = () => {
                 value={formData.company}
                 onChange={handleChange}
                 className={styles["form-input"]}
-                placeholder="Enter your company Name
-"
+                placeholder="Enter your company name"
               />
             </div>
           </div>
