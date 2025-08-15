@@ -1,9 +1,10 @@
-import { signInWithPopup } from "firebase/auth";
-import { get, push, ref, set } from "firebase/database";
+import { sendEmailVerification, signInWithPopup, updateProfile } from "firebase/auth";
 import { auth, db, provider } from "../../firebase";
 import { LocationState } from "../slice/location";
 import { setUser } from "../slice/user";
 import { store } from "../store";
+import { collection, doc, getDoc, setDoc, updateDoc, arrayUnion, query, where, getDocs } from "firebase/firestore";
+import toast from "react-hot-toast";
 
 
 const getCurrentDateTime = () => {
@@ -41,6 +42,11 @@ const getFirstInitials = (array: string[]) => {
     const initials = [firstInitials, secondInitials]
     return initials
 }
+
+function capitalizeFirstLetter(str: string) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 interface FirebaseProviderData {
     providerId: string | null;
     uid: string | null;
@@ -55,160 +61,99 @@ export class AuthService {
         const currentDateTime = getCurrentDateTime();
         const signInData = signInWithPopup(auth, provider).then(async (res: { user: { refreshToken: string; providerData: { photoURL: any; }[]; uid: any; }; }) => {
             const providerData = res.user.providerData[0] as FirebaseProviderData;
-
-            // sessionStorage.setItem("accessToken", res.user.refreshToken);
             // const newDocRef = push(ref(db, `users`));
+            const userDocRef = doc(collection(db, "nerveaccount"), res.user.uid);
+            
 
             const gottenNames: string[] = splitFullNameBySpace(providerData.displayName);
             const allInitials: string[] = getFirstInitials(gottenNames);
-
-            store.dispatch(setUser({
-                providerId: providerData.providerId,
-                uid: providerData.uid,
-                firstName: gottenNames[0],
-                lastName: gottenNames[1],
-                email: providerData.email,
-                phoneNumber: providerData.phoneNumber,
-                photoURL: providerData.photoURL
-            }))
+            // const user = res.user;
+            // await updateProfile(user, {
+            //     displayName: `${userData.firstName} ${userData.lastName}`,
+            // });
             // Writting user data to the database
-            //   set(newDocRef, {
-            //     primaryInformation: {
-            //       firstName: capitalizeFirstLetter(gottenNames[0]),
-            //       lastName: capitalizeFirstLetter(gottenNames[1]),
-            //       middleName: "",
-            //       email: res.user.providerData[0].email,
-            //       phone: "",
-            //       userType: "member",
-            //       nameInitials: `${allInitials[0].toUpperCase()}${allInitials[1].toUpperCase()}`,
-            //       uniqueIdentifier: res.user.uid,
-            //       gender: "",
-            //       dateOfBirth: "",
-            //       disability: false,
-            //       disabilityType: "",
-            //       loginCount: handleLoginCount(0),
-            //       educationalLevel: "",
-            //       photoUrl: res.user.providerData[0].photoURL
-            //     },
-            //     secondaryInformation: {
-            //       referralName: "",
-            //       secondaryEmail: "",
-            //       securityQuestion: "",
-            //       securityAnswer: "",
-            //     },
-            //     userAuthententication: {
-            //       isLoggedIn: true,
-            //       verifiedEmail: false,
-            //       verifyPhoneNumber: false,
-            //       agreedToTerms: true,
-            //       twoFactorSettings: false,
-            //     },
-            //     location: {
-            //       countrySelected: locationData.principalSubdivision,
-            //       countryDetailsFromDevice: locationData,
-            //       currentdateTime: currentDateTime,
-            //     },
-            //     kCoin: {
-            //       amount: 0,
-            //       storeCardDetails: false,
-            //       mineCoins: {
-            //         numberOfReferals: 0,
-            //         numberOfAdsWatched: 0
-            //       }
-            //     },
-            //     courses: AllCourses,
-            //     notifications: AllNotifications,
-            //     schedules: AllSchedles,
-            //     diaries: [
-            //       {
-            //         diaryTitle: "The Diary Platform",
-            //         description: "Tell us your thoughts",
-            //         startDate: currentDateTime.formattedDateTime,
-            //         endDate: addDaysToDate(currentDateTime.formattedDateTime, 30),
-            //       }
-            //     ],
-            //     lunchBox: {
-            //       events: [
-            //         {
-            //           eventTitle: "D'roid Technologies - Chess Marathon",
-            //           description: "The Chess Marathon of the year",
-            //           imageLink: "",
-            //           attendees: 0,
-            //           createdTime: currentDateTime.time,
-            //           createdDate: `${currentDateTime.date}-${currentDateTime.month}-${currentDateTime.year}`,
-            //         }
-            //       ],
-            //       jobs: [
-            //         {
-            //           jobTitle: "Front-End Developer - React Js",
-            //           description: "We are looking for a front end developer in Recat Js",
-            //           imageLink: "",
-            //           peopleApplied: 0,
-            //           createdTime: currentDateTime.time,
-            //           createdDate: `${currentDateTime.date}-${currentDateTime.month}-${currentDateTime.year}`,
-            //         }
-            //       ]
-            //     }
-            //   });
-            //   store.dispatch(
-            //     setAuthData({
-            //       uid: newDocRef.key,
-            //       accessToken: res.user.refreshToken,
-            //     })
-            //   );
-            // sessionStorage.setItem("accessToken", res.user.refreshToken);
-            // const dbRef = ref(db, `users`);
-            // const snapShot = await get(dbRef);
-            // const objectsOfData: object[] = Object.values(snapShot.val());
-            // let userObject: any = getUser(objectsOfData, res.user.uid);
-            // console.log("from sign up database", userObject);
-            // store.dispatch(
-            //     setUserData({
-            //         firstName: userObject.primaryInformation.firstName,
-            //         lastName: userObject.primaryInformation.lastName,
-            //         middleName: userObject.primaryInformation.middleName,
-            //         country: userObject.location.country,
-            //         phone: userObject.primaryInformation.phone,
-            //         verifyPhoneNumber:
-            //             userObject.userAuthententication.verifyPhoneNumber,
-            //         userType: userObject.primaryInformation.userType,
-            //         verifiedEmail: userObject.userAuthententication.verifiedEmail,
-            //         agreedToTerms: userObject.userAuthententication.agreedToTerms,
-            //         nameInitials: userObject.primaryInformation.nameInitials,
-            //         uniqueIdentifier: userObject.primaryInformation.uniqueIdentifier,
-            //         gender: userObject.primaryInformation.gender,
-            //         dateOfBirth: userObject.primaryInformation.dateOfBirth,
-            //         disability: userObject.primaryInformation.disability,
-            //         disabilityType: userObject.primaryInformation.disabilityType,
-            //         timeZone: userObject.location.timeZone,
-            //         educationalLevel: userObject.primaryInformation.educationalLevel,
-            //         referralName: userObject.secondaryInformation.referralName,
-            //         secondaryEmail: userObject.secondaryInformation.secondaryEmail,
-            //         residentialAddress: userObject.location.residentialAddress,
-            //         city: userObject.location.city,
-            //         state: userObject.location.state,
-            //         postalCode: userObject.location.postalCode,
-            //         loginCount: userObject.primaryInformation.loginCount,
-            //         kCoin: userObject.kCoin.amount,
-            //     })
-            // );
-            // store.dispatch(
-            //     addCourses(userObject.courses)
-            // );
-            // store.dispatch(
-            //     addDiaries(userObject.diaries)
-            // );
-            // store.dispatch(
-            //     addLunchBox(userObject.lunchBox)
-            // );
-            // store.dispatch(
-            //     addNotification(userObject.notifications)
-            // );
-            // store.dispatch(
-            //     addSchedule(userObject.schedules)
-            // );
+           
+            const nerveAccount = {
+                user: {
+                    primaryInformation: {
+                        firstName: capitalizeFirstLetter(gottenNames[0]),
+                        lastName: capitalizeFirstLetter(gottenNames[1]),
+                        middleName: "",
+                        email: providerData.email,
+                        phone: "",
+                        userType: "user",
+                        nameInitials: `${allInitials[0].toUpperCase()}${allInitials[1].toUpperCase()}`,
+                        uniqueIdentifier: res.user.uid,
+                        gender: "",
+                        dateOfBirth: "",
+                        photoUrl: providerData.photoURL,
+                        isLoggedIn: true,
+                        agreedToTerms: true,
+                        disability: false,
+                        disabilityType: "",
+                        educationalLevel: "",
+                        referralName: "",
+                        secondaryEmail: "",
+                        securityQuestion: "",
+                        securityAnswer: "",
+                        verifiedEmail: false,
+                        verifyPhoneNumber: false,
+                        twoFactorSettings: false,
+                        streetNumber: "",
+                        streetName: "",
+                        city: "",
+                        state: "",
+                        country: "",
+                        dateOfCreation: currentDateTime
+                    },
+                    // location: {
+                    //     locationFromDevice: locationData,
+                    //     currentdateTime: currentDateTime,
+                    // },
+                }
+                // payslips: {
+                //     paySlip: []
+                // },
+            };
+
+            await setDoc(userDocRef, nerveAccount);
+            const userSnapshot = await getDoc(userDocRef);
+
+            if (userSnapshot.exists()) {
+                const fetchedUserData = userSnapshot.data();
+                const primaryInformation = fetchedUserData.user.primaryInformation;
+
+                store.dispatch(setUser({
+                    providerId: providerData.providerId,
+                    uid: providerData.uid,
+                    firstName: gottenNames[0],
+                    lastName: gottenNames[1],
+                    email: providerData.email,
+                    phoneNumber: providerData.phoneNumber,
+                    photoURL: providerData.photoURL
+                }))
+
+                // await sendEmailVerification(user);
+                // await signOut(auth); // Prevent implicit navigation
+
+                toast.success(`Your D'roid Account has been successfully created`, {
+                    style: { background: "#4BB543", color: "#fff" },
+                });
+
+                return { success: true };
+            } else {
+                toast.error("User Information does not exist 🚫", {
+                    style: { background: "#ff4d4f", color: "#fff" },
+                });
+                return null;
+            }
+            
         }).catch((err) => {
-            console.log(err.message)
+            console.error("Error during registration:", err);
+            toast.error(`Error creating your D'roid Account 🚫`, {
+                style: { background: "#ff4d4f", color: "#fff" },
+            });
+            return null;
         })
         return signInData
     }

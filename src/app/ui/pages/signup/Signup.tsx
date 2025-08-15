@@ -243,7 +243,9 @@ const SignUp: React.FunctionComponent = () => {
             <button
               type="button"
               className="social-button google"
-              onClick={() => authService.handleGoogleSignin()}
+              onClick={() => authService.handleGoogleSignin().then(() => {
+                navigate("/shop")
+              })}
             >
               <GoogleIcon />
               <span>Google</span>
@@ -259,7 +261,7 @@ const SignUp: React.FunctionComponent = () => {
             <button
               type="button"
               className="social-button facebook"
-              // onClick={() => handleSocialSignup("Facebook")}
+            // onClick={() => handleSocialSignup("Facebook")}
             >
               <FacebookIcon />
               <span>Facebook</span>
