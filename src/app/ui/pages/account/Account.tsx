@@ -11,11 +11,13 @@ import {
   SettingsIcon,
   User,
   Plus,
+  CircleCheckBig,
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import styles from "./account.module.css";
 import { useNavigate } from "react-router-dom";
+import OrderStatus from "../orderPages/OrderStatus";
 
 const mockUser = {
   firstName: "John",
@@ -75,7 +77,14 @@ interface OrderStatusProps {
 export default function MyAccountPage() {
   const user = useSelector((state: RootState) => state.user);
   const navigate = useNavigate();
-
+  const navigateToPaidOrders = () => navigate("/orders/paid");
+  const navigateToSealedOrders = () => navigate("/orders/sealed");
+  const navigateToDispatchedOrders = () => navigate("/orders/dispatched");
+  const navigateToArrivedOrders = () => navigate("/orders/arrived");
+  const navigateToConfirmedOrders = () => navigate("/orders/confirmed");
+  const navigateToReturnedOrders = () => navigate("/orders/returned");
+  const navigateToReviewedOrders = () => navigate("/orders/reviewed");
+  const navigateToAllOrders = () => navigate("/orders/all");
   const earlyBirdReg = () => {
     navigate("/early-bird-registration");
   };
@@ -129,61 +138,66 @@ export default function MyAccountPage() {
           </div>
           <div className={styles["account-profile-detail"]}>
             <span className={styles["account-detail-label"]}>Phone</span>
-            <span className={styles["account-detail-value"]}>
-              {mockUser.phone}
-            </span>
+            <span className={styles["account-detail-value"]}>{user.phone}</span>
           </div>
           <div className={styles["account-profile-detail"]}>
             <span className={styles["account-detail-label"]}>Member Since</span>
             <span className={styles["account-detail-value"]}>
-              {mockUser.joinDate}
+              {user.joinDate}
             </span>
           </div>
         </div>
       </div>
 
       <div className={styles["account-section"]}>
-        <h2 className={styles["account-h2"]}>Order Status</h2>
+        <div className={styles["account-profile-header"]}>
+          <h2 className={styles["account-h2"]}>Order Status</h2>
+          <button className={styles["account-edit-btn"]}>
+            View All Orders
+          </button>
+        </div>
         <div className={styles["account-orders-grid"]}>
           <OrderStatus
             label="Paid"
             count={mockUser.orders.paid}
             Icon={CheckCircle}
+            onClick={navigateToPaidOrders}
           />
           <OrderStatus
             label="Sealed"
             count={mockUser.orders.sealed}
-            Icon={Package}
+            Icon={Package}    
+            onClick={navigateToSealedOrders}
           />
           <OrderStatus
             label="Dispatched"
             count={mockUser.orders.dispatched}
             Icon={Truck}
+            onClick={navigateToDispatchedOrders}
           />
           <OrderStatus
             label="Arrived"
             count={mockUser.orders.arrived}
             Icon={CheckCircle}
+            onClick={navigateToArrivedOrders}
           />
           <OrderStatus
             label="Confirmed"
             count={mockUser.orders.confirmed}
             Icon={CheckCircle}
-          />
-          <OrderStatus
-            label="View All Orders"
-            count={mockUser.orders.viewallorder}
-            Icon={CheckCircle}
+            onClick={navigateToConfirmedOrders}
           />
           <OrderStatus
             label="Returned"
             count={mockUser.orders.returned}
             Icon={RefreshCcw}
+            onClick={navigateToReturnedOrders}
           />
           <OrderStatus
             label="Reviewed"
             count={mockUser.orders.reviewed}
             Icon={MessageSquare}
+            onClick={navigateToReviewedOrders}
           />
         </div>
       </div>
@@ -275,20 +289,6 @@ export default function MyAccountPage() {
             Create Item
           </button>
         </div>
-      </div>
-    </div>
-  );
-}
-
-function OrderStatus({ label, count, Icon }: OrderStatusProps) {
-  return (
-    <div className={styles["account-order-status"]}>
-      <Icon className={styles["account-order-status-icon"]} />
-      <div className={styles["account-order-status-text"]}>
-        <span className={styles["account-order-status-label"]}>{label}</span>
-        <span className={styles["account-order-status-count"]}>
-          {count} orders
-        </span>
       </div>
     </div>
   );

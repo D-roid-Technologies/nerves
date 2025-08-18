@@ -16,6 +16,14 @@ import CategoriesPage from "../ui/pages/catergories/CategoriesPage";
 import ProductPageAlt from "../ui/pages/productPage/ProductPageAlt";
 import ScrollToTop from "../ui/components/srollToTop/ScrollToTop";
 import EarlyBirdRegistration from "../ui/pages/EarlyBirdRegistration/EarlyBirdRegistration";
+import PaidOrders from "../ui/pages/orderPages/PaidOrders";
+import SealedOrders from "../ui/pages/orderPages/SealedOrders";
+import DispatchedOrders from "../ui/pages/orderPages/DispatchedOrders";
+import ArrivedOrders from "../ui/pages/orderPages/ArrivedOrders";
+import ConfirmedOrders from "../ui/pages/orderPages/ConfirmedOrders";
+import ReturnedOrders from "../ui/pages/orderPages/ReturnedOrders";
+import ReviewedOrders from "../ui/pages/orderPages/ReviewedOrders";
+import ViewAllOrders from "../ui/pages/orderPages/ViewAllOrders";
 // import CheckoutPage from "../ui/components/checkout/Checkoutpage";
 
 const Index: React.FunctionComponent = () => {
@@ -36,7 +44,19 @@ const Index: React.FunctionComponent = () => {
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/catergories" element={<CategoriesPage />} />
         <Route path="/collections" element={<Collections />} />
-        <Route path="/early-bird-registration" element={<EarlyBirdRegistration />} />
+        <Route
+          path="/early-bird-registration"
+          element={<EarlyBirdRegistration />}
+        />
+        {/* oreder pages  */}
+        <Route path="/orders/paid" element={<PaidOrders />} />
+        <Route path="/orders/sealed" element={<SealedOrders />} />
+        <Route path="/orders/dispatched" element={<DispatchedOrders />} />
+        <Route path="/orders/arrived" element={<ArrivedOrders />} />
+        <Route path="/orders/confirmed" element={<ConfirmedOrders />} />
+        <Route path="/orders/returned" element={<ReturnedOrders />} />
+        <Route path="/orders/reviewed" element={<ReviewedOrders />} />
+        <Route path="/orders/all" element={<ViewAllOrders />} />
 
         {/* <Route
         path="/products/:category/:productTitle"
