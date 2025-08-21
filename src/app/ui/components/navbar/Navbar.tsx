@@ -289,9 +289,9 @@ const Navbar = () => {
                       </>
                     ) : (
                       <>
-                        <Link to="/early-bird-registration" className={styles.dropdownItem}>
+                        {/* <Link to="/early-bird-registration" className={styles.dropdownItem}>
                           Early Bird Registration
-                        </Link>
+                        </Link> */}
                         <Link to="/guest" className={styles.dropdownItem}>
                           Continue as Guest
                         </Link>
@@ -453,12 +453,19 @@ const Navbar = () => {
                 </>
               ) : (
                 <>
-                  <Link
-                    to="/login"
+                  {/* <Link
+                    to="/early-bird-registration"
                     className={styles.modalItem}
                     onClick={closeUserModal}
                   >
-                    Sign In
+                    Early Bird Registration
+                  </Link> */}
+                  <Link
+                    to="/guest"
+                    className={styles.modalItem}
+                    onClick={closeUserModal}
+                  >
+                    Continue as Guest
                   </Link>
                   <Link
                     to="/register"
@@ -468,18 +475,11 @@ const Navbar = () => {
                     Create Account
                   </Link>
                   <Link
-                    to="/guest"
+                    to="/login"
                     className={styles.modalItem}
                     onClick={closeUserModal}
                   >
-                    Early Bird Registration
-                  </Link>
-                  <Link
-                    to="/early-bird-registration"
-                    className={styles.modalItem}
-                    onClick={closeUserModal}
-                  >
-                    Continue as Guest
+                    Sign In
                   </Link>
                 </>
               )}

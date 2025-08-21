@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import { Friends } from "../../utils/types/friends/interface/friendInterface";
 import { Wallet } from "../../utils/types/wallets/interface/wallets";
 import { Product } from "../../types/product";
+import { setListedItems } from "../slice/products";
 
 
 const getCurrentDateTime = (): string => {
@@ -118,7 +119,7 @@ interface ReviewInter {
 type ItemStatus = "delivered" | "returned";
 
 // Items listed by the user for sale
-interface ListedItem {
+export interface ListedItem {
     itemId: string;
     title: string;
     description: string;
@@ -225,7 +226,7 @@ export class AuthService {
                 notifications: [] as Notification[],
                 orders: [] as OrderInter[],
                 reviews: [] as ReviewInter[],
-                myItems: {} as MyItems,
+                myItems: [] as MyItems[],
                 friends: {} as Friends,
                 wallet: {} as Wallet,
             };
@@ -359,8 +360,24 @@ export class AuthService {
             return null;
         }
     }
+    async fetchAllListedItems() {
+        try {
+            const usersSnapshot = await getDocs(collection(db, "nerveaccount"));
+            const allUsers: any = usersSnapshot.docs.map(doc => doc.data());
 
+            // Flatten all listed items
+            const allListedItems: ListedItem[] = allUsers.flatMap((user: { myItems: any[]; }) =>
+                user.myItems.flatMap(myItem => myItem.listedForSale)
+            );
 
+            // Store in Redux
+            store.dispatch(setListedItems(allListedItems));
+            return allListedItems;
+        } catch (err) {
+            console.error("Error fetching all listed items:", err);
+            return [];
+        }
+    };
 }
 
 export const authService = new AuthService()

@@ -8,6 +8,9 @@ import Review from "../../components/review/Review";
 import Footer from "../../components/footer/Footer";
 
 import "./ProductPage.css";
+import { authService } from "../../../redux/configuration/auth.service";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux/store";
 
 interface Product {
   id: number;
@@ -42,6 +45,13 @@ const ProductPageAlt = () => {
   });
   const [isFiltering, setIsFiltering] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+
+  const listedItems = useSelector((state: RootState) => state.products.listedItems);
+
+  useEffect(() => {
+    // authService.fetchAllListedItems()
+    console.log("fetch and store in slice", listedItems)
+  }, []);
 
   useEffect(() => {
     const fetchProducts = async () => {
