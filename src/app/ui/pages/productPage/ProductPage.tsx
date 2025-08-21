@@ -13,14 +13,19 @@ interface Product {
   id: number;
   name: string;
   price: number;
+  slug?: string;
   discountPrice?: number;
   rating: number;
   reviewCount: number;
+  description?: string;
+  details?: string[];
   image: string;
-  category: string;
-  isNew: boolean;
-  isFeatured: boolean;
+  isNew?: boolean;
+  isFeatured?: boolean;
+  category?: string;
+  sellerId: string; // <- add this
 }
+
 
 const ProductPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -81,7 +86,7 @@ const ProductPage = () => {
         result = result.filter(
           (product) =>
             product.name.toLowerCase().includes(query) ||
-            product.category.toLowerCase().includes(query) ||
+            product.category?.toLowerCase().includes(query) ||
             product.discountPrice?.toString().includes(query) ||
             product.price.toString().includes(query)
         );
@@ -313,9 +318,8 @@ const ProductPage = () => {
             <div className="filter-nav-inner">
               <div className="filter-dropdown">
                 <button
-                  className={`filter-dropdown-toggle ${
-                    activeDropdown === "categories" ? "active" : ""
-                  }`}
+                  className={`filter-dropdown-toggle ${activeDropdown === "categories" ? "active" : ""
+                    }`}
                   onClick={() => toggleDropdown("categories")}
                 >
                   Categories
@@ -338,20 +342,17 @@ const ProductPage = () => {
                           </button>
                         </li>
                         {Array.from(
-                          new Set(products.map((p) => p.category))
+                          new Set(products.map((p) => p.category).filter((c): c is string => !!c))
                         ).map((category) => (
                           <li key={category}>
                             <button
-                              className={
-                                filters.category === category ? "active" : ""
-                              }
+                              className={filters.category === category ? "active" : ""}
                               onClick={() => {
                                 handleCategoryFilter(category);
                                 setActiveDropdown(null);
                               }}
                             >
-                              {category.charAt(0).toUpperCase() +
-                                category.slice(1)}
+                              {category.charAt(0).toUpperCase() + category.slice(1)}
                             </button>
                           </li>
                         ))}
@@ -363,9 +364,8 @@ const ProductPage = () => {
 
               <div className="filter-dropdown">
                 <button
-                  className={`filter-dropdown-toggle ${
-                    activeDropdown === "price" ? "active" : ""
-                  }`}
+                  className={`filter-dropdown-toggle ${activeDropdown === "price" ? "active" : ""
+                    }`}
                   onClick={() => toggleDropdown("price")}
                 >
                   Price
@@ -403,9 +403,8 @@ const ProductPage = () => {
 
               <div className="filter-dropdown">
                 <button
-                  className={`filter-dropdown-toggle ${
-                    activeDropdown === "rating" ? "active" : ""
-                  }`}
+                  className={`filter-dropdown-toggle ${activeDropdown === "rating" ? "active" : ""
+                    }`}
                   onClick={() => toggleDropdown("rating")}
                 >
                   Rating
@@ -450,9 +449,8 @@ const ProductPage = () => {
 
               <div className="filter-dropdown">
                 <button
-                  className={`filter-dropdown-toggle ${
-                    activeDropdown === "sort" ? "active" : ""
-                  }`}
+                  className={`filter-dropdown-toggle ${activeDropdown === "sort" ? "active" : ""
+                    }`}
                   onClick={() => toggleDropdown("sort")}
                 >
                   Sort By
@@ -551,9 +549,17 @@ const ProductPage = () => {
             <>
               <div className="product-grid">
                 {currentProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard
+                    key={product.id}
+                    product={{
+                      ...product,
+                      sellerId: product.sellerId || "000000", // ensure sellerId exists
+                      category: product.category || "uncategorized", // ensure category exists
+                    }}
+                  />
                 ))}
               </div>
+
 
               {totalPages > 1 && (
                 <Pagination

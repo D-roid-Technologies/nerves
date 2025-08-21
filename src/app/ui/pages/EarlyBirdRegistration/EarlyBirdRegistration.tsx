@@ -1,31 +1,29 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import styles from "./EarlyBirdRegistration.module.css";
 
-const EarlyBirdRegistration: React.FunctionComponent = () => {
+interface ItemImage {
+  file: File;
+  preview: string;
+  title: string;
+}
+
+const EarlyBirdRegistration: React.FC = () => {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
     phone: "",
     company: "",
-    profilePicture: null as File | null,
   });
 
-  const [timeLeft, setTimeLeft] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-  });
-
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [images, setImages] = useState<ItemImage[]>([]);
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const navigate = useNavigate();
 
+  // Countdown timer
   useEffect(() => {
     const countDownDate = new Date();
     countDownDate.setDate(countDownDate.getDate() + 7);
@@ -36,86 +34,92 @@ const EarlyBirdRegistration: React.FunctionComponent = () => {
 
       setTimeLeft({
         days: Math.floor(distance / (1000 * 60 * 60 * 24)),
-        hours: Math.floor(
-          (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-        ),
+        hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
         minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
         seconds: Math.floor((distance % (1000 * 60)) / 1000),
       });
 
-      if (distance < 0) {
-        clearInterval(interval);
-      }
+      if (distance < 0) clearInterval(interval);
     }, 1000);
 
     return () => clearInterval(interval);
   }, []);
 
+  // Form field changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
+  // Handle image upload
+  const handleImagesChange = (files: FileList | null) => {
+    if (!files) return;
+    const newImages: ItemImage[] = [];
 
+    Array.from(files).forEach(file => {
       if (!file.type.match("image.*")) {
-        toast.error("Please select an image file (JPEG, PNG)");
+        toast.error("Please select only images (JPEG, PNG)");
         return;
       }
-
       if (file.size > 2 * 1024 * 1024) {
         toast.error("Image size should be less than 2MB");
         return;
       }
-
-      setFormData((prev) => ({ ...prev, profilePicture: file }));
-
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPreviewImage(reader.result as string);
+        setImages(prev => [...prev, { file, preview: reader.result as string, title: "" }]);
       };
       reader.readAsDataURL(file);
-    }
+    });
   };
 
   const triggerFileInput = () => {
     fileInputRef.current?.click();
   };
 
-  const removeImage = () => {
-    setFormData((prev) => ({ ...prev, profilePicture: null }));
-    setPreviewImage(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
+  const removeImage = (index: number) => {
+    setImages(prev => prev.filter((_, i) => i !== index));
   };
 
+  const handleTitleChange = (index: number, title: string) => {
+    setImages(prev => prev.map((img, i) => (i === index ? { ...img, title } : img)));
+  };
+
+  // Drag-and-drop handlers
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    handleImagesChange(e.dataTransfer.files);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+  };
+
+  // Form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
     if (!formData.firstName || !formData.lastName) {
       toast.error("Please enter your full name");
       setIsLoading(false);
       return;
     }
-
     if (!emailRegex.test(formData.email)) {
       toast.error("Please enter a valid email address");
       setIsLoading(false);
       return;
     }
+    if (images.length === 0) {
+      toast.error("Please upload at least one item image");
+      setIsLoading(false);
+      return;
+    }
 
-    // Simulate form submission with image upload
+    // Simulate form submission
     setTimeout(() => {
-      console.log("Form data with image:", {
-        ...formData,
-        profilePicture: formData.profilePicture?.name,
-      });
+      console.log("Form data:", { ...formData, images });
       toast.success("Early bird registration successful!");
       setIsLoading(false);
     }, 2000);
@@ -123,222 +127,105 @@ const EarlyBirdRegistration: React.FunctionComponent = () => {
 
   return (
     <div className={styles["registration-background"]}>
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={true}
-        newestOnTop={false}
-        closeOnClick
-        theme="colored"
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
+      <ToastContainer position="top-right" autoClose={5000} hideProgressBar theme="colored" />
 
       <div className={styles["registration-container"]}>
         <div className={styles["header-section"]}>
           <h1 className={styles["title"]}>Early Bird Registration</h1>
-          <p className={styles["subtitle"]}>
-            Limited time offer - Register now to secure your spot
-          </p>
+          <p className={styles["subtitle"]}>Limited time offer - Register now to secure your spot</p>
         </div>
 
         <div className={styles["countdown-section"]}>
           <div className={styles["countdown-title"]}>Offer Ends In:</div>
           <div className={styles["countdown-timer"]}>
-            <div className={styles["countdown-item"]}>
-              <span className={styles["countdown-value"]}>{timeLeft.days}</span>
-              <span className={styles["countdown-label"]}>Days</span>
-            </div>
-            <div className={styles["countdown-separator"]}>:</div>
-            <div className={styles["countdown-item"]}>
-              <span className={styles["countdown-value"]}>
-                {timeLeft.hours}
-              </span>
-              <span className={styles["countdown-label"]}>Hours</span>
-            </div>
-            <div className={styles["countdown-separator"]}>:</div>
-            <div className={styles["countdown-item"]}>
-              <span className={styles["countdown-value"]}>
-                {timeLeft.minutes}
-              </span>
-              <span className={styles["countdown-label"]}>Minutes</span>
-            </div>
-            <div className={styles["countdown-separator"]}>:</div>
-            <div className={styles["countdown-item"]}>
-              <span className={styles["countdown-value"]}>
-                {timeLeft.seconds}
-              </span>
-              <span className={styles["countdown-label"]}>Seconds</span>
-            </div>
+            {["days", "hours", "minutes", "seconds"].map((unit, idx) => (
+              <React.Fragment key={unit}>
+                <div className={styles["countdown-item"]}>
+                  <span className={styles["countdown-value"]}>{(timeLeft as any)[unit]}</span>
+                  <span className={styles["countdown-label"]}>{unit.charAt(0).toUpperCase() + unit.slice(1)}</span>
+                </div>
+                {idx < 3 && <div className={styles["countdown-separator"]}>:</div>}
+              </React.Fragment>
+            ))}
           </div>
-        </div>
-
-        <div className={styles["benefits-section"]}>
-          <h2 className={styles["benefits-title"]}>Early Bird Benefits</h2>
-          <ul className={styles["benefits-list"]}>
-            <li className={styles["benefit-item"]}>
-              20% discount on registration
-            </li>
-            <li className={styles["benefit-item"]}>
-              Exclusive access to premium content
-            </li>
-            <li className={styles["benefit-item"]}>
-              Priority seating at events
-            </li>
-            <li className={styles["benefit-item"]}>Free bonus materials</li>
-          </ul>
         </div>
 
         <form className={styles["registration-form"]} onSubmit={handleSubmit}>
-          {/* Profile Picture Upload */}
+          {/* Image Upload Section */}
           <div className={styles["form-group"]}>
-            <label className={styles["form-label"]}>Profile Picture</label>
-            <div className={styles["image-upload-container"]}>
+            <label className={styles["form-label"]}>Item Images</label>
+            <div
+              className={styles["upload-area"]}
+              onClick={triggerFileInput}
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+            >
+              <span className={styles["upload-text"]}>Drag & drop images here or click to upload</span>
+              <span className={styles["upload-hint"]}>JPEG or PNG, max 2MB each</span>
               <input
                 type="file"
                 ref={fileInputRef}
-                onChange={handleImageChange}
+                onChange={e => handleImagesChange(e.target.files)}
                 accept="image/*"
+                multiple
                 className={styles["file-input"]}
-                required
               />
+            </div>
 
-              {previewImage ? (
-                <div className={styles["image-preview-container"]}>
-                  <img
-                    src={previewImage}
-                    alt="Preview"
-                    className={styles["image-preview"]}
+            <div className={styles["image-preview-grid"]}>
+              {images.map((img, index) => (
+                <div key={index} className={styles["image-preview-container"]}>
+                  <img src={img.preview} alt={`Preview ${index}`} className={styles["image-preview"]} />
+                  <input
+                    type="text"
+                    placeholder="Image title"
+                    value={img.title}
+                    onChange={e => handleTitleChange(index, e.target.value)}
+                    className={styles["image-title-input"]}
                   />
-                  <button
-                    type="button"
-                    onClick={removeImage}
-                    className={styles["remove-image-button"]}
-                  >
+                  <button type="button" className={styles["remove-image-button"]} onClick={() => removeImage(index)}>
                     ×
                   </button>
                 </div>
-              ) : (
-                <div
-                  className={styles["upload-area"]}
-                  onClick={triggerFileInput}
-                >
-                  <span className={styles["upload-icon"]}>+</span>
-                  <span className={styles["upload-text"]}>
-                    Click to upload profile picture
-                  </span>
-                  <span className={styles["upload-hint"]}>
-                    JPEG or PNG, max 2MB
-                  </span>
-                </div>
-              )}
+              ))}
             </div>
           </div>
 
+          {/* User Info Fields */}
           <div className={styles["form-row"]}>
             <div className={styles["form-group"]}>
-              <label htmlFor="firstName" className={styles["form-label"]}>
-                First Name
-              </label>
-              <input
-                type="text"
-                id="firstName"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleChange}
-                className={styles["form-input"]}
-                placeholder="Enter your first name"
-                required
-              />
+              <label htmlFor="firstName" className={styles["form-label"]}>First Name</label>
+              <input type="text" id="firstName" name="firstName" value={formData.firstName} onChange={handleChange} className={styles["form-input"]} required />
             </div>
             <div className={styles["form-group"]}>
-              <label htmlFor="lastName" className={styles["form-label"]}>
-                Last Name
-              </label>
-              <input
-                type="text"
-                id="lastName"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleChange}
-                className={styles["form-input"]}
-                placeholder="Enter your last name"
-                required
-              />
+              <label htmlFor="lastName" className={styles["form-label"]}>Last Name</label>
+              <input type="text" id="lastName" name="lastName" value={formData.lastName} onChange={handleChange} className={styles["form-input"]} required />
             </div>
           </div>
 
           <div className={styles["form-group"]}>
-            <label htmlFor="email" className={styles["form-label"]}>
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className={styles["form-input"]}
-              placeholder="Enter your email"
-              required
-            />
+            <label htmlFor="email" className={styles["form-label"]}>Email</label>
+            <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} className={styles["form-input"]} required />
           </div>
 
           <div className={styles["form-row"]}>
             <div className={styles["form-group"]}>
-              <label htmlFor="phone" className={styles["form-label"]}>
-                Phone Number
-              </label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                className={styles["form-input"]}
-                placeholder="Enter your phone"
-              />
+              <label htmlFor="phone" className={styles["form-label"]}>Phone</label>
+              <input type="tel" id="phone" name="phone" value={formData.phone} onChange={handleChange} className={styles["form-input"]} />
             </div>
             <div className={styles["form-group"]}>
-              <label htmlFor="company" className={styles["form-label"]}>
-                Company Name
-              </label>
-              <input
-                type="text"
-                id="company"
-                name="company"
-                value={formData.company}
-                onChange={handleChange}
-                className={styles["form-input"]}
-                placeholder="Enter your company name"
-              />
+              <label htmlFor="company" className={styles["form-label"]}>Company</label>
+              <input type="text" id="company" name="company" value={formData.company} onChange={handleChange} className={styles["form-input"]} />
             </div>
           </div>
 
-          <button
-            type="submit"
-            className={`${styles["submit-button"]} ${
-              isLoading ? styles["loading"] : ""
-            }`}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <span className={styles["spinner"]}></span>
-                Processing...
-              </>
-            ) : (
-              "Register Now & Save 20%"
-            )}
+          <button type="submit" className={`${styles["submit-button"]} ${isLoading ? styles["loading"] : ""}`} disabled={isLoading}>
+            {isLoading ? "Processing..." : "Register Now & Save 20%"}
           </button>
         </form>
 
         <div className={styles["footer-section"]}>
-          <p className={styles["footer-text"]}>
-            Limited spots available. Offer ends when timer reaches zero.
-          </p>
+          <p className={styles["footer-text"]}>Limited spots available. Offer ends when timer reaches zero.</p>
         </div>
       </div>
     </div>

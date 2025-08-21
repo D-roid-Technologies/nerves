@@ -96,15 +96,14 @@ export default function MyAccountPage() {
               <p>See all account infos</p>
             </div>
           </div>
-          <div>
+          {/* <div>
             <button
               onClick={earlyBirdReg}
               className={styles["account-edit-btn"]}
             >
-              {/* <Edit size={16} style={{ marginRight: "8px" }} /> */}
               Early Bird Registration
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -120,12 +119,12 @@ export default function MyAccountPage() {
           <div className={styles["account-profile-detail"]}>
             <span className={styles["account-detail-label"]}>Name</span>
             <span className={styles["account-detail-value"]}>
-              {user.firstName} {user.lastName}
+              {user.primaryInformation?.firstName} {user.primaryInformation?.lastName}
             </span>
           </div>
           <div className={styles["account-profile-detail"]}>
             <span className={styles["account-detail-label"]}>Email</span>
-            <span className={styles["account-detail-value"]}>{user.email}</span>
+            <span className={styles["account-detail-value"]}>{user.primaryInformation?.email}</span>
           </div>
           <div className={styles["account-profile-detail"]}>
             <span className={styles["account-detail-label"]}>Phone</span>

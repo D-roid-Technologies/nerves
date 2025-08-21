@@ -16,8 +16,14 @@ interface ProductCardProps {
     reviewCount: number;
     image: string;
     isNew?: boolean;
+
+    // Added fields for cart functionality
+    sellerId: string;       // required when adding to cart
+    total?: number;         // derived field: price * quantity
+    addedAt?: string;       // timestamp when added to cart
   };
 }
+
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const dispatch = useDispatch();
@@ -38,8 +44,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   const discountPercentage = product.discountPrice
     ? Math.round(
-        ((product.price - product.discountPrice) / product.price) * 100
-      )
+      ((product.price - product.discountPrice) / product.price) * 100
+    )
     : 0;
 
   return (

@@ -199,7 +199,7 @@ const Checkout = () => {
       email: paymentDetails.email,
       amount: Number(paymentDetails.amount) * 100,
       onSuccess: (res) => {
-        alert(`Payment success: ${res}`);
+        alert(`Payment success: ${res.message}`);
       },
       onCancel: () => {
         console.log(`Payment cancelled`);

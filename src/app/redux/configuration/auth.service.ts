@@ -5,30 +5,22 @@ import { setUser } from "../slice/user";
 import { store } from "../store";
 import { collection, doc, getDoc, setDoc, updateDoc, arrayUnion, query, where, getDocs } from "firebase/firestore";
 import toast from "react-hot-toast";
+import { Friends } from "../../utils/types/friends/interface/friendInterface";
+import { Wallet } from "../../utils/types/wallets/interface/wallets";
+import { Product } from "../../types/product";
 
 
-const getCurrentDateTime = () => {
+const getCurrentDateTime = (): string => {
     const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0"); // months are 0-indexed
+    const day = String(now.getDate()).padStart(2, "0");
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const seconds = String(now.getSeconds()).padStart(2, "0");
 
-    const year = now.getFullYear(); // Retrieves the full year (e.g., 2024)
-    const month = now.getMonth() + 1; // Retrieves the month (0-11), adding 1 to make it 1-12
-    const date = now.getDate(); // Retrieves the day of the month (1-31)
-    const hours = now.getHours(); // Retrieves the hour (0-23)
-    const minutes = now.getMinutes(); // Retrieves the minutes (0-59)
-    const seconds = now.getSeconds(); // Retrieves the seconds (0-59)
-
-    // Formatting the date and time as strings
-    const formattedDate = `${year}-${String(month).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
-    const formattedTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-
-    return {
-        year,
-        month,
-        date,
-        time: formattedTime,
-        formattedDateTime: `${formattedDate} ${formattedTime}`
-    };
-}
+    return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+};
 
 const splitFullNameBySpace = (name: any) => {
     const names: string[] = name.split(' ')
@@ -56,23 +48,138 @@ interface FirebaseProviderData {
     photoURL: string | null;
 }
 
+interface Notification {
+    id: string;
+    type: "order" | "system" | "message" | "promotion";
+    title: string;
+    message: string;
+    isRead: boolean;
+    createdAt: string; // or Date
+}
+
+type OrderStatus =
+    | "paid"
+    | "sealed"
+    | "dispatched"
+    | "arrived"
+    | "confirmed"
+    | "returned"
+    | "reviewed"
+    | "cancelled";
+
+type PaymentMethod = "card" | "wallet" | "bank_transfer" | "cash_on_delivery";
+
+type PaymentStatus = "pending" | "successful" | "failed" | "refunded";
+
+// Interfaces for clarity
+interface OrderItem {
+    itemId: string;
+    sellerId: string;
+    buyerId: string;
+    title: string;
+    quantity: number;
+    price: number;
+    imageUrl: string;
+}
+
+interface OrderInter {
+    orderId: string;
+    items: OrderItem[];
+    status: OrderStatus;
+    shippingAddress: {
+        street: string;
+        city: string;
+        state: string;
+        country: string;
+        postalCode: string;
+    };
+    paymentInfo: {
+        method: PaymentMethod;
+        transactionId: string;
+        amount: number;
+        currency: string;
+        status: PaymentStatus;
+    };
+    orderTimeline: { status: OrderStatus; timestamp: string }[];
+    createdAt: string; // or Date
+}
+
+interface ReviewInter {
+    reviewId: string;
+    itemId: string;
+    reviewerId: string;
+    rating: number; // 1 - 5 stars
+    comment: string;
+    images: string[];
+    createdAt: string; // or Date
+}
+
+// Status type for purchased/sold items
+type ItemStatus = "delivered" | "returned";
+
+// Items listed by the user for sale
+interface ListedItem {
+    itemId: string;
+    title: string;
+    description: string;
+    category: string;
+    price: number;
+    stock: number;
+    images: string[];
+    createdAt: string; // or Date
+}
+
+// Items the user has purchased
+interface PurchasedItem {
+    itemId: string;
+    sellerId: string;
+    title: string;
+    price: number;
+    quantity: number;
+    status: ItemStatus;
+    createdAt: string; // or Date
+}
+
+// Items the user has sold
+interface SoldItem {
+    itemId: string;
+    buyerId: string;
+    title: string;
+    price: number;
+    quantity: number;
+    status: ItemStatus;
+    createdAt: string; // or Date
+}
+
+// Group all myItems together
+interface MyItems {
+    listedForSale: ListedItem[];
+    purchased: PurchasedItem[];
+    sold: SoldItem[];
+}
+
+interface CartItem {
+    product: Product & {
+        sellerId: string;   // attach seller information
+        total: number;      // derived field (price * quantity)
+        addedAt: string;    // timestamp when added
+    };
+    quantity: number;
+}
+
+interface Cart {
+    items: CartItem[];
+}
+
+
 export class AuthService {
     async handleGoogleSignin() {
         const currentDateTime = getCurrentDateTime();
         const signInData = signInWithPopup(auth, provider).then(async (res: { user: { refreshToken: string; providerData: { photoURL: any; }[]; uid: any; }; }) => {
             const providerData = res.user.providerData[0] as FirebaseProviderData;
-            // const newDocRef = push(ref(db, `users`));
             const userDocRef = doc(collection(db, "nerveaccount"), res.user.uid);
-            
-
             const gottenNames: string[] = splitFullNameBySpace(providerData.displayName);
             const allInitials: string[] = getFirstInitials(gottenNames);
-            // const user = res.user;
-            // await updateProfile(user, {
-            //     displayName: `${userData.firstName} ${userData.lastName}`,
-            // });
-            // Writting user data to the database
-           
             const nerveAccount = {
                 user: {
                     primaryInformation: {
@@ -81,7 +188,7 @@ export class AuthService {
                         middleName: "",
                         email: providerData.email,
                         phone: "",
-                        userType: "user",
+                        userType: "Buyer",
                         nameInitials: `${allInitials[0].toUpperCase()}${allInitials[1].toUpperCase()}`,
                         uniqueIdentifier: res.user.uid,
                         gender: "",
@@ -89,49 +196,89 @@ export class AuthService {
                         photoUrl: providerData.photoURL,
                         isLoggedIn: true,
                         agreedToTerms: true,
-                        disability: false,
-                        disabilityType: "",
-                        educationalLevel: "",
+                        verifiedEmail: false,
+                        verifyPhoneNumber: false,
+                        twoFactorSettings: false,
                         referralName: "",
                         secondaryEmail: "",
                         securityQuestion: "",
                         securityAnswer: "",
-                        verifiedEmail: false,
-                        verifyPhoneNumber: false,
-                        twoFactorSettings: false,
+                        disability: false,
+                        disabilityType: "",
+                        educationalLevel: "",
+                        dateOfCreation: currentDateTime,
+                    },
+                    location: {
                         streetNumber: "",
                         streetName: "",
                         city: "",
                         state: "",
                         country: "",
-                        dateOfCreation: currentDateTime
+                        postalCode: "",
+                        geoCoordinates: {
+                            latitude: "",
+                            longitude: "",
+                        },
                     },
-                    // location: {
-                    //     locationFromDevice: locationData,
-                    //     currentdateTime: currentDateTime,
-                    // },
-                }
-                // payslips: {
-                //     paySlip: []
-                // },
+                },
+                cart: {} as Cart,
+                notifications: [] as Notification[],
+                orders: [] as OrderInter[],
+                reviews: [] as ReviewInter[],
+                myItems: {} as MyItems,
+                friends: {} as Friends,
+                wallet: {} as Wallet,
             };
-
             await setDoc(userDocRef, nerveAccount);
             const userSnapshot = await getDoc(userDocRef);
-
             if (userSnapshot.exists()) {
                 const fetchedUserData = userSnapshot.data();
                 const primaryInformation = fetchedUserData.user.primaryInformation;
 
                 store.dispatch(setUser({
-                    providerId: providerData.providerId,
-                    uid: providerData.uid,
-                    firstName: gottenNames[0],
-                    lastName: gottenNames[1],
-                    email: providerData.email,
-                    phoneNumber: providerData.phoneNumber,
-                    photoURL: providerData.photoURL
-                }))
+                    providerId: providerData.providerId || "",
+                    uid: providerData.uid || "",
+                    primaryInformation: {
+                        firstName: capitalizeFirstLetter(gottenNames[0] || ""),
+                        lastName: capitalizeFirstLetter(gottenNames[1] || ""),
+                        middleName: "",
+                        email: providerData.email || "",
+                        phone: providerData.phoneNumber || "",
+                        userType: "user",
+                        nameInitials: `${(gottenNames[0]?.[0] || "").toUpperCase()}${(gottenNames[1]?.[0] || "").toUpperCase()}`,
+                        uniqueIdentifier: providerData.uid || "",
+                        gender: "",
+                        dateOfBirth: "",
+                        photoUrl: providerData.photoURL || "",
+                        isLoggedIn: true,
+                        agreedToTerms: true,
+                        verifiedEmail: false,
+                        verifyPhoneNumber: false,
+                        twoFactorSettings: false,
+                        referralName: "",
+                        secondaryEmail: "",
+                        securityQuestion: "",
+                        securityAnswer: "",
+                        disability: false,
+                        disabilityType: "",
+                        educationalLevel: "",
+                        dateOfCreation: getCurrentDateTime(),
+                    },
+                    location: {
+                        streetNumber: "",
+                        streetName: "",
+                        city: "",
+                        state: "",
+                        country: "",
+                        postalCode: "",
+                        geoCoordinates: {
+                            latitude: "",
+                            longitude: "",
+                        },
+                    },
+                }));
+
+
 
                 // await sendEmailVerification(user);
                 // await signOut(auth); // Prevent implicit navigation
@@ -147,7 +294,7 @@ export class AuthService {
                 });
                 return null;
             }
-            
+
         }).catch((err) => {
             console.error("Error during registration:", err);
             toast.error(`Error creating your D'roid Account 🚫`, {
@@ -157,6 +304,63 @@ export class AuthService {
         })
         return signInData
     }
+    async handleUserLogin() {
+        try {
+            // 1️⃣ Sign in with Google
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+            const providerData = user.providerData[0] as FirebaseProviderData;
+
+            // 2️⃣ Reference Firestore document
+            const userDocRef = doc(collection(db, "nerveaccount"), user.uid);
+            const userSnapshot = await getDoc(userDocRef);
+
+            if (!userSnapshot.exists()) {
+                toast.error("User account does not exist. Please sign up first 🚫", {
+                    style: { background: "#ff4d4f", color: "#fff" },
+                });
+                return null;
+            }
+
+            // 3️⃣ Fetch user data from Firestore
+            const fetchedUserData = userSnapshot.data();
+            const primaryInformation = fetchedUserData.user.primaryInformation;
+            const location = fetchedUserData.user.location;
+
+            // 4️⃣ Update Redux store
+            store.dispatch(setUser({
+                providerId: providerData.providerId || "",
+                uid: user.uid || "",
+                primaryInformation: {
+                    ...primaryInformation,
+                    isLoggedIn: true, // ensure user is marked as logged in
+                },
+                location: location || {
+                    streetNumber: "",
+                    streetName: "",
+                    city: "",
+                    state: "",
+                    country: "",
+                    postalCode: "",
+                    geoCoordinates: { latitude: "", longitude: "" },
+                },
+            }));
+
+            toast.success(`Welcome back, ${primaryInformation.firstName}!`, {
+                style: { background: "#4BB543", color: "#fff" },
+            });
+
+            return { success: true };
+        } catch (err) {
+            console.error("Error during login:", err);
+            toast.error(`Error logging in 🚫`, {
+                style: { background: "#ff4d4f", color: "#fff" },
+            });
+            return null;
+        }
+    }
+
+
 }
 
 export const authService = new AuthService()
