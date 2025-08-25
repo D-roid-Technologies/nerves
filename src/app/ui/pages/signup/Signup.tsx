@@ -5,6 +5,7 @@ import { store } from "../../../redux/store";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./signup.css";
+import { authService } from "../../../redux/configuration/auth.service";
 
 const SignUp: React.FunctionComponent = () => {
   const [formData, setFormData] = useState({
@@ -26,131 +27,131 @@ const SignUp: React.FunctionComponent = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  // const handleSubmit = (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setIsLoading(true);
 
-    // Simple regex validations
-    const nameRegex = /^[a-zA-Z]{2,}$/;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{6,}$/;
+  //   // Simple regex validations
+  //   const nameRegex = /^[a-zA-Z]{2,}$/;
+  //   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  //   const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{6,}$/;
 
-    if (!nameRegex.test(formData.firstName)) {
-      toast.error(
-        "First name must contain only letters and be at least 2 characters.",
-        {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-        }
-      );
-      setIsLoading(false);
-      return;
-    }
+  //   if (!nameRegex.test(formData.firstName)) {
+  //     toast.error(
+  //       "First name must contain only letters and be at least 2 characters.",
+  //       {
+  //         position: "top-right",
+  //         autoClose: 5000,
+  //         hideProgressBar: true,
+  //         closeOnClick: true,
+  //         pauseOnHover: true,
+  //         draggable: true,
+  //         progress: undefined,
+  //         theme: "colored",
+  //       }
+  //     );
+  //     setIsLoading(false);
+  //     return;
+  //   }
 
-    if (formData.middleName && !nameRegex.test(formData.middleName)) {
-      toast.error("Middle name must contain only letters.", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-      });
-      setIsLoading(false);
-      return;
-    }
+  //   if (formData.middleName && !nameRegex.test(formData.middleName)) {
+  //     toast.error("Middle name must contain only letters.", {
+  //       position: "top-right",
+  //       autoClose: 5000,
+  //       hideProgressBar: true,
+  //       closeOnClick: true,
+  //       pauseOnHover: true,
+  //       draggable: true,
+  //       progress: undefined,
+  //       theme: "colored",
+  //     });
+  //     setIsLoading(false);
+  //     return;
+  //   }
 
-    if (!nameRegex.test(formData.lastName)) {
-      toast.error(
-        "Last name must contain only letters and be at least 2 characters.",
-        {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-        }
-      );
-      setIsLoading(false);
-      return;
-    }
+  //   if (!nameRegex.test(formData.lastName)) {
+  //     toast.error(
+  //       "Last name must contain only letters and be at least 2 characters.",
+  //       {
+  //         position: "top-right",
+  //         autoClose: 5000,
+  //         hideProgressBar: true,
+  //         closeOnClick: true,
+  //         pauseOnHover: true,
+  //         draggable: true,
+  //         progress: undefined,
+  //         theme: "colored",
+  //       }
+  //     );
+  //     setIsLoading(false);
+  //     return;
+  //   }
 
-    if (!emailRegex.test(formData.email)) {
-      toast.error("Please enter a valid email address.", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-      });
-      setIsLoading(false);
-      return;
-    }
+  //   if (!emailRegex.test(formData.email)) {
+  //     toast.error("Please enter a valid email address.", {
+  //       position: "top-right",
+  //       autoClose: 5000,
+  //       hideProgressBar: true,
+  //       closeOnClick: true,
+  //       pauseOnHover: true,
+  //       draggable: true,
+  //       progress: undefined,
+  //       theme: "colored",
+  //     });
+  //     setIsLoading(false);
+  //     return;
+  //   }
 
-    if (!passwordRegex.test(formData.password)) {
-      toast.error(
-        "Password must be at least 6 characters, with at least one uppercase letter and one number.",
-        {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-        }
-      );
-      setIsLoading(false);
-      return;
-    }
+  //   if (!passwordRegex.test(formData.password)) {
+  //     toast.error(
+  //       "Password must be at least 6 characters, with at least one uppercase letter and one number.",
+  //       {
+  //         position: "top-right",
+  //         autoClose: 5000,
+  //         hideProgressBar: true,
+  //         closeOnClick: true,
+  //         pauseOnHover: true,
+  //         draggable: true,
+  //         progress: undefined,
+  //         theme: "colored",
+  //       }
+  //     );
+  //     setIsLoading(false);
+  //     return;
+  //   }
 
-    if (formData.password !== formData.confirmPassword) {
-      toast.error("Passwords do not match.", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-      });
-      setIsLoading(false);
-      return;
-    }
+  //   if (formData.password !== formData.confirmPassword) {
+  //     toast.error("Passwords do not match.", {
+  //       position: "top-right",
+  //       autoClose: 5000,
+  //       hideProgressBar: true,
+  //       closeOnClick: true,
+  //       pauseOnHover: true,
+  //       draggable: true,
+  //       progress: undefined,
+  //       theme: "colored",
+  //     });
+  //     setIsLoading(false);
+  //     return;
+  //   }
 
-    // Simulate signup process
-    setTimeout(() => {
-      store.dispatch(setUser(formData));
-      setIsLoading(false);
-      toast.success("Account created successfully! Redirecting...", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-      });
-      setTimeout(() => navigate("/"), 2000);
-    }, 2000);
-  };
+  //   // Simulate signup process
+  //   setTimeout(() => {
+  //     store.dispatch(setUser(formData));
+  //     setIsLoading(false);
+  //     toast.success("Account created successfully! Redirecting...", {
+  //       position: "top-right",
+  //       autoClose: 2000,
+  //       hideProgressBar: true,
+  //       closeOnClick: true,
+  //       pauseOnHover: true,
+  //       draggable: true,
+  //       progress: undefined,
+  //       theme: "colored",
+  //     });
+  //     setTimeout(() => navigate("/"), 2000);
+  //   }, 2000);
+  // };
 
   const handleSocialSignup = (provider: string) => {
     toast.info(`Signing up with ${provider}`, {
@@ -242,7 +243,9 @@ const SignUp: React.FunctionComponent = () => {
             <button
               type="button"
               className="social-button google"
-              onClick={() => handleSocialSignup("Google")}
+              onClick={() => authService.handleGoogleSignin().then(() => {
+                navigate("/shop")
+              })}
             >
               <GoogleIcon />
               <span>Google</span>
@@ -258,7 +261,7 @@ const SignUp: React.FunctionComponent = () => {
             <button
               type="button"
               className="social-button facebook"
-              onClick={() => handleSocialSignup("Facebook")}
+            // onClick={() => handleSocialSignup("Facebook")}
             >
               <FacebookIcon />
               <span>Facebook</span>

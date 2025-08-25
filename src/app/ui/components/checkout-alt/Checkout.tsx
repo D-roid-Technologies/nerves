@@ -21,6 +21,7 @@ import {
   ShoppingBag,
 } from "lucide-react";
 import "./checkout.css";
+import PayStackPop from "@paystack/inline-js"
 
 interface ShippingDetails {
   firstName: string;
@@ -34,12 +35,20 @@ interface ShippingDetails {
   country: string;
 }
 
+// interface PaymentDetails {
+//   cardNumber: string;
+//   expiryDate: string;
+//   cvv: string;
+//   cardholderName: string;
+// }
+
 interface PaymentDetails {
-  cardNumber: string;
-  expiryDate: string;
-  cvv: string;
-  cardholderName: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  amount: string; // keep as string for now (we can convert later if needed)
 }
+
 
 const Checkout = () => {
   const dispatch = useDispatch();
@@ -59,12 +68,20 @@ const Checkout = () => {
     country: "United States",
   });
 
+  // const [paymentDetails, setPaymentDetails] = useState<PaymentDetails>({
+  //   cardNumber: "",
+  //   expiryDate: "",
+  //   cvv: "",
+  //   cardholderName: "",
+  // });
+
   const [paymentDetails, setPaymentDetails] = useState<PaymentDetails>({
-    cardNumber: "",
-    expiryDate: "",
-    cvv: "",
-    cardholderName: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    amount: "",
   });
+
 
   const [shippingMethod, setShippingMethod] = useState("standard");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -77,8 +94,8 @@ const Checkout = () => {
     shippingMethod === "express"
       ? 15.99
       : shippingMethod === "overnight"
-      ? 29.99
-      : 5.99;
+        ? 29.99
+        : 5.99;
   const tax = subtotal * 0.08;
   const total = subtotal + shippingCost + tax;
 
@@ -101,9 +118,17 @@ const Checkout = () => {
     setShippingDetails((prev) => ({ ...prev, [field]: value }));
   };
 
+  // const handlePaymentChange = (field: keyof PaymentDetails, value: string) => {
+  //   setPaymentDetails((prev) => ({ ...prev, [field]: value }));
+  // };
+
   const handlePaymentChange = (field: keyof PaymentDetails, value: string) => {
-    setPaymentDetails((prev) => ({ ...prev, [field]: value }));
+    setPaymentDetails((prev) => ({
+      ...prev,
+      [field]: field === "amount" ? value.replace(/\D/g, "") : value, // only numbers for amount
+    }));
   };
+
 
   const formatCardNumber = (value: string) => {
     const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
@@ -120,22 +145,22 @@ const Checkout = () => {
     }
   };
 
-  const handleCardNumberChange = (value: string) => {
-    const formatted = formatCardNumber(value);
-    if (formatted.replace(/\s/g, "").length <= 16) {
-      handlePaymentChange("cardNumber", formatted);
-    }
-  };
+  // const handleCardNumberChange = (value: string) => {
+  //   const formatted = formatCardNumber(value);
+  //   if (formatted.replace(/\s/g, "").length <= 16) {
+  //     handlePaymentChange("cardNumber", formatted);
+  //   }
+  // };
 
-  const handleExpiryChange = (value: string) => {
-    const v = value.replace(/\D/g, "");
-    if (v.length >= 2) {
-      const formatted = v.substring(0, 2) + "/" + v.substring(2, 4);
-      handlePaymentChange("expiryDate", formatted);
-    } else {
-      handlePaymentChange("expiryDate", v);
-    }
-  };
+  // const handleExpiryChange = (value: string) => {
+  //   const v = value.replace(/\D/g, "");
+  //   if (v.length >= 2) {
+  //     const formatted = v.substring(0, 2) + "/" + v.substring(2, 4);
+  //     handlePaymentChange("expiryDate", formatted);
+  //   } else {
+  //     handlePaymentChange("expiryDate", v);
+  //   }
+  // };
 
   const validateStep = (step: number) => {
     if (step === 1) {
@@ -154,18 +179,32 @@ const Checkout = () => {
     return true;
   };
 
-  const handlePlaceOrder = async () => {
-    setIsProcessing(true);
+  // setIsProcessing(true);
 
-    // Simulate payment processing
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+  //   // Simulate payment processing
+  //   await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    alert("Order placed successfully!");
-    dispatch(clearCart());
-    setIsProcessing(false);
+  //   alert("Order placed successfully!");
+  //   dispatch(clearCart());
+  //   setIsProcessing(false);
 
-    // Navigate back to home or success page
-    navigate("/");
+  //   // Navigate back to home or success page
+  //   navigate("/");
+
+  const handlePlaceOrder = async (e: any) => {
+    e.preventDefault()
+    const payStack = new PayStackPop()
+    payStack.newTransaction({
+      key: "pk_test_db0145199289f83c428d57cf70755142bb0b8b28",
+      email: paymentDetails.email,
+      amount: Number(paymentDetails.amount) * 100,
+      onSuccess: (res) => {
+        alert(`Payment success: ${res.message}`);
+      },
+      onCancel: () => {
+        console.log(`Payment cancelled`);
+      },
+    });
   };
 
   const nextStep = () => {
@@ -496,7 +535,7 @@ const Checkout = () => {
                     <h2>Payment Information</h2>
                   </div>
 
-                  <form className="payment-form">
+                  {/* <form className="payment-form">
                     <div className="form-group">
                       <label htmlFor="cardholderName">Cardholder Name</label>
                       <div className="input-wrapper">
@@ -511,7 +550,7 @@ const Checkout = () => {
                               e.target.value
                             )
                           }
-                          placeholder="John Doe"
+                          placeholder="Richard Oyekachi"
                           required
                         />
                       </div>
@@ -569,7 +608,70 @@ const Checkout = () => {
                         </div>
                       </div>
                     </div>
+                  </form> */}
+                  <form className="payment-form">
+                    <div className="form-group">
+                      <label htmlFor="firstName">First Name</label>
+                      <div className="input-wrapper">
+                        <User className="input-icon" />
+                        <input
+                          type="text"
+                          id="firstName"
+                          value={paymentDetails.firstName}
+                          onChange={(e) => handlePaymentChange("firstName", e.target.value)}
+                          placeholder="Richard"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="lastName">Last Name</label>
+                      <div className="input-wrapper">
+                        <User className="input-icon" />
+                        <input
+                          type="text"
+                          id="lastName"
+                          value={paymentDetails.lastName}
+                          onChange={(e) => handlePaymentChange("lastName", e.target.value)}
+                          placeholder="Oyekachi"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="email">Email</label>
+                      <div className="input-wrapper">
+                        <Mail className="input-icon" />
+                        <input
+                          type="email"
+                          id="email"
+                          value={paymentDetails.email}
+                          onChange={(e) => handlePaymentChange("email", e.target.value)}
+                          placeholder="example@email.com"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="amount">Amount</label>
+                      <div className="input-wrapper">
+                        <CreditCard className="input-icon" />
+                        <input
+                          type="number"
+                          id="amount"
+                          value={paymentDetails.amount}
+                          onChange={(e) => handlePaymentChange("amount", e.target.value)}
+                          placeholder="1000"
+                          min="1"
+                          required
+                        />
+                      </div>
+                    </div>
                   </form>
+
                 </div>
               )}
             </div>
@@ -601,9 +703,10 @@ const Checkout = () => {
                     <div className="review-payment">
                       <h3>Payment Method</h3>
                       <p>
-                        **** **** **** {paymentDetails.cardNumber.slice(-4)}
+                        {/* **** **** **** {paymentDetails.cardNumber.slice(-4)} */}
+                        **** **** **** {paymentDetails.firstName}
                       </p>
-                      <p>{paymentDetails.cardholderName}</p>
+                      <p>{paymentDetails.email}</p>
                     </div>
 
                     <div className="review-shipping-method">

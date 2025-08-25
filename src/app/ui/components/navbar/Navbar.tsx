@@ -256,7 +256,7 @@ const Navbar = () => {
                     {user.isLoggedIn ? (
                       <>
                         <div className={styles.dropdownHeader}>
-                          Welcome, {user.firstName}
+                          Welcome, {user.primaryInformation?.firstName}
                         </div>
                         <Link to="/account" className={styles.dropdownItem}>
                           My Account
@@ -281,7 +281,7 @@ const Navbar = () => {
                           onClick={() => {
                             store.dispatch(clearUser());
                             setShowDropdown(false);
-                            navigate("/products");
+                            navigate("/");
                           }}
                         >
                           Sign Out
@@ -289,14 +289,17 @@ const Navbar = () => {
                       </>
                     ) : (
                       <>
-                        <Link to="/login" className={styles.dropdownItem}>
-                          Sign In
+                        {/* <Link to="/early-bird-registration" className={styles.dropdownItem}>
+                          Early Bird Registration
+                        </Link> */}
+                        <Link to="/guest" className={styles.dropdownItem}>
+                          Continue as Guest
                         </Link>
                         <Link to="/register" className={styles.dropdownItem}>
                           Create Account
                         </Link>
-                        <Link to="/guest" className={styles.dropdownItem}>
-                          Continue as Guest
+                        <Link to="/login" className={styles.dropdownItem}>
+                          Sign In
                         </Link>
                       </>
                     )}
@@ -400,7 +403,7 @@ const Navbar = () => {
               {user.isLoggedIn ? (
                 <>
                   <div className={styles.modalWelcome}>
-                    Welcome, {user.firstName}
+                    Welcome, {user.primaryInformation?.firstName}
                   </div>
                   <Link
                     to="/account"
@@ -442,7 +445,7 @@ const Navbar = () => {
                     onClick={() => {
                       store.dispatch(clearUser());
                       closeUserModal();
-                      navigate("/products");
+                      navigate("/");
                     }}
                   >
                     Sign Out
@@ -450,12 +453,19 @@ const Navbar = () => {
                 </>
               ) : (
                 <>
-                  <Link
-                    to="/login"
+                  {/* <Link
+                    to="/early-bird-registration"
                     className={styles.modalItem}
                     onClick={closeUserModal}
                   >
-                    Sign In
+                    Early Bird Registration
+                  </Link> */}
+                  <Link
+                    to="/guest"
+                    className={styles.modalItem}
+                    onClick={closeUserModal}
+                  >
+                    Continue as Guest
                   </Link>
                   <Link
                     to="/register"
@@ -465,11 +475,11 @@ const Navbar = () => {
                     Create Account
                   </Link>
                   <Link
-                    to="/guest"
+                    to="/login"
                     className={styles.modalItem}
                     onClick={closeUserModal}
                   >
-                    Continue as Guest
+                    Sign In
                   </Link>
                 </>
               )}
