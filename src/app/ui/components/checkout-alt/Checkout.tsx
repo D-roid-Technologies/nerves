@@ -344,7 +344,7 @@ const Checkout = () => {
                             onChange={(e) =>
                               handleShippingChange("firstName", e.target.value)
                             }
-                            placeholder="John"
+                            placeholder="Onyekachi"
                             required
                           />
                         </div>
@@ -360,7 +360,7 @@ const Checkout = () => {
                             onChange={(e) =>
                               handleShippingChange("lastName", e.target.value)
                             }
-                            placeholder="Doe"
+                            placeholder="Godswill"
                             required
                           />
                         </div>
@@ -379,7 +379,7 @@ const Checkout = () => {
                             onChange={(e) =>
                               handleShippingChange("email", e.target.value)
                             }
-                            placeholder="john.doe@example.com"
+                            placeholder="onyekachi.godswill@example.com"
                             required
                           />
                         </div>

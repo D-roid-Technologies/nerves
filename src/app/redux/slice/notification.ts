@@ -104,10 +104,12 @@ export const notificationSlice = createSlice({
       }
     },
 
+    // In your notificationSlice.ts
     removeNotification(state, action: PayloadAction<string>) {
       const index = state.items.findIndex((item) => item.id === action.payload);
       if (index !== -1) {
         const notification = state.items[index];
+        // FIX: Only decrement unreadCount if the notification is actually unread
         if (!notification.isRead) {
           state.unreadCount = Math.max(0, state.unreadCount - 1);
         }
@@ -117,10 +119,11 @@ export const notificationSlice = createSlice({
 
     clearAllNotifications(state) {
       state.items = [];
-      state.unreadCount = 0;
+      state.unreadCount = 0; // This should already be correct
     },
 
     clearReadNotifications(state) {
+      const readCount = state.items.filter((item) => item.isRead).length;
       state.items = state.items.filter((item) => !item.isRead);
     },
 

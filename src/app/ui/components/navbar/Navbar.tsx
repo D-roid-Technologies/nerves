@@ -134,7 +134,7 @@ const Navbar = () => {
           {/* Right Actions */}
           <div className={styles.actions}>
             {/* Search Icon */}
-            <button
+            {/* <button
               className={styles.searchIcon}
               onClick={toggleSearch}
               aria-label="Search"
@@ -153,7 +153,7 @@ const Navbar = () => {
                 <path d="m21 21-4.34-4.34" />
                 <circle cx="11" cy="11" r="8" />
               </svg>
-            </button>
+            </button> */}
 
             {/* Cart Icon */}
             <button
@@ -307,6 +307,7 @@ const Navbar = () => {
                           Settings
                         </Link>
                         <button
+                          style={{ color: "red" }}
                           className={styles.dropdownItem}
                           onClick={() => {
                             dispatch(clearUser());
@@ -481,6 +482,7 @@ const Navbar = () => {
                     Settings
                   </Link>
                   <button
+                    style={{ color: "red" }}
                     className={styles.modalItem}
                     onClick={() => {
                       dispatch(clearUser());

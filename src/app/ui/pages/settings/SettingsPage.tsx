@@ -31,11 +31,13 @@ import {
   Download,
   Trash2,
   LogOut,
+  Key,
 } from "lucide-react";
 import "./settings.css";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import { UserState } from "../../../redux/slice/user";
+import { countries, currencies } from "../../../utils/locationData";
 
 // interface UserProfile {
 //   firstName: string;
@@ -98,59 +100,61 @@ const SettingsPage = () => {
     uid: null,
     isLoggedIn: false,
     primaryInformation: {
-      firstName: "John",
-      lastName: "Doe",
-      middleName: "",
-      email: "john.doe@example.com",
-      phone: "+1 (555) 123-4567",
-      userType: "user",
-      nameInitials: "JD",
-      uniqueIdentifier: "",
-      gender: "male",
-      dateOfBirth: "1990-01-15",
-      photoUrl: "",
-      isLoggedIn: false,
-      agreedToTerms: false,
-      verifiedEmail: false,
-      verifyPhoneNumber: false,
-      twoFactorSettings: false,
-      referralName: "",
-      secondaryEmail: "",
-      securityQuestion: "",
-      securityAnswer: "",
-      disability: false,
-      disabilityType: "",
-      educationalLevel: "",
-      dateOfCreation: new Date().toISOString(),
+      firstName: user.primaryInformation?.firstName || "",
+      lastName: user.primaryInformation?.lastName || "",
+      middleName: user.primaryInformation?.middleName || "",
+      email: user.primaryInformation?.email || "",
+      phone: user.primaryInformation?.phone || "",
+      userType: user.primaryInformation?.userType || "user",
+      nameInitials: user.primaryInformation?.nameInitials || "",
+      uniqueIdentifier: user.primaryInformation?.uniqueIdentifier || "",
+      gender: user.primaryInformation?.gender || "",
+      dateOfBirth: user.primaryInformation?.dateOfBirth || "",
+      photoUrl: user.primaryInformation?.photoUrl || "",
+      isLoggedIn: user.primaryInformation?.isLoggedIn || false,
+      agreedToTerms: user.primaryInformation?.agreedToTerms || false,
+      verifiedEmail: user.primaryInformation?.verifiedEmail || false,
+      verifyPhoneNumber: user.primaryInformation?.verifyPhoneNumber || false,
+      twoFactorSettings: user.primaryInformation?.twoFactorSettings || false,
+      referralName: user.primaryInformation?.referralName || "",
+      secondaryEmail: user.primaryInformation?.secondaryEmail || "",
+      securityQuestion: user.primaryInformation?.securityQuestion || "",
+      securityAnswer: user.primaryInformation?.securityAnswer || "",
+      disability: user.primaryInformation?.disability || false,
+      disabilityType: user.primaryInformation?.disabilityType || "",
+      educationalLevel: user.primaryInformation?.educationalLevel || "",
+      dateOfCreation:
+        user.primaryInformation?.dateOfCreation || new Date().toISOString(),
     },
     location: {
-      streetNumber: "",
-      streetName: "",
-      city: "",
-      state: "",
-      country: "",
-      postalCode: "",
+      streetNumber: user.location?.streetNumber || "",
+      streetName: user.location?.streetName || "",
+      city: user.location?.city || "",
+      state: user.location?.state || "",
+      country: user.location?.country || "",
+      postalCode: user.location?.postalCode || "",
       geoCoordinates: {
-        latitude: "",
-        longitude: "",
+        latitude: user.location?.geoCoordinates?.latitude || "",
+        longitude: user.location?.geoCoordinates?.longitude || "",
       },
     },
   });
 
+  // Update initial address states to be empty
   const [billingAddress, setBillingAddress] = useState<AddressInfo>({
-    street: "123 Main Street",
-    city: "New York",
-    state: "NY",
-    zipCode: "10001",
-    country: "United States",
+    street: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    country: "",
   });
 
   const [shippingAddress, setShippingAddress] = useState<AddressInfo>({
-    street: "123 Main Street",
-    city: "New York",
-    state: "NY",
-    zipCode: "10001",
-    country: "United States",
+    street: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    country: "",
   });
 
   const [notifications, setNotifications] = useState<NotificationSettings>({
@@ -313,11 +317,16 @@ const SettingsPage = () => {
       console.log(`=== ${section.toUpperCase()} SETTINGS ===`);
       switch (section) {
         case "profile":
-          console.log("Profile Data:", profile);
+          console.log("User Profile Details:", {
+            primaryInformation: profile.primaryInformation,
+            location: profile.location,
+          });
           break;
         case "addresses":
-          console.log("Billing Address:", billingAddress);
-          console.log("Shipping Address:", shippingAddress);
+          console.log("Address Details:", {
+            billingAddress,
+            shippingAddress,
+          });
           break;
         case "notifications":
           console.log("Notification Settings:", notifications);
@@ -339,7 +348,7 @@ const SettingsPage = () => {
   };
 
   const copyShippingToBilling = () => {
-    setBillingAddress({ ...shippingAddress });
+    setShippingAddress({ ...billingAddress });
     toast.success("Shipping address copied to billing");
   };
 
@@ -408,9 +417,13 @@ const SettingsPage = () => {
                 <label>First Name</label>
                 <input
                   type="text"
-                  value={user.primaryInformation?.firstName || ""}
+                  value={profile.primaryInformation?.firstName || ""}
                   onChange={(e) =>
-                    handleProfileUpdate("firstName", e.target.value, "primaryInformation")
+                    handleProfileUpdate(
+                      "firstName",
+                      e.target.value,
+                      "primaryInformation"
+                    )
                   }
                   placeholder="Enter first name"
                 />
@@ -420,9 +433,13 @@ const SettingsPage = () => {
                 <label>Middle Name</label>
                 <input
                   type="text"
-                  value={user.primaryInformation?.middleName || ""}
+                  value={profile.primaryInformation?.middleName || ""}
                   onChange={(e) =>
-                    handleProfileUpdate("middleName", e.target.value, "primaryInformation")
+                    handleProfileUpdate(
+                      "middleName",
+                      e.target.value,
+                      "primaryInformation"
+                    )
                   }
                   placeholder="Enter middle name"
                 />
@@ -432,9 +449,13 @@ const SettingsPage = () => {
                 <label>Last Name</label>
                 <input
                   type="text"
-                  value={user.primaryInformation?.lastName || ""}
+                  value={profile.primaryInformation?.lastName || ""}
                   onChange={(e) =>
-                    handleProfileUpdate("lastName", e.target.value, "primaryInformation")
+                    handleProfileUpdate(
+                      "lastName",
+                      e.target.value,
+                      "primaryInformation"
+                    )
                   }
                   placeholder="Enter last name"
                 />
@@ -449,6 +470,7 @@ const SettingsPage = () => {
                     value={user.primaryInformation?.email || ""}
                     readOnly
                     placeholder="Enter email address"
+                    className="read-only-input"
                   />
                 </div>
               </div>
@@ -457,9 +479,13 @@ const SettingsPage = () => {
                 <label>Secondary Email</label>
                 <input
                   type="email"
-                  value={user.primaryInformation?.secondaryEmail || ""}
+                  value={profile.primaryInformation?.secondaryEmail || ""}
                   onChange={(e) =>
-                    handleProfileUpdate("secondaryEmail", e.target.value, "primaryInformation")
+                    handleProfileUpdate(
+                      "secondaryEmail",
+                      e.target.value,
+                      "primaryInformation"
+                    )
                   }
                   placeholder="Enter secondary email"
                 />
@@ -471,9 +497,13 @@ const SettingsPage = () => {
                   <Phone className="input-icon" />
                   <input
                     type="tel"
-                    value={user.primaryInformation?.phone || ""}
+                    value={profile.primaryInformation?.phone || ""}
                     onChange={(e) =>
-                      handleProfileUpdate("phone", e.target.value, "primaryInformation")
+                      handleProfileUpdate(
+                        "phone",
+                        e.target.value,
+                        "primaryInformation"
+                      )
                     }
                     placeholder="Enter phone number"
                   />
@@ -483,36 +513,48 @@ const SettingsPage = () => {
               <div className="form-group">
                 <label>User Type</label>
                 <select
-                  value={user.primaryInformation?.userType || "Buyer"}
+                  value={profile.primaryInformation?.userType || "user"}
                   onChange={(e) =>
-                    handleProfileUpdate("userType", e.target.value, "primaryInformation")
+                    handleProfileUpdate(
+                      "userType",
+                      e.target.value,
+                      "primaryInformation"
+                    )
                   }
                 >
                   <option value="buyer">Buyer</option>
                   <option value="seller">Seller</option>
+                  <option value="user">User</option>
                 </select>
               </div>
 
               <div className="form-group">
                 <label>Unique Identifier</label>
-                <input
-                  type="text"
-                  value={user.primaryInformation?.uniqueIdentifier || ""}
-                  onChange={(e) =>
-                    handleProfileUpdate("uniqueIdentifier", e.target.value, "primaryInformation")
-                  }
-                  placeholder="Enter unique identifier"
-                />
+                <div className="input-wrapper">
+                  <Key className="input-icon" />
+                  <input
+                    type="text"
+                    value={user.primaryInformation?.uniqueIdentifier || ""}
+                    readOnly
+                    placeholder="Unique identifier"
+                    className="read-only-input"
+                  />
+                </div>
               </div>
 
               <div className="form-group">
                 <label>Gender</label>
                 <select
-                  value={user.primaryInformation?.gender || ""}
+                  value={profile.primaryInformation?.gender || ""}
                   onChange={(e) =>
-                    handleProfileUpdate("gender", e.target.value, "primaryInformation")
+                    handleProfileUpdate(
+                      "gender",
+                      e.target.value,
+                      "primaryInformation"
+                    )
                   }
                 >
+                  <option value="">Select gender</option>
                   <option value="male">Male</option>
                   <option value="female">Female</option>
                   <option value="other">Other</option>
@@ -524,9 +566,13 @@ const SettingsPage = () => {
                 <label>Date of Birth</label>
                 <input
                   type="date"
-                  value={user.primaryInformation?.dateOfBirth || ""}
+                  value={profile.primaryInformation?.dateOfBirth || ""}
                   onChange={(e) =>
-                    handleProfileUpdate("dateOfBirth", e.target.value, "primaryInformation")
+                    handleProfileUpdate(
+                      "dateOfBirth",
+                      e.target.value,
+                      "primaryInformation"
+                    )
                   }
                 />
               </div>
@@ -535,9 +581,13 @@ const SettingsPage = () => {
                 <label>Educational Level</label>
                 <input
                   type="text"
-                  value={user.primaryInformation?.educationalLevel || ""}
+                  value={profile.primaryInformation?.educationalLevel || ""}
                   onChange={(e) =>
-                    handleProfileUpdate("educationalLevel", e.target.value, "primaryInformation")
+                    handleProfileUpdate(
+                      "educationalLevel",
+                      e.target.value,
+                      "primaryInformation"
+                    )
                   }
                   placeholder="Enter educational level"
                 />
@@ -547,9 +597,13 @@ const SettingsPage = () => {
                 <label>Referral Name</label>
                 <input
                   type="text"
-                  value={user.primaryInformation?.referralName || ""}
+                  value={profile.primaryInformation?.referralName || ""}
                   onChange={(e) =>
-                    handleProfileUpdate("referralName", e.target.value, "primaryInformation")
+                    handleProfileUpdate(
+                      "referralName",
+                      e.target.value,
+                      "primaryInformation"
+                    )
                   }
                   placeholder="Enter referral name"
                 />
@@ -559,9 +613,13 @@ const SettingsPage = () => {
                 <label>Security Question</label>
                 <input
                   type="text"
-                  value={user.primaryInformation?.securityQuestion || ""}
+                  value={profile.primaryInformation?.securityQuestion || ""}
                   onChange={(e) =>
-                    handleProfileUpdate("securityQuestion", e.target.value, "primaryInformation")
+                    handleProfileUpdate(
+                      "securityQuestion",
+                      e.target.value,
+                      "primaryInformation"
+                    )
                   }
                   placeholder="Enter security question"
                 />
@@ -571,9 +629,13 @@ const SettingsPage = () => {
                 <label>Security Answer</label>
                 <input
                   type="text"
-                  value={user.primaryInformation?.securityAnswer || ""}
+                  value={profile.primaryInformation?.securityAnswer || ""}
                   onChange={(e) =>
-                    handleProfileUpdate("securityAnswer", e.target.value, "primaryInformation")
+                    handleProfileUpdate(
+                      "securityAnswer",
+                      e.target.value,
+                      "primaryInformation"
+                    )
                   }
                   placeholder="Enter security answer"
                 />
@@ -582,12 +644,12 @@ const SettingsPage = () => {
               <div className="form-group">
                 <label>Disability</label>
                 <select
-                  value={user.primaryInformation?.disability ? "yes" : "no"}
+                  value={profile.primaryInformation?.disability ? "yes" : "no"}
                   onChange={(e) =>
                     handleProfileUpdate(
                       "disability",
                       e.target.value === "yes",
-                      "primaryInformation" // ✅ section argument added
+                      "primaryInformation"
                     )
                   }
                 >
@@ -596,105 +658,23 @@ const SettingsPage = () => {
                 </select>
               </div>
 
-              {user.primaryInformation?.disability && (
+              {profile.primaryInformation?.disability && (
                 <div className="form-group">
                   <label>Disability Type</label>
                   <input
                     type="text"
-                    value={user.primaryInformation?.disabilityType || ""}
+                    value={profile.primaryInformation?.disabilityType || ""}
                     onChange={(e) =>
-                      handleProfileUpdate("disabilityType", e.target.value, "primaryInformation")
+                      handleProfileUpdate(
+                        "disabilityType",
+                        e.target.value,
+                        "primaryInformation"
+                      )
                     }
                     placeholder="Specify disability type"
                   />
                 </div>
               )}
-
-              {/* Location Information */}
-              <h3 className="section-subtitle">Location Information</h3>
-
-              <div className="form-group">
-                <label>Street Number</label>
-                <input
-                  type="text"
-                  value={user.location?.streetNumber || ""}
-                  onChange={(e) =>
-                    handleProfileUpdate("streetNumber", e.target.value, "location")
-                  }
-                  placeholder="Enter street number"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Street Name</label>
-                <input
-                  type="text"
-                  value={user.location?.streetName || ""}
-                  onChange={(e) =>
-                    handleProfileUpdate("streetName", e.target.value, "location")
-                  }
-                  placeholder="Enter street name"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>City</label>
-                <input
-                  type="text"
-                  value={user.location?.city || ""}
-                  onChange={(e) =>
-                    handleProfileUpdate("city", e.target.value, "location")
-                  }
-                  placeholder="Enter city"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>State</label>
-                <input
-                  type="text"
-                  value={user.location?.state || ""}
-                  onChange={(e) =>
-                    handleProfileUpdate("state", e.target.value, "location")
-                  }
-                  placeholder="Enter state"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Country</label>
-                <input
-                  type="text"
-                  value={user.location?.country || ""}
-                  onChange={(e) =>
-                    handleProfileUpdate("country", e.target.value, "location")
-                  }
-                  placeholder="Enter country"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Postal Code</label>
-                <input
-                  type="text"
-                  value={user.location?.postalCode || ""}
-                  onChange={(e) =>
-                    handleProfileUpdate("postalCode", e.target.value, "location")
-                  }
-                  placeholder="Enter postal code"
-                />
-              </div>
-
-              {/* Bio / Notes */}
-              {/* <div className="form-group full-width">
-                <label>Bio</label>
-                <textarea
-                  value={user.primaryInformation?.bio || ""}
-                  onChange={(e) => handleProfileUpdate("bio", e.target.value)}
-                  placeholder="Tell us about yourself"
-                  rows={4}
-                />
-              </div> */}
             </div>
 
             <div className="form-actions">
@@ -710,7 +690,6 @@ const SettingsPage = () => {
             </div>
           </div>
         );
-
       case "account":
         return (
           <div className="tab-content">
@@ -853,14 +832,7 @@ const SettingsPage = () => {
             <div className="addresses-container">
               <div className="address-section">
                 <div className="address-header">
-                  <h3>Billing Address</h3>
-                  <button
-                    type="button"
-                    className="copy-btn"
-                    onClick={copyShippingToBilling}
-                  >
-                    Copy from Shipping
-                  </button>
+                  <h3>Shipping Address</h3>
                 </div>
 
                 <div className="form-grid">
@@ -928,11 +900,11 @@ const SettingsPage = () => {
                         )
                       }
                     >
-                      <option value="United States">United States</option>
-                      <option value="Canada">Canada</option>
-                      <option value="United Kingdom">United Kingdom</option>
-                      <option value="Australia">Australia</option>
-                      <option value="Germany">Germany</option>
+                      <option value="United States">United States</option>{" "}
+                      <option value="Canada">Canada</option>{" "}
+                      <option value="United Kingdom">United Kingdom</option>{" "}
+                      <option value="Australia">Australia</option>{" "}
+                      <option value="Germany">Germany</option>{" "}
                       <option value="France">France</option>
                     </select>
                   </div>
@@ -940,8 +912,17 @@ const SettingsPage = () => {
               </div>
 
               <div className="address-section">
-                <h3>Shipping Address</h3>
+                <div className="address-header">
+                  <h3>Billing Address</h3>
 
+                  <button
+                    type="button"
+                    className="copy-btn"
+                    onClick={copyShippingToBilling}
+                  >
+                    Copy from Shipping
+                  </button>
+                </div>
                 <div className="form-grid">
                   <div className="form-group full-width">
                     <label>Street Address</label>
@@ -1011,11 +992,11 @@ const SettingsPage = () => {
                         )
                       }
                     >
-                      <option value="United States">United States</option>
-                      <option value="Canada">Canada</option>
-                      <option value="United Kingdom">United Kingdom</option>
-                      <option value="Australia">Australia</option>
-                      <option value="Germany">Germany</option>
+                      <option value="United States">United States</option>{" "}
+                      <option value="Canada">Canada</option>{" "}
+                      <option value="United Kingdom">United Kingdom</option>{" "}
+                      <option value="Australia">Australia</option>{" "}
+                      <option value="Germany">Germany</option>{" "}
                       <option value="France">France</option>
                     </select>
                   </div>
@@ -1725,13 +1706,12 @@ const SettingsPage = () => {
                           handleAppearanceUpdate("currency", e.target.value)
                         }
                       >
-                        <option value="USD">USD - US Dollar</option>
-                        <option value="EUR">EUR - Euro</option>
-                        <option value="GBP">GBP - British Pound</option>
-                        <option value="CAD">CAD - Canadian Dollar</option>
-                        <option value="AUD">AUD - Australian Dollar</option>
-                        <option value="JPY">JPY - Japanese Yen</option>
-                        <option value="CNY">CNY - Chinese Yuan</option>
+                        {currencies.map((currency) => (
+                          <option key={currency.code} value={currency.code}>
+                            {currency.code} - {currency.name} ({currency.symbol}
+                            )
+                          </option>
+                        ))}
                       </select>
                     </div>
                   </div>

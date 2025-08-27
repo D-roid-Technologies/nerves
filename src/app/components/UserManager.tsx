@@ -45,29 +45,29 @@ const UserManager: React.FC = () => {
   }, [user.isLoggedIn, user.primaryInformation, dispatch, notification.items]);
 
   // Add welcome notification for new users (optional)
-  useEffect(() => {
-    if (user.isLoggedIn && user.primaryInformation?.firstName) {
-      // Check if this is a first-time login (you might want to add a flag to user state)
-      // For now, we'll just show a welcome message if they don't have other notifications
-      if (notification.items.length === 0) {
-        dispatch(
-          addNotification(
-            "success",
-            "Welcome to Nerve Systems Network!",
-            `Hi ${user.primaryInformation.firstName}! Thanks for joining our community.`,
-            {
-              expiresIn: 24 * 60 * 60 * 1000, // 24 hours
-            }
-          )
-        );
-      }
-    }
-  }, [
-    user.isLoggedIn,
-    user.primaryInformation?.firstName,
-    dispatch,
-    notification.items.length,
-  ]);
+  // useEffect(() => {
+  //   if (user.isLoggedIn && user.primaryInformation?.firstName) {
+  //     // Check if this is a first-time login (you might want to add a flag to user state)
+  //     // For now, we'll just show a welcome message if they don't have other notifications
+  //     if (notification.items.length === 0) {
+  //       dispatch(
+  //         addNotification(
+  //           "success",
+  //           "Welcome to Nerve Systems Network!",
+  //           `Hi ${user.primaryInformation.firstName}! Thanks for joining our community.`,
+  //           {
+  //             expiresIn: 24 * 60 * 60 * 1000, // 24 hours
+  //           }
+  //         )
+  //       );
+  //     }
+  //   }
+  // }, [
+  //   user.isLoggedIn,
+  //   user.primaryInformation?.firstName,
+  //   dispatch,
+  //   notification.items.length,
+  // ]);
 
   return null; // This component doesn't render anything
 };

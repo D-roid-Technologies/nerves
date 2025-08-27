@@ -120,7 +120,10 @@ export default function MyAccountPage() {
       <div className={styles["account-section"]}>
         <div className={styles["account-profile-header"]}>
           <h2 className={styles["account-h2"]}>Profile Information</h2>
-          <button className={styles["account-edit-btn"]}>
+          <button
+            className={styles["account-edit-btn"]}
+            onClick={() => navigate("/settings")}
+          >
             <Edit size={16} style={{ marginRight: "8px" }} />
             Edit Profile
           </button>
@@ -142,7 +145,7 @@ export default function MyAccountPage() {
           <div className={styles["account-profile-detail"]}>
             <span className={styles["account-detail-label"]}>Phone</span>
             <span className={styles["account-detail-value"]}>
-              {user.primaryInformation?.phone}
+              {user.primaryInformation?.phone || "Not Provided"} 
             </span>
           </div>
           <div className={styles["account-profile-detail"]}>
