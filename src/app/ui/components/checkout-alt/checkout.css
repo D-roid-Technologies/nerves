@@ -3,7 +3,7 @@
   margin: 0 auto;
   padding: 2rem 1rem;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: #f8fafc;
+  background: none;
   min-height: 100vh;
 }
 
@@ -39,7 +39,7 @@
 
 .back-to-products-btn:hover {
   border-color: #000;
-  background: #f8fafc;
+  background: none;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
@@ -196,7 +196,7 @@
   align-items: center;
   gap: 1.5rem;
   padding: 2rem;
-  background: #f8fafc;
+  background: none;
   border-radius: 16px;
   border: 2px solid #e5e7eb;
   transition: all 0.3s ease;
@@ -211,7 +211,12 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
   transition: left 0.6s;
 }
 
@@ -283,7 +288,7 @@
 
 .quantity-controls button:hover:not(:disabled) {
   border-color: #000;
-  background: #f8fafc;
+  background: none;
   transform: scale(1.1);
 }
 
@@ -449,7 +454,7 @@
 
 .shipping-option:hover {
   border-color: #000;
-  background: #f8fafc;
+  background: none;
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
@@ -503,7 +508,7 @@
 .review-payment,
 .review-shipping-method {
   padding: 2rem;
-  background: #f8fafc;
+  background: none;
   border-radius: 12px;
   border: 2px solid #e5e7eb;
   width: 100%;
@@ -566,7 +571,12 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
   transition: left 0.6s;
 }
 
@@ -601,7 +611,7 @@
 }
 
 .btn-secondary:hover {
-  background: #f8fafc;
+  background: none;
   border-color: #000;
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
@@ -645,7 +655,7 @@
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  background: #f8fafc;
+  background: none;
   border-radius: 12px;
   transition: transform 0.2s ease;
   width: 100%;

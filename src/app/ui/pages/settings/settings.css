@@ -2,7 +2,7 @@
   max-width: 1400px;
   margin: 0 auto;
   padding: 2rem 1rem;
-  background: #f8fafc;
+  background: none;
   min-height: 100vh;
 }
 
@@ -151,7 +151,7 @@
   gap: 2rem;
   margin-bottom: 3rem;
   padding: 2rem;
-  background: #f8fafc;
+  background: none;
   border-radius: 16px;
   border: 2px solid #e5e7eb;
 }
@@ -464,7 +464,7 @@
 
 .address-section {
   padding: 2rem;
-  background: #f8fafc;
+  background: none;
   border-radius: 16px;
   border: 2px solid #e5e7eb;
 }
@@ -511,7 +511,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 2rem;
-  background: #f8fafc;
+  background: none;
   border: 2px solid #e5e7eb;
   border-radius: 16px;
   transition: all 0.3s ease;
@@ -625,7 +625,7 @@
 .appearance-group,
 .preferences-group {
   padding: 2rem;
-  background: #f8fafc;
+  background: none;
   border: 2px solid #e5e7eb;
   border-radius: 16px;
 }
@@ -773,7 +773,7 @@ input:checked + .toggle-slider:before {
 
 .radio-option:hover {
   border-color: #000;
-  background: #f8fafc;
+  background: none;
 }
 
 .radio-option input[type="radio"] {
@@ -824,7 +824,7 @@ input:checked + .toggle-slider:before {
 
 .theme-option input[type="radio"]:checked + .theme-preview {
   border-color: #000;
-  background: #f8fafc;
+  background: none;
   transform: translateY(-4px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }

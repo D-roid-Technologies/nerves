@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useState, useEffect, useRef } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { clearUser } from "../../../redux/slice/user";
-import { RootState, store } from "../../../redux/store";
+import { toggleNotificationDrawer } from "../../../redux/slice/notification";
+import { RootState } from "../../../redux/store";
 import styles from "./navbar.module.css";
 
 const Navbar = () => {
@@ -12,13 +13,42 @@ const Navbar = () => {
   const [showUserModal, setShowUserModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const user = useSelector((state: RootState) => state.user);
   const cart = useSelector((state: RootState) => state.cart);
+  const notification = useSelector((state: RootState) => state.notification);
+
+  // Create a ref for the dropdown container
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const cartItemCount = cart.items.reduce(
     (total, item) => total + item.quantity,
     0
   );
+
+  // Add useEffect to handle clicks outside the dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowDropdown(false);
+      }
+    };
+
+    // Add event listener when dropdown is open
+    if (showDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    // Clean up the event listener
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showDropdown]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,8 +81,10 @@ const Navbar = () => {
     setShowUserModal(false);
   };
 
-  const dispatch = store.dispatch;
-  const navigate = useNavigate();
+  // Function to handle dropdown item clicks
+  const handleDropdownItemClick = () => {
+    setShowDropdown(false);
+  };
 
   return (
     <>
@@ -149,11 +181,13 @@ const Navbar = () => {
                 <span className={styles.cartBadge}>{cartItemCount}</span>
               )}
             </button>
+
+            {/* Notification Icon */}
             <button
               type="button"
               className={styles.cartIcon}
               aria-label="Notifications"
-            // onClick;
+              onClick={() => dispatch(toggleNotificationDrawer())}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -162,46 +196,23 @@ const Navbar = () => {
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
                 <path d="M10.268 21a2 2 0 0 0 3.464 0" />
                 <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" />
               </svg>
 
-              {cartItemCount > 0 && (
-                <span className={styles.cartBadge}>{cartItemCount}</span>
+              {notification.unreadCount > 0 && (
+                <span className={styles.cartBadge}>
+                  {notification.unreadCount}
+                </span>
               )}
             </button>
 
-            {/* <button
-              type="button"
-              className={styles.cartIcon}
-              aria-label="Notifications"
-              // onClick;
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M10.268 21a2 2 0 0 0 3.464 0" />
-                <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" />
-              </svg>
-
-              {cartItemCount > 0 && (
-                <span className={styles.cartBadge}>{cartItemCount}</span>
-              )}
-            </button> */}
             {/* User Icon - Desktop shows dropdown, Mobile shows modal */}
-            <div className={styles.userContainer}>
+            <div className={styles.userContainer} ref={dropdownRef}>
               <div className={styles.userDropdown}>
                 <button
                   className={styles.userButton}
@@ -214,6 +225,7 @@ const Navbar = () => {
                     }
                   }}
                   aria-label="User menu"
+                  aria-expanded={showDropdown}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -236,8 +248,9 @@ const Navbar = () => {
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke={user.isLoggedIn ? "#ff6b35" : "currentColor"}
-                    className={`${styles.chevron} ${showDropdown ? styles.rotate : ""
-                      } ${styles.desktopOnly}`}
+                    className={`${styles.chevron} ${
+                      showDropdown ? styles.rotate : ""
+                    } ${styles.desktopOnly}`}
                   >
                     <path
                       strokeLinecap="round"
@@ -258,28 +271,45 @@ const Navbar = () => {
                         <div className={styles.dropdownHeader}>
                           Welcome, {user.primaryInformation?.firstName}
                         </div>
-                        <Link to="/account" className={styles.dropdownItem}>
+                        <Link
+                          to="/account"
+                          className={styles.dropdownItem}
+                          onClick={handleDropdownItemClick}
+                        >
                           My Account
                         </Link>
-                        <Link to="/orders" className={styles.dropdownItem}>
+                        <Link
+                          to="/orders"
+                          className={styles.dropdownItem}
+                          onClick={handleDropdownItemClick}
+                        >
                           My Orders
                         </Link>
                         <Link
                           to="/notifications"
                           className={styles.dropdownItem}
+                          onClick={handleDropdownItemClick}
                         >
                           Notifications
                         </Link>
-                        <Link to="/create" className={styles.dropdownItem}>
+                        <Link
+                          to="/create"
+                          className={styles.dropdownItem}
+                          onClick={handleDropdownItemClick}
+                        >
                           Create Items
                         </Link>
-                        <Link to="/settings" className={styles.dropdownItem}>
+                        <Link
+                          to="/settings"
+                          className={styles.dropdownItem}
+                          onClick={handleDropdownItemClick}
+                        >
                           Settings
                         </Link>
                         <button
                           className={styles.dropdownItem}
                           onClick={() => {
-                            store.dispatch(clearUser());
+                            dispatch(clearUser());
                             setShowDropdown(false);
                             navigate("/");
                           }}
@@ -289,16 +319,25 @@ const Navbar = () => {
                       </>
                     ) : (
                       <>
-                        {/* <Link to="/early-bird-registration" className={styles.dropdownItem}>
-                          Early Bird Registration
-                        </Link> */}
-                        <Link to="/guest" className={styles.dropdownItem}>
+                        <Link
+                          to="/guest"
+                          className={styles.dropdownItem}
+                          onClick={handleDropdownItemClick}
+                        >
                           Continue as Guest
                         </Link>
-                        <Link to="/register" className={styles.dropdownItem}>
+                        <Link
+                          to="/register"
+                          className={styles.dropdownItem}
+                          onClick={handleDropdownItemClick}
+                        >
                           Create Account
                         </Link>
-                        <Link to="/login" className={styles.dropdownItem}>
+                        <Link
+                          to="/login"
+                          className={styles.dropdownItem}
+                          onClick={handleDropdownItemClick}
+                        >
                           Sign In
                         </Link>
                       </>
@@ -316,8 +355,9 @@ const Navbar = () => {
         <>
           <div className={styles.sidebarOverlay} onClick={closeSidebar}></div>
           <div
-            className={`${styles.sidebar} ${showSidebar ? styles.sidebarOpen : ""
-              }`}
+            className={`${styles.sidebar} ${
+              showSidebar ? styles.sidebarOpen : ""
+            }`}
           >
             <div className={styles.sidebarHeader}>
               <span className={styles.sidebarTitle}>Menu</span>
@@ -443,7 +483,7 @@ const Navbar = () => {
                   <button
                     className={styles.modalItem}
                     onClick={() => {
-                      store.dispatch(clearUser());
+                      dispatch(clearUser());
                       closeUserModal();
                       navigate("/");
                     }}
@@ -453,13 +493,6 @@ const Navbar = () => {
                 </>
               ) : (
                 <>
-                  {/* <Link
-                    to="/early-bird-registration"
-                    className={styles.modalItem}
-                    onClick={closeUserModal}
-                  >
-                    Early Bird Registration
-                  </Link> */}
                   <Link
                     to="/guest"
                     className={styles.modalItem}

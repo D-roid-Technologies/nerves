@@ -6,16 +6,20 @@ import { store } from "./app/redux/store";
 import Index from "./app/routes/Index";
 import Navbar from "./app/ui/components/navbar/Navbar";
 import CartDrawer from "./app/ui/components/cartDrawer/CartDrawer";
+import NotificationDrawer from "./app/ui/components/notificationDrawer/NotificationDrawer";
 import Overlay from "./app/ui/components/Overlay/Overlay";
+import UserManager from "./app/components/UserManager";
 
 function App() {
   return (
     <Provider store={store}>
       <BrowserRouter>
+        <UserManager />
         <Navbar />
         <Index />
         <CartDrawer />
-        <Overlay />
+        <NotificationDrawer />
+        {/* <Overlay /> */}
       </BrowserRouter>
     </Provider>
   );

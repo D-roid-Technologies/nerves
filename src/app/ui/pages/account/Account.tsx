@@ -88,6 +88,7 @@ export default function MyAccountPage() {
   const earlyBirdReg = () => {
     navigate("/early-bird-registration");
   };
+
   return (
     <div className={styles["account-container"]}>
       <div className="settings-header">
@@ -128,21 +129,51 @@ export default function MyAccountPage() {
           <div className={styles["account-profile-detail"]}>
             <span className={styles["account-detail-label"]}>Name</span>
             <span className={styles["account-detail-value"]}>
-              {user.primaryInformation?.firstName} {user.primaryInformation?.lastName}
+              {user.primaryInformation?.firstName}{" "}
+              {user.primaryInformation?.lastName}
             </span>
           </div>
           <div className={styles["account-profile-detail"]}>
             <span className={styles["account-detail-label"]}>Email</span>
-            <span className={styles["account-detail-value"]}>{user.primaryInformation?.email}</span>
+            <span className={styles["account-detail-value"]}>
+              {user.primaryInformation?.email}
+            </span>
           </div>
           <div className={styles["account-profile-detail"]}>
             <span className={styles["account-detail-label"]}>Phone</span>
-            <span className={styles["account-detail-value"]}>{user.phone}</span>
+            <span className={styles["account-detail-value"]}>
+              {user.primaryInformation?.phone}
+            </span>
           </div>
           <div className={styles["account-profile-detail"]}>
             <span className={styles["account-detail-label"]}>Member Since</span>
             <span className={styles["account-detail-value"]}>
-              {user.joinDate}
+              <span className={styles["account-detail-value"]}>
+                {/* {user.primaryInformation?.dateOfCreation
+                  ? new Date(
+                      user.primaryInformation.dateOfCreation
+                        .split(" ")[0]
+                        .split("-")
+                        .reverse()
+                        .join("-")
+                    ).toLocaleDateString("en-US", {
+                      month: "long",
+                      day: "numeric",
+                    })
+                  : "N/A"} */}
+                {user.primaryInformation?.dateOfCreation
+                  ? new Date(
+                      user.primaryInformation.dateOfCreation
+                        .split(" ")[0]
+                        .split("-")
+                        .reverse()
+                        .join("-")
+                    ).toLocaleDateString("en-US", {
+                      month: "long",
+                      year: "numeric",
+                    })
+                  : "N/A"}
+              </span>
             </span>
           </div>
         </div>
@@ -165,7 +196,7 @@ export default function MyAccountPage() {
           <OrderStatus
             label="Sealed"
             count={mockUser.orders.sealed}
-            Icon={Package}    
+            Icon={Package}
             onClick={navigateToSealedOrders}
           />
           <OrderStatus

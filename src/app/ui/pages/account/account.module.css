@@ -110,7 +110,7 @@
   gap: 1rem;
   padding: 1.25rem;
   border-radius: 10px;
-  background: #f8fafc;
+  background: none;
   border: 1px solid #e5e7eb;
   transition: all 0.3s ease;
   cursor: pointer;
@@ -153,7 +153,7 @@
 .account-list-item {
   border-radius: 8px;
   padding: 1.5rem;
-  background: #f8fafc;
+  background: none;
   border: 1px solid #e5e7eb;
   transition: all 0.3s ease;
 }
@@ -260,7 +260,7 @@
   gap: 1rem;
   padding: 1.25rem;
   border-radius: 10px;
-  background: #f8fafc;
+  background: none;
   border: 1px solid #e5e7eb;
   transition: all 0.3s ease;
 }
