@@ -1,6 +1,4 @@
-"use client";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "../../../redux/store";
 import {
@@ -21,7 +19,8 @@ import {
   ShoppingBag,
 } from "lucide-react";
 import "./checkout.css";
-import PayStackPop from "@paystack/inline-js"
+import PayStackPop from "@paystack/inline-js";
+import toast from "react-hot-toast";
 
 interface ShippingDetails {
   firstName: string;
@@ -35,69 +34,167 @@ interface ShippingDetails {
   country: string;
 }
 
-// interface PaymentDetails {
-//   cardNumber: string;
-//   expiryDate: string;
-//   cvv: string;
-//   cardholderName: string;
-// }
-
 interface PaymentDetails {
   firstName: string;
   lastName: string;
   email: string;
-  amount: string; // keep as string for now (we can convert later if needed)
+  amount: string;
 }
-
 
 const Checkout = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { items } = useSelector((state: RootState) => state.cart);
+  // Get user data from Redux store
+  const user = useSelector((state: RootState) => state.user);
 
   const [currentStep, setCurrentStep] = useState(1);
-  const [shippingDetails, setShippingDetails] = useState<ShippingDetails>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    address: "",
-    city: "",
-    state: "",
-    zipCode: "",
-    country: "United States",
-  });
 
-  // const [paymentDetails, setPaymentDetails] = useState<PaymentDetails>({
-  //   cardNumber: "",
-  //   expiryDate: "",
-  //   cvv: "",
-  //   cardholderName: "",
-  // });
+  // Helper function to get initial shipping details from user data
+  const getInitialShippingDetails = (): ShippingDetails => {
+    if (user.isLoggedIn && user.primaryInformation && user.location) {
+      return {
+        firstName: user.primaryInformation.firstName || "",
+        lastName: user.primaryInformation.lastName || "",
+        email: user.primaryInformation.email || "",
+        phone: user.primaryInformation.phone || "",
+        address: `${user.location.streetNumber || ""} ${
+          user.location.streetName || ""
+        }`.trim(),
+        city: user.location.city || "",
+        state: user.location.state || "",
+        zipCode: user.location.postalCode || "",
+        country: user.location.country || "Nigeria",
+      };
+    }
+    return {
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      address: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      country: "Nigeria",
+    };
+  };
 
-  const [paymentDetails, setPaymentDetails] = useState<PaymentDetails>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    amount: "",
-  });
+  // Helper function to get initial payment details from user data
+  const getInitialPaymentDetails = (): PaymentDetails => {
+    if (user.isLoggedIn && user.primaryInformation) {
+      return {
+        firstName: user.primaryInformation.firstName || "",
+        lastName: user.primaryInformation.lastName || "",
+        email: user.primaryInformation.email || "",
+        amount: "",
+      };
+    }
+    return {
+      firstName: "",
+      lastName: "",
+      email: "",
+      amount: "",
+    };
+  };
 
+  const [shippingDetails, setShippingDetails] = useState<ShippingDetails>(
+    getInitialShippingDetails()
+  );
+  const [paymentDetails, setPaymentDetails] = useState<PaymentDetails>(
+    getInitialPaymentDetails()
+  );
 
   const [shippingMethod, setShippingMethod] = useState("standard");
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const subtotal = items.reduce(
-    (sum: number, item) => sum + item.product.price * item.quantity,
-    0
-  );
+  // Function to check if user profile is complete
+  const checkProfileCompletion = () => {
+    if (!user.isLoggedIn || !user.primaryInformation || !user.location) {
+      return {
+        isComplete: false,
+        missingFields: ["Please sign in to continue"],
+      };
+    }
+
+    const missingFields: string[] = [];
+    const { primaryInformation, location } = user;
+
+    // Check required primary information fields
+    if (!primaryInformation.firstName?.trim()) missingFields.push("First Name");
+    if (!primaryInformation.lastName?.trim()) missingFields.push("Last Name");
+    if (!primaryInformation.email?.trim()) missingFields.push("Email");
+    if (!primaryInformation.phone?.trim()) missingFields.push("Phone Number");
+
+    // Check required location fields
+    if (!location.streetName?.trim() && !location.streetNumber?.trim()) {
+      missingFields.push("Address");
+    }
+    if (!location.city?.trim()) missingFields.push("City");
+    if (!location.state?.trim()) missingFields.push("State");
+    if (!location.postalCode?.trim()) missingFields.push("ZIP/Postal Code");
+    // if (!location.country?.trim()) missingFields.push("Country");
+
+    return {
+      isComplete: missingFields.length === 0,
+      missingFields,
+    };
+  };
+
+  const profileCompletion = checkProfileCompletion();
+
+  // Update forms when user data changes
+  useEffect(() => {
+    if (user.isLoggedIn && user.primaryInformation) {
+      setShippingDetails(getInitialShippingDetails());
+      setPaymentDetails((prev) => ({
+        ...getInitialPaymentDetails(),
+        amount: prev.amount, // Keep the calculated amount
+      }));
+    }
+  }, [user.isLoggedIn, user.primaryInformation, user.location]);
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency: "NGN",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(price);
+  };
+
+  const subtotal = items.reduce((sum, item) => {
+    const regularPrice = Number(item.product.price) || 0;
+    const discountPrice = item.product.discountPrice
+      ? Number(item.product.discountPrice)
+      : null;
+
+    const itemPrice = discountPrice || regularPrice;
+
+    // Use cents-based calculation for precision
+    const itemPriceInCents = Math.round(itemPrice * 100);
+    const itemTotalInCents = itemPriceInCents * item.quantity;
+    const itemTotal = itemTotalInCents / 100;
+
+    return sum + itemTotal;
+  }, 0);
+
   const shippingCost =
     shippingMethod === "express"
-      ? 15.99
+      ? 1599
       : shippingMethod === "overnight"
-        ? 29.99
-        : 5.99;
+      ? 2999
+      : 599;
   const tax = subtotal * 0.08;
   const total = subtotal + shippingCost + tax;
+
+  // Update payment amount whenever total changes
+  useEffect(() => {
+    setPaymentDetails((prev) => ({
+      ...prev,
+      amount: Math.round(total).toString(),
+    }));
+  }, [total]);
 
   const handleRemoveFromCart = (itemId: number) => {
     dispatch(removeFromCart(itemId));
@@ -118,49 +215,12 @@ const Checkout = () => {
     setShippingDetails((prev) => ({ ...prev, [field]: value }));
   };
 
-  // const handlePaymentChange = (field: keyof PaymentDetails, value: string) => {
-  //   setPaymentDetails((prev) => ({ ...prev, [field]: value }));
-  // };
-
   const handlePaymentChange = (field: keyof PaymentDetails, value: string) => {
     setPaymentDetails((prev) => ({
       ...prev,
-      [field]: field === "amount" ? value.replace(/\D/g, "") : value, // only numbers for amount
+      [field]: field === "amount" ? value.replace(/\D/g, "") : value,
     }));
   };
-
-
-  const formatCardNumber = (value: string) => {
-    const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
-    const matches = v.match(/\d{4,16}/g);
-    const match = (matches && matches[0]) || "";
-    const parts = [];
-    for (let i = 0, len = match.length; i < len; i += 4) {
-      parts.push(match.substring(i, i + 4));
-    }
-    if (parts.length) {
-      return parts.join(" ");
-    } else {
-      return v;
-    }
-  };
-
-  // const handleCardNumberChange = (value: string) => {
-  //   const formatted = formatCardNumber(value);
-  //   if (formatted.replace(/\s/g, "").length <= 16) {
-  //     handlePaymentChange("cardNumber", formatted);
-  //   }
-  // };
-
-  // const handleExpiryChange = (value: string) => {
-  //   const v = value.replace(/\D/g, "");
-  //   if (v.length >= 2) {
-  //     const formatted = v.substring(0, 2) + "/" + v.substring(2, 4);
-  //     handlePaymentChange("expiryDate", formatted);
-  //   } else {
-  //     handlePaymentChange("expiryDate", v);
-  //   }
-  // };
 
   const validateStep = (step: number) => {
     if (step === 1) {
@@ -179,27 +239,23 @@ const Checkout = () => {
     return true;
   };
 
-  // setIsProcessing(true);
-
-  //   // Simulate payment processing
-  //   await new Promise((resolve) => setTimeout(resolve, 2000));
-
-  //   alert("Order placed successfully!");
-  //   dispatch(clearCart());
-  //   setIsProcessing(false);
-
-  //   // Navigate back to home or success page
-  //   navigate("/");
-
   const handlePlaceOrder = async (e: any) => {
-    e.preventDefault()
-    const payStack = new PayStackPop()
+    e.preventDefault();
+    const payStack = new PayStackPop();
     payStack.newTransaction({
       key: "pk_test_db0145199289f83c428d57cf70755142bb0b8b28",
       email: paymentDetails.email,
       amount: Number(paymentDetails.amount) * 100,
       onSuccess: (res) => {
-        alert(`Payment success: ${res.message}`);
+        toast.success(`Payment success: ${res.message}`, {
+          style: { background: "#4BB543", color: "#fff" },
+          duration: 3000, // Show for 3 seconds
+        });
+
+        setTimeout(() => {
+          dispatch(clearCart());
+          navigate("/");
+        }, 3000); // Match the toast duration
       },
       onCancel: () => {
         console.log(`Payment cancelled`);
@@ -208,6 +264,12 @@ const Checkout = () => {
   };
 
   const nextStep = () => {
+    // Check profile completion when trying to proceed from step 2
+    if (currentStep === 2 && user.isLoggedIn && !profileCompletion.isComplete) {
+      toast.error("Please complete your profile information before proceeding");
+      return;
+    }
+
     if (validateStep(currentStep)) {
       setCurrentStep(currentStep + 1);
     }
@@ -240,6 +302,7 @@ const Checkout = () => {
           <ArrowLeft className="back-icon" />
           Continue Shopping
         </button>
+
         <div className="step-indicator">
           <div className={`step ${currentStep >= 1 ? "active" : ""}`}>
             <div className="step-number">1</div>
@@ -272,6 +335,10 @@ const Checkout = () => {
                     <ShoppingBag className="section-icon" />
                     <h2>Review Your Order</h2>
                   </div>
+
+                  {/* Show login prompt if not logged in */}
+                  {/* {!user.isLoggedIn && renderLoginPrompt()} */}
+
                   <div className="cart-items-list">
                     {items.map((item) => (
                       <div key={item.product.id} className="cart-item">
@@ -282,7 +349,11 @@ const Checkout = () => {
                         />
                         <div className="cart-item-details">
                           <h3>{item.product.name}</h3>
-                          <p className="item-price">${item.product.price}</p>
+                          <p className="item-price">
+                            {formatPrice(
+                              item.product.discountPrice || item.product.price
+                            )}
+                          </p>
                           <div className="quantity-controls">
                             <button
                               onClick={() =>
@@ -329,8 +400,48 @@ const Checkout = () => {
                   <div className="section-header">
                     <Truck className="section-icon" />
                     <h2>Shipping Information</h2>
+                    {user.isLoggedIn && (
+                      <span className="auto-filled-notice">
+                        ✓ Information auto-filled from your profile
+                      </span>
+                    )}
                   </div>
-
+                  {/* Show profile completion warning for logged in users with incomplete profiles */}
+                  {user.isLoggedIn && !profileCompletion.isComplete && (
+                    <div className="profile-warning">
+                      <div className="warning-content">
+                        <div className="warning-header">
+                          <User className="warning-icon" />
+                          <h3>Complete Your Profile</h3>
+                        </div>
+                        <div className="warning-body">
+                          <p>
+                            Some required information is missing from your
+                            profile. Please complete it to proceed with
+                            checkout.
+                          </p>
+                          <div className="missing-fields-list">
+                            <strong>Missing Information:</strong>
+                            <ul>
+                              {profileCompletion.missingFields.map(
+                                (field, index) => (
+                                  <li key={index}>{field}</li>
+                                )
+                              )}
+                            </ul>
+                          </div>
+                        </div>
+                        <div className="warning-actions">
+                          <button
+                            className="btn btn-warning"
+                            onClick={() => navigate("/settings")}
+                          >
+                            Complete Profile Now
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   <form className="shipping-form">
                     <div className="form-row">
                       <div className="form-group">
@@ -395,7 +506,7 @@ const Checkout = () => {
                             onChange={(e) =>
                               handleShippingChange("phone", e.target.value)
                             }
-                            placeholder="(555) 123-4567"
+                            placeholder="(234) 123-4567"
                             required
                           />
                         </div>
@@ -429,7 +540,7 @@ const Checkout = () => {
                           onChange={(e) =>
                             handleShippingChange("city", e.target.value)
                           }
-                          placeholder="New York"
+                          placeholder="Lagos"
                           required
                         />
                       </div>
@@ -442,7 +553,7 @@ const Checkout = () => {
                           onChange={(e) =>
                             handleShippingChange("state", e.target.value)
                           }
-                          placeholder="NY"
+                          placeholder="Lagos"
                           required
                         />
                       </div>
@@ -455,7 +566,7 @@ const Checkout = () => {
                           onChange={(e) =>
                             handleShippingChange("zipCode", e.target.value)
                           }
-                          placeholder="10001"
+                          placeholder="100001"
                           required
                         />
                       </div>
@@ -479,7 +590,7 @@ const Checkout = () => {
                             <span className="option-time">
                               5-7 business days
                             </span>
-                            <span className="option-price">$5.99</span>
+                            <span className="option-price">₦599</span>
                           </div>
                         </label>
                         <label className="shipping-option">
@@ -497,7 +608,7 @@ const Checkout = () => {
                             <span className="option-time">
                               2-3 business days
                             </span>
-                            <span className="option-price">$15.99</span>
+                            <span className="option-price">₦1,599</span>
                           </div>
                         </label>
                         <label className="shipping-option">
@@ -515,7 +626,7 @@ const Checkout = () => {
                             <span className="option-time">
                               Next business day
                             </span>
-                            <span className="option-price">$29.99</span>
+                            <span className="option-price">₦2,999</span>
                           </div>
                         </label>
                       </div>
@@ -533,82 +644,13 @@ const Checkout = () => {
                   <div className="section-header">
                     <CreditCard className="section-icon" />
                     <h2>Payment Information</h2>
+                    {user.isLoggedIn && (
+                      <span className="auto-filled-notice">
+                        ✓ Information auto-filled from your profile
+                      </span>
+                    )}
                   </div>
 
-                  {/* <form className="payment-form">
-                    <div className="form-group">
-                      <label htmlFor="cardholderName">Cardholder Name</label>
-                      <div className="input-wrapper">
-                        <User className="input-icon" />
-                        <input
-                          type="text"
-                          id="cardholderName"
-                          value={paymentDetails.cardholderName}
-                          onChange={(e) =>
-                            handlePaymentChange(
-                              "cardholderName",
-                              e.target.value
-                            )
-                          }
-                          placeholder="Richard Oyekachi"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="cardNumber">Card Number</label>
-                      <div className="input-wrapper">
-                        <CreditCard className="input-icon" />
-                        <input
-                          type="text"
-                          id="cardNumber"
-                          value={paymentDetails.cardNumber}
-                          onChange={(e) =>
-                            handleCardNumberChange(e.target.value)
-                          }
-                          placeholder="1234 5678 9012 3456"
-                          maxLength={19}
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="form-row">
-                      <div className="form-group">
-                        <label htmlFor="expiryDate">Expiry Date</label>
-                        <input
-                          type="text"
-                          id="expiryDate"
-                          value={paymentDetails.expiryDate}
-                          onChange={(e) => handleExpiryChange(e.target.value)}
-                          placeholder="MM/YY"
-                          maxLength={5}
-                          required
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label htmlFor="cvv">CVV</label>
-                        <div className="input-wrapper">
-                          <Lock className="input-icon" />
-                          <input
-                            type="text"
-                            id="cvv"
-                            value={paymentDetails.cvv}
-                            onChange={(e) =>
-                              handlePaymentChange(
-                                "cvv",
-                                e.target.value.replace(/\D/g, "").slice(0, 4)
-                              )
-                            }
-                            placeholder="123"
-                            maxLength={4}
-                            required
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </form> */}
                   <form className="payment-form">
                     <div className="form-group">
                       <label htmlFor="firstName">First Name</label>
@@ -618,7 +660,9 @@ const Checkout = () => {
                           type="text"
                           id="firstName"
                           value={paymentDetails.firstName}
-                          onChange={(e) => handlePaymentChange("firstName", e.target.value)}
+                          onChange={(e) =>
+                            handlePaymentChange("firstName", e.target.value)
+                          }
                           placeholder="Richard"
                           required
                         />
@@ -633,7 +677,9 @@ const Checkout = () => {
                           type="text"
                           id="lastName"
                           value={paymentDetails.lastName}
-                          onChange={(e) => handlePaymentChange("lastName", e.target.value)}
+                          onChange={(e) =>
+                            handlePaymentChange("lastName", e.target.value)
+                          }
                           placeholder="Oyekachi"
                           required
                         />
@@ -648,7 +694,9 @@ const Checkout = () => {
                           type="email"
                           id="email"
                           value={paymentDetails.email}
-                          onChange={(e) => handlePaymentChange("email", e.target.value)}
+                          onChange={(e) =>
+                            handlePaymentChange("email", e.target.value)
+                          }
                           placeholder="example@email.com"
                           required
                         />
@@ -656,22 +704,26 @@ const Checkout = () => {
                     </div>
 
                     <div className="form-group">
-                      <label htmlFor="amount">Amount</label>
+                      <label htmlFor="amount">
+                        Amount (Auto-calculated from total)
+                      </label>
                       <div className="input-wrapper">
                         <CreditCard className="input-icon" />
                         <input
                           type="number"
                           id="amount"
                           value={paymentDetails.amount}
-                          onChange={(e) => handlePaymentChange("amount", e.target.value)}
-                          placeholder="1000"
+                          onChange={(e) =>
+                            handlePaymentChange("amount", e.target.value)
+                          }
+                          placeholder={Math.round(total).toString()}
                           min="1"
                           required
+                          readOnly
                         />
                       </div>
                     </div>
                   </form>
-
                 </div>
               )}
             </div>
@@ -703,10 +755,12 @@ const Checkout = () => {
                     <div className="review-payment">
                       <h3>Payment Method</h3>
                       <p>
-                        {/* **** **** **** {paymentDetails.cardNumber.slice(-4)} */}
-                        **** **** **** {paymentDetails.firstName}
+                        {paymentDetails.firstName} {paymentDetails.lastName}
                       </p>
                       <p>{paymentDetails.email}</p>
+                      <p>
+                        Amount: {formatPrice(Number(paymentDetails.amount))}
+                      </p>
                     </div>
 
                     <div className="review-shipping-method">
@@ -742,9 +796,18 @@ const Checkout = () => {
                 type="button"
                 className="btn btn-primary"
                 onClick={nextStep}
-                disabled={!validateStep(currentStep)}
+                disabled={
+                  !validateStep(currentStep) ||
+                  (currentStep === 2 &&
+                    user.isLoggedIn &&
+                    !profileCompletion.isComplete)
+                }
               >
-                Continue
+                {currentStep === 2 &&
+                user.isLoggedIn &&
+                !profileCompletion.isComplete
+                  ? "Complete Profile First"
+                  : "Continue"}
               </button>
             ) : (
               <button
@@ -775,7 +838,10 @@ const Checkout = () => {
                     <span className="item-quantity">Qty: {item.quantity}</span>
                   </div>
                   <span className="item-price">
-                    ${(item.product.price * item.quantity).toFixed(2)}
+                    {formatPrice(
+                      (item.product.discountPrice || item.product.price) *
+                        item.quantity
+                    )}
                   </span>
                 </div>
               ))}
@@ -784,19 +850,19 @@ const Checkout = () => {
             <div className="summary-totals">
               <div className="total-row">
                 <span>Subtotal:</span>
-                <span>${subtotal.toFixed(2)}</span>
+                <span>{formatPrice(subtotal)}</span>
               </div>
               <div className="total-row">
                 <span>Shipping:</span>
-                <span>${shippingCost.toFixed(2)}</span>
+                <span>{formatPrice(shippingCost)}</span>
               </div>
               <div className="total-row">
                 <span>Tax:</span>
-                <span>${tax.toFixed(2)}</span>
+                <span>{formatPrice(tax)}</span>
               </div>
               <div className="total-row total-final">
                 <span>Total:</span>
-                <span>${total.toFixed(2)}</span>
+                <span>{formatPrice(total)}</span>
               </div>
             </div>
           </div>

@@ -19,10 +19,31 @@ const CartDrawer: React.FunctionComponent = () => {
   );
   const navigate = useNavigate();
 
-  const totalPrice = items.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
-    0
-  );
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency: "NGN",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(price);
+  };
+
+  const totalPrice = items.reduce((sum, item) => {
+    // Ensure we're working with numbers and handle precision
+    const regularPrice = Number(item.product.price) || 0;
+    const discountPrice = item.product.discountPrice
+      ? Number(item.product.discountPrice)
+      : null;
+
+    const itemPrice = discountPrice || regularPrice;
+
+    // Use cents-based calculation for precision
+    const itemPriceInCents = Math.round(itemPrice * 100);
+    const itemTotalInCents = itemPriceInCents * item.quantity;
+    const itemTotal = itemTotalInCents / 100;
+
+    return sum + itemTotal;
+  }, 0);
 
   return (
     <>
@@ -55,7 +76,28 @@ const CartDrawer: React.FunctionComponent = () => {
                   />
                   <div className={styles.productInfo}>
                     <h3>{item.product.name}</h3>
-                    <p>${item.product.price}</p>
+                    <div className="price-display">
+                      {item.product.discountPrice ? (
+                        <>
+                          <span className="discounted-price">
+                            {formatPrice(item.product.discountPrice)}
+                          </span>
+                          <span
+                            className="original-price"
+                            style={{
+                              textDecoration: "line-through",
+                              fontSize: "0.9em",
+                              color: "#999",
+                              marginLeft: "8px",
+                            }}
+                          >
+                            {formatPrice(item.product.price)}
+                          </span>
+                        </>
+                      ) : (
+                        <p>{formatPrice(item.product.price)}</p>
+                      )}
+                    </div>
                     <div className={styles.quantityControls}>
                       <button
                         onClick={() =>
@@ -100,7 +142,7 @@ const CartDrawer: React.FunctionComponent = () => {
             <div className={styles.cartFooter}>
               <div className={styles.total}>
                 <span>Total:</span>
-                <span>${totalPrice.toFixed(2)}</span>
+                <span>{formatPrice(totalPrice)}</span>
               </div>
               <button
                 className={styles.checkoutButton}
@@ -110,7 +152,7 @@ const CartDrawer: React.FunctionComponent = () => {
                       style: { background: "#4BB543", color: "#fff" },
                     });
                     dispatch(toggleCart());
-                    navigate("/checkout"); // Add this line to navigate to checkout
+                    navigate("/checkout");
                   } else {
                     toast.error("Please log in to your account.", {
                       style: { background: "red", color: "#fff" },

@@ -163,7 +163,7 @@
 }
 
 .discounted-price {
-  font-size: 1.75rem;
+  /* font-size: 1.75rem; */
   font-weight: bold;
   color: #333;
 }
@@ -360,7 +360,7 @@
 }
 
 .review-count {
-  width: 50px;
+  /* width: 50px; */
   text-align: right;
 }
 
@@ -436,8 +436,8 @@
   }
 
   .thumbnail-images {
-    flex-direction: column;
-    width: 80px;
+    flex-direction: row;
+    /* width: 80px; */
     order: 1;
   }
 
@@ -535,4 +535,4 @@ input:focus {
 
 .back-to-products:hover {
   background-color: #555;
-}   
+}

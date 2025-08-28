@@ -62,7 +62,7 @@ const ProductDetailsPage = () => {
             discountPrice:
               foundProduct.price -
               (foundProduct.price * (foundProduct.discountPercentage || 0)) /
-              100,
+                100,
             rating: foundProduct.rating,
             reviewCount: Math.floor(Math.random() * 100) + 10,
             image: foundProduct.thumbnail,
@@ -97,11 +97,11 @@ const ProductDetailsPage = () => {
   const productImages = product?.images?.length
     ? product.images
     : [
-      product?.image || "",
-      "https://via.placeholder.com/600x600?text=Product+2",
-      "https://via.placeholder.com/600x600?text=Product+3",
-      "https://via.placeholder.com/600x600?text=Product+4",
-    ];
+        product?.image || "",
+        "https://via.placeholder.com/600x600?text=Product+2",
+        "https://via.placeholder.com/600x600?text=Product+3",
+        "https://via.placeholder.com/600x600?text=Product+4",
+      ];
 
   const handleAddToCart = () => {
     if (product) {
@@ -119,10 +119,11 @@ const ProductDetailsPage = () => {
   };
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("en-NG", {
       style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
+      currency: "NGN",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(price);
   };
 
@@ -170,8 +171,9 @@ const ProductDetailsPage = () => {
             {productImages.map((img, index) => (
               <button
                 key={index}
-                className={`thumbnail-btn ${selectedImage === index ? "active" : ""
-                  }`}
+                className={`thumbnail-btn ${
+                  selectedImage === index ? "active" : ""
+                }`}
                 onClick={() => setSelectedImage(index)}
                 aria-label={`View product image ${index + 1}`}
               >
@@ -248,7 +250,7 @@ const ProductDetailsPage = () => {
                 <span className="discount-percentage">
                   {Math.round(
                     ((product.price - product.discountPrice) / product.price) *
-                    100
+                      100
                   )}
                   % OFF
                 </span>

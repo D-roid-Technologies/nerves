@@ -18,12 +18,20 @@ interface ProductCardProps {
     isNew?: boolean;
 
     // Added fields for cart functionality
-    sellerId: string;       // required when adding to cart
-    total?: number;         // derived field: price * quantity
-    addedAt?: string;       // timestamp when added to cart
+    sellerId: string; // required when adding to cart
+    total?: number; // derived field: price * quantity
+    addedAt?: string; // timestamp when added to cart
   };
 }
 
+const formatPrice = (price: number) => {
+  return new Intl.NumberFormat("en-NG", {
+    style: "currency",
+    currency: "NGN",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(price);
+};
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const dispatch = useDispatch();
@@ -44,8 +52,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   const discountPercentage = product.discountPrice
     ? Math.round(
-      ((product.price - product.discountPrice) / product.price) * 100
-    )
+        ((product.price - product.discountPrice) / product.price) * 100
+      )
     : 0;
 
   return (
@@ -96,14 +104,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           {product.discountPrice ? (
             <>
               <span className="discounted-price">
-                ${product.discountPrice.toFixed(2)}
+                {formatPrice(product.discountPrice)}
               </span>
               <span className="original-price">
-                ${product.price.toFixed(2)}
+                {formatPrice(product.price)}
               </span>
             </>
           ) : (
-            <span className="price">${product.price.toFixed(2)}</span>
+            <span className="price">{formatPrice(product.price)}</span>
           )}
         </div>
       </div>
