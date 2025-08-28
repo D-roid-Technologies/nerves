@@ -362,7 +362,7 @@ const CreateItemPage = () => {
                 />
               </div>
 
-              <div className="form-group">
+              {/* <div className="form-group">
                 <label htmlFor="sku">SKU</label>
                 <input
                   type="text"
@@ -371,7 +371,7 @@ const CreateItemPage = () => {
                   onChange={(e) => handleInputChange("sku", e.target.value)}
                   placeholder="Stock Keeping Unit"
                 />
-              </div>
+              </div> */}
 
               <div className="form-group">
                 <label htmlFor="stock">Stock Quantity *</label>
@@ -603,6 +603,7 @@ const CreateItemPage = () => {
       </div>
     </div>
   );
+  
 };
 
 export default CreateItemPage;

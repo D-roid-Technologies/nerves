@@ -12,9 +12,10 @@ const ReviewedOrders: React.FC = () => {
       title="Reviewed Orders"
       description="Orders that have been reviewed"
       orders={reviewedOrders}
-      showStatus={false}
+      showStatus={true}
     />
   );
 };
 
 export default ReviewedOrders;
+    

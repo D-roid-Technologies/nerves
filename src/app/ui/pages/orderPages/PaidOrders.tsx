@@ -10,7 +10,7 @@ const PaidOrders: React.FC = () => {
       title="Paid Orders"
       description="Orders that have been successfully paid for"
       orders={paidOrders}
-      showStatus={false}
+      showStatus={true}
     />
   );
 };

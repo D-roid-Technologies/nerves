@@ -180,8 +180,8 @@ const SettingsPage = () => {
   const [appearance, setAppearance] = useState<AppearanceSettings>({
     theme: "system",
     language: "en",
-    currency: "USD",
-    timezone: "America/New_York",
+    currency: "NGN", // Changed from USD to NGN
+    timezone: "Africa/Lagos", // Changed to Nigerian timezone
     soundEnabled: true,
     animations: true,
     compactMode: false,
@@ -1035,7 +1035,7 @@ const SettingsPage = () => {
                   <CreditCard className="card-icon" />
                   <div>
                     <h4>Visa ending in 4242</h4>
-                    <p>Expires 12/2025</p>
+                    <p>₦50,000 limit • Expires 12/2025</p>
                   </div>
                 </div>
                 <div className="card-actions">
@@ -1053,7 +1053,7 @@ const SettingsPage = () => {
                   <CreditCard className="card-icon" />
                   <div>
                     <h4>Mastercard ending in 8888</h4>
-                    <p>Expires 06/2026</p>
+                    <p>₦100,000 limit • Expires 06/2026</p>
                   </div>
                 </div>
                 <div className="card-actions">
@@ -1706,12 +1706,11 @@ const SettingsPage = () => {
                           handleAppearanceUpdate("currency", e.target.value)
                         }
                       >
-                        {currencies.map((currency) => (
-                          <option key={currency.code} value={currency.code}>
-                            {currency.code} - {currency.name} ({currency.symbol}
-                            )
-                          </option>
-                        ))}
+                        <option value="NGN">NGN - Nigerian Naira (₦)</option>
+                        <option value="USD">USD - US Dollar ($)</option>
+                        <option value="EUR">EUR - Euro (€)</option>
+                        <option value="GBP">GBP - British Pound (£)</option>
+                        {/* ...other currency options */}
                       </select>
                     </div>
                   </div>

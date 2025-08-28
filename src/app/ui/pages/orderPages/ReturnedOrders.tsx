@@ -12,7 +12,7 @@ const ReturnedOrders: React.FC = () => {
       title="Returned Orders"
       description="Orders that have been returned"
       orders={returnedOrders}
-      showStatus={false}
+      showStatus={true}
     />
   );
 };

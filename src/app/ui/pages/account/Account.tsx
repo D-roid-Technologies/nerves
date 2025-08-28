@@ -18,6 +18,7 @@ import { RootState } from "../../../redux/store";
 import styles from "./account.module.css";
 import { useNavigate } from "react-router-dom";
 import OrderStatus from "../orderPages/OrderStatus";
+import { mockOrders } from "../orderPages/mockOrders";
 
 const mockUser = {
   firstName: "John",
@@ -25,16 +26,6 @@ const mockUser = {
   email: "john.doe@example.com",
   phone: "+1 (555) 123-4567",
   joinDate: "January 2023",
-  orders: {
-    paid: 5,
-    sealed: 3,
-    dispatched: 2,
-    arrived: 2,
-    confirmed: 1,
-    returned: 0,
-    reviewed: 4,
-    viewallorder: 6,
-  },
   reviews: [
     {
       id: 1,
@@ -77,6 +68,26 @@ interface OrderStatusProps {
 export default function MyAccountPage() {
   const user = useSelector((state: RootState) => state.user);
   const navigate = useNavigate();
+
+  const getOrderCountsByStatus = () => {
+    return {
+      paid: mockOrders.filter((order) => order.status === "paid").length,
+      sealed: mockOrders.filter((order) => order.status === "sealed").length,
+      dispatched: mockOrders.filter((order) => order.status === "dispatched")
+        .length,
+      arrived: mockOrders.filter((order) => order.status === "arrived").length,
+      confirmed: mockOrders.filter((order) => order.status === "confirmed")
+        .length,
+      returned: mockOrders.filter((order) => order.status === "returned")
+        .length,
+      reviewed: mockOrders.filter((order) => order.status === "reviewed")
+        .length,
+      total: mockOrders.length,
+    };
+  };
+
+  const orderCounts = getOrderCountsByStatus();
+
   const navigateToPaidOrders = () => navigate("/orders/paid");
   const navigateToSealedOrders = () => navigate("/orders/sealed");
   const navigateToDispatchedOrders = () => navigate("/orders/dispatched");
@@ -96,7 +107,6 @@ export default function MyAccountPage() {
           className="header-content"
           style={{ justifyContent: "space-between" }}
         >
-          {/* <User className="header-icon" /> */}
           <div className={styles["account-header"]}>
             <div>
               <User className="header-icon" />
@@ -106,14 +116,6 @@ export default function MyAccountPage() {
               <p>See all account infos</p>
             </div>
           </div>
-          {/* <div>
-            <button
-              onClick={earlyBirdReg}
-              className={styles["account-edit-btn"]}
-            >
-              Early Bird Registration
-            </button>
-          </div> */}
         </div>
       </div>
 
@@ -145,25 +147,13 @@ export default function MyAccountPage() {
           <div className={styles["account-profile-detail"]}>
             <span className={styles["account-detail-label"]}>Phone</span>
             <span className={styles["account-detail-value"]}>
-              {user.primaryInformation?.phone || "Not Provided"} 
+              {user.primaryInformation?.phone || "Not Provided"}
             </span>
           </div>
           <div className={styles["account-profile-detail"]}>
             <span className={styles["account-detail-label"]}>Member Since</span>
             <span className={styles["account-detail-value"]}>
               <span className={styles["account-detail-value"]}>
-                {/* {user.primaryInformation?.dateOfCreation
-                  ? new Date(
-                      user.primaryInformation.dateOfCreation
-                        .split(" ")[0]
-                        .split("-")
-                        .reverse()
-                        .join("-")
-                    ).toLocaleDateString("en-US", {
-                      month: "long",
-                      day: "numeric",
-                    })
-                  : "N/A"} */}
                 {user.primaryInformation?.dateOfCreation
                   ? new Date(
                       user.primaryInformation.dateOfCreation
@@ -185,50 +175,53 @@ export default function MyAccountPage() {
       <div className={styles["account-section"]}>
         <div className={styles["account-profile-header"]}>
           <h2 className={styles["account-h2"]}>Order Status</h2>
-          <button className={styles["account-edit-btn"]}>
-            View All Orders
+          <button
+            className={styles["account-edit-btn"]}
+            onClick={navigateToAllOrders}
+          >
+            View All Orders ({orderCounts.total})
           </button>
         </div>
         <div className={styles["account-orders-grid"]}>
           <OrderStatus
             label="Paid"
-            count={mockUser.orders.paid}
+            count={orderCounts.paid}
             Icon={CheckCircle}
             onClick={navigateToPaidOrders}
           />
           <OrderStatus
             label="Sealed"
-            count={mockUser.orders.sealed}
+            count={orderCounts.sealed}
             Icon={Package}
             onClick={navigateToSealedOrders}
           />
           <OrderStatus
             label="Dispatched"
-            count={mockUser.orders.dispatched}
+            count={orderCounts.dispatched}
             Icon={Truck}
             onClick={navigateToDispatchedOrders}
           />
           <OrderStatus
             label="Arrived"
-            count={mockUser.orders.arrived}
+            count={orderCounts.arrived}
             Icon={CheckCircle}
             onClick={navigateToArrivedOrders}
           />
           <OrderStatus
             label="Confirmed"
-            count={mockUser.orders.confirmed}
+            count={orderCounts.confirmed}
             Icon={CheckCircle}
             onClick={navigateToConfirmedOrders}
           />
           <OrderStatus
             label="Returned"
-            count={mockUser.orders.returned}
+            count={orderCounts.returned}
             Icon={RefreshCcw}
             onClick={navigateToReturnedOrders}
           />
           <OrderStatus
             label="Reviewed"
-            count={mockUser.orders.reviewed}
+            count={orderCounts.reviewed}
             Icon={MessageSquare}
             onClick={navigateToReviewedOrders}
           />

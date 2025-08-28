@@ -12,5 +12,4 @@ const ViewAllOrders: React.FC = () => {
     />
   );
 };
-
 export default ViewAllOrders;

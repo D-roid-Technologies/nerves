@@ -62,7 +62,7 @@ const Index: React.FunctionComponent = () => {
         {/* <Route
         path="/products/:category/:productTitle"
         element={<ProductDetailsPage />}
-      /> */}  
+      /> */}
         <Route
           path="/products/:productTitle"
           element={<ProductDetailsPage />}

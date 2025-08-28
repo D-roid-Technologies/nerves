@@ -18,8 +18,36 @@ const OrderList: React.FC<OrderListProps> = ({
 }) => {
   const navigate = useNavigate();
 
+  // Determine if this is a single-status page based on title
+  const isSingleStatus =
+    title.toLowerCase().includes("paid") ||
+    title.toLowerCase().includes("sealed") ||
+    title.toLowerCase().includes("dispatched") ||
+    title.toLowerCase().includes("arrived") ||
+    title.toLowerCase().includes("confirmed") ||
+    title.toLowerCase().includes("returned") ||
+    title.toLowerCase().includes("reviewed");
+
+  // Extract status from title for data attribute
+  const getStatusFromTitle = (title: string) => {
+    const titleLower = title.toLowerCase();
+    if (titleLower.includes("paid")) return "paid";
+    if (titleLower.includes("sealed")) return "sealed";
+    if (titleLower.includes("dispatched")) return "dispatched";
+    if (titleLower.includes("arrived")) return "arrived";
+    if (titleLower.includes("confirmed")) return "confirmed";
+    if (titleLower.includes("returned")) return "returned";
+    if (titleLower.includes("reviewed")) return "reviewed";
+    return "";
+  };
+
+  const dataStatus = isSingleStatus ? getStatusFromTitle(title) : "";
+
   return (
-    <div className={styles["order-list-container"]}>
+    <div
+      className={styles["order-list-container"]}
+      {...(dataStatus && { "data-status": dataStatus })}
+    >
       <button className={styles["order-back-btn"]} onClick={() => navigate(-1)}>
         <ArrowLeft size={16} />
         Back
@@ -87,7 +115,7 @@ const OrderList: React.FC<OrderListProps> = ({
       ) : (
         <div className={styles["order-empty-state"]}>
           <Package className={styles["order-empty-icon"]} />
-          <p>No {title.toLowerCase()} orders found</p>
+          <p>No {title.toLowerCase()} found</p>
         </div>
       )}
     </div>

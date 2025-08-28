@@ -12,7 +12,7 @@ const ArrivedOrders: React.FC = () => {
       title="Arrived Orders"
       description="Orders that have arrived at their destination"
       orders={arrivedOrders}
-      showStatus={false}
+      showStatus={true}
     />
   );
 };

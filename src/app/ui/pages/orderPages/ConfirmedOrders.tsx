@@ -12,7 +12,7 @@ const ConfirmedOrders: React.FC = () => {
       title="Confirmed Orders"
       description="Orders that have been received and confirmed"
       orders={confirmedOrders}
-      showStatus={false}
+      showStatus={true}
     />
   );
 };

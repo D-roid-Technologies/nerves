@@ -12,7 +12,7 @@ const DispatchedOrders: React.FC = () => {
       title="Dispatched Orders"
       description="Orders that have been shipped"
       orders={dispatchedOrders}
-      showStatus={false}
+      showStatus={true}
     />
   );
 };

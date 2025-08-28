@@ -10,7 +10,7 @@ const SealedOrders: React.FC = () => {
       title="Sealed Orders"
       description="Orders that have been packaged and sealed"
       orders={sealedOrders}
-      showStatus={false}
+      showStatus={true}
     />
   );
 };
