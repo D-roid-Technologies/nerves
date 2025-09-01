@@ -454,7 +454,7 @@ const Navbar = () => {
                     My Account
                   </Link>
                   <Link
-                    to="/orders"
+                    to="/orders/all"
                     className={styles.modalItem}
                     onClick={closeUserModal}
                   >
