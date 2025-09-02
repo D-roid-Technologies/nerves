@@ -579,8 +579,7 @@ const SettingsPage = () => {
 
               <div className="form-group">
                 <label>Educational Level</label>
-                <input
-                  type="text"
+                <select
                   value={profile.primaryInformation?.educationalLevel || ""}
                   onChange={(e) =>
                     handleProfileUpdate(
@@ -589,8 +588,35 @@ const SettingsPage = () => {
                       "primaryInformation"
                     )
                   }
-                  placeholder="Enter educational level"
-                />
+                >
+                  <option value="">Select educational level</option>
+                  <option value="No formal education">
+                    No formal education
+                  </option>
+                  <option value="Primary education">Primary education</option>
+                  <option value="Secondary education">
+                    Secondary education
+                  </option>
+                  <option value="Senior Secondary Certificate Examination (SSCE)">
+                    Senior Secondary Certificate Examination (SSCE)
+                  </option>
+                  <option value="National Diploma (ND)">
+                    National Diploma (ND)
+                  </option>
+                  <option value="Higher National Diploma (HND)">
+                    Higher National Diploma (HND)
+                  </option>
+                  <option value="Bachelor's degree">Bachelor's degree</option>
+                  <option value="Master's degree">Master's degree</option>
+                  <option value="Doctorate degree">Doctorate degree</option>
+                  <option value="Professional certification">
+                    Professional certification
+                  </option>
+                  <option value="Trade/Vocational training">
+                    Trade/Vocational training
+                  </option>
+                  <option value="Other">Other</option>
+                </select>
               </div>
 
               <div className="form-group">
@@ -611,8 +637,7 @@ const SettingsPage = () => {
 
               <div className="form-group">
                 <label>Security Question</label>
-                <input
-                  type="text"
+                <select
                   value={profile.primaryInformation?.securityQuestion || ""}
                   onChange={(e) =>
                     handleProfileUpdate(
@@ -621,8 +646,39 @@ const SettingsPage = () => {
                       "primaryInformation"
                     )
                   }
-                  placeholder="Enter security question"
-                />
+                >
+                  <option value="">Select a security question</option>
+                  <option value="What was the name of your first pet?">
+                    What was the name of your first pet?
+                  </option>
+                  <option value="What is your mother's maiden name?">
+                    What is your mother's maiden name?
+                  </option>
+                  <option value="What was the name of your first school?">
+                    What was the name of your first school?
+                  </option>
+                  <option value="In what city were you born?">
+                    In what city were you born?
+                  </option>
+                  <option value="What is the name of your favorite teacher?">
+                    What is the name of your favorite teacher?
+                  </option>
+                  <option value="What was your childhood nickname?">
+                    What was your childhood nickname?
+                  </option>
+                  <option value="What is the name of the street you grew up on?">
+                    What is the name of the street you grew up on?
+                  </option>
+                  <option value="What was the make of your first car?">
+                    What was the make of your first car?
+                  </option>
+                  <option value="What is your favorite book?">
+                    What is your favorite book?
+                  </option>
+                  <option value="What is the name of your best childhood friend?">
+                    What is the name of your best childhood friend?
+                  </option>
+                </select>
               </div>
 
               <div className="form-group">
@@ -661,8 +717,7 @@ const SettingsPage = () => {
               {profile.primaryInformation?.disability && (
                 <div className="form-group">
                   <label>Disability Type</label>
-                  <input
-                    type="text"
+                  <select
                     value={profile.primaryInformation?.disabilityType || ""}
                     onChange={(e) =>
                       handleProfileUpdate(
@@ -671,8 +726,39 @@ const SettingsPage = () => {
                         "primaryInformation"
                       )
                     }
-                    placeholder="Specify disability type"
-                  />
+                  >
+                    <option value="">Select disability type</option>
+                    <option value="Visual impairment">Visual impairment</option>
+                    <option value="Hearing impairment">
+                      Hearing impairment
+                    </option>
+                    <option value="Physical disability">
+                      Physical disability
+                    </option>
+                    <option value="Cognitive disability">
+                      Cognitive disability
+                    </option>
+                    <option value="Learning disability">
+                      Learning disability
+                    </option>
+                    <option value="Speech and language disability">
+                      Speech and language disability
+                    </option>
+                    <option value="Mental health condition">
+                      Mental health condition
+                    </option>
+                    <option value="Neurological condition">
+                      Neurological condition
+                    </option>
+                    <option value="Chronic illness">Chronic illness</option>
+                    <option value="Multiple disabilities">
+                      Multiple disabilities
+                    </option>
+                    <option value="Other">Other</option>
+                    <option value="Prefer not to specify">
+                      Prefer not to specify
+                    </option>
+                  </select>
                 </div>
               )}
             </div>
@@ -799,7 +885,7 @@ const SettingsPage = () => {
                   </button>
                 </div>
 
-                <div className="danger-item">
+                {/* <div className="danger-item">
                   <div>
                     <h4>Logout</h4>
                     <p>Sign out of your account on this device</p>
@@ -812,7 +898,7 @@ const SettingsPage = () => {
                     <LogOut className="btn-icon" />
                     Logout
                   </button>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
@@ -1030,40 +1116,14 @@ const SettingsPage = () => {
             </div>
 
             <div className="payment-methods">
-              <div className="payment-card">
-                <div className="card-info">
-                  <CreditCard className="card-icon" />
-                  <div>
-                    <h4>Visa ending in 4242</h4>
-                    <p>₦50,000 limit • Expires 12/2025</p>
-                  </div>
-                </div>
-                <div className="card-actions">
-                  <button type="button" className="edit-btn">
-                    Edit
-                  </button>
-                  <button type="button" className="remove-btn">
-                    Remove
-                  </button>
-                </div>
-              </div>
-
-              <div className="payment-card">
-                <div className="card-info">
-                  <CreditCard className="card-icon" />
-                  <div>
-                    <h4>Mastercard ending in 8888</h4>
-                    <p>₦100,000 limit • Expires 06/2026</p>
-                  </div>
-                </div>
-                <div className="card-actions">
-                  <button type="button" className="edit-btn">
-                    Edit
-                  </button>
-                  <button type="button" className="remove-btn">
-                    Remove
-                  </button>
-                </div>
+              {/* Empty state for new users - no payment methods shown initially */}
+              <div className="empty-payment-state">
+                <CreditCard className="empty-state-icon" />
+                <h3>No payment methods added yet</h3>
+                <p>
+                  Add a payment method to make purchases and manage your
+                  billing.
+                </p>
               </div>
 
               <button type="button" className="add-payment-btn">
@@ -1754,7 +1814,7 @@ const SettingsPage = () => {
                   </div>
                 </div>
               </div>
-
+              {/* 
               <div className="preferences-group">
                 <h3>Data Management</h3>
                 <div className="data-actions">
@@ -1769,7 +1829,7 @@ const SettingsPage = () => {
                     </button>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
 
             <div className="form-actions">
