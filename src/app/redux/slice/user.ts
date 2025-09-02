@@ -2,7 +2,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 // 1️⃣ Define the shape of the user state
-interface Location {
+export interface LocationS {
     streetNumber: string;
     streetName: string;
     city: string;
@@ -15,7 +15,7 @@ interface Location {
     };
 }
 
-interface PrimaryInformation {
+export interface PrimaryInformation {
     firstName: string;
     lastName: string;
     middleName: string;
@@ -46,7 +46,7 @@ export interface UserState {
     providerId: string | null;
     uid: string | null;
     primaryInformation: PrimaryInformation | null;
-    location: Location | null;
+    location: LocationS | null;
     isLoggedIn: boolean;
 }
 
@@ -83,7 +83,11 @@ interface SetUserPayload {
     providerId: string;
     uid: string;
     primaryInformation: PrimaryInformation;
-    location: Location;
+    location: LocationS;
+}
+
+interface UpdatePrimaryInformationPayload {
+    primaryInformation: Partial<PrimaryInformation>;
 }
 
 export const userSlice = createSlice({
@@ -108,8 +112,26 @@ export const userSlice = createSlice({
 
             localStorage.removeItem('user');
         },
+        updatePrimaryInformationS: (state, action: PayloadAction<Partial<PrimaryInformation>>) => {
+            if (state.primaryInformation) {
+                state.primaryInformation = {
+                    ...state.primaryInformation,
+                    ...action.payload, // ✅ directly merge fields
+                };
+                localStorage.setItem("user", JSON.stringify(state));
+            }
+        },
+        updateLocationS: (state, action: PayloadAction<Partial<LocationS>>) => {
+            if (state.location) {
+                state.location = {
+                    ...state.location,
+                    ...action.payload, // ✅ merge only the fields being updated
+                };
+                localStorage.setItem("user", JSON.stringify(state));
+            }
+        },
     },
 });
 
-export const { setUser, clearUser } = userSlice.actions;
+export const { setUser, clearUser, updatePrimaryInformationS, updateLocationS } = userSlice.actions;
 export default userSlice.reducer;
