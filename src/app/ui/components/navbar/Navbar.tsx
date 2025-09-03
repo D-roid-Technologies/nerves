@@ -121,7 +121,7 @@ const Navbar = () => {
             <li>
               <Link to="/collections">Collections</Link>
             </li>
-            <li>y
+            <li>
               <Link to="/about">About</Link>
             </li>
           </ul>

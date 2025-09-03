@@ -319,7 +319,7 @@ const SettingsPage = () => {
         case "profile":
           console.log("User Profile Details:", {
             primaryInformation: profile.primaryInformation,
-            // location: profile.location,
+            location: profile.location,
           });
           break;
         case "addresses":
