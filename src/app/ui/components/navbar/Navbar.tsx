@@ -119,7 +119,7 @@ const Navbar = () => {
               <Link to="/products">Shop</Link>
             </li>
             <li>
-              <Link to="/collections">Collections</Link>
+              <Link to="/catergories">catergories</Link>
             </li>
             <li>
               <Link to="/about">About</Link>
@@ -393,11 +393,11 @@ const Navbar = () => {
                 Shop
               </Link>
               <Link
-                to="/collections"
+                to="/catergories"
                 className={styles.sidebarItem}
                 onClick={closeSidebar}
               >
-                Collections
+                catergories
               </Link>
               <Link
                 to="/about"

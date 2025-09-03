@@ -32,67 +32,42 @@ import {
   Trash2,
   LogOut,
   Key,
+  X,
 } from "lucide-react";
 import "./settings.css";
 import { useSelector } from "react-redux";
 import { RootState, store } from "../../../redux/store";
-import { updateLocationS, updatePrimaryInformationS, UserState } from "../../../redux/slice/user";
-import { countries, currencies } from "../../../utils/locationData";
+import {
+  updateLocationS,
+  updatePrimaryInformationS,
+  UserState,
+} from "../../../redux/slice/user";
 import { authService } from "../../../redux/configuration/auth.service";
 
-// interface UserProfile {
-//   firstName: string;
-//   lastName: string;
-//   email: string;
-//   phone: string;
-//   avatar: string;
-//   bio: string;
-//   dateOfBirth: string;
-//   gender: string;
-// }
-
-interface AddressInfo {
-  street: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  country: string;
-}
-
-interface NotificationSettings {
-  emailNotifications: boolean;
-  pushNotifications: boolean;
-  smsNotifications: boolean;
-  orderUpdates: boolean;
-  promotions: boolean;
-  newsletter: boolean;
-  productRecommendations: boolean;
-  priceAlerts: boolean;
-}
-
-interface PrivacySettings {
-  profileVisibility: string;
-  showEmail: boolean;
-  showPhone: boolean;
-  dataCollection: boolean;
-  thirdPartySharing: boolean;
-  marketingEmails: boolean;
-}
-
-interface AppearanceSettings {
-  theme: string;
-  language: string;
-  currency: string;
-  timezone: string;
-  soundEnabled: boolean;
-  animations: boolean;
-  compactMode: boolean;
+// Payment Method Interface
+interface PaymentMethod {
+  id: string;
+  type: string;
+  last4: string;
+  expMonth: number;
+  expYear: number;
+  brand: string;
+  isDefault: boolean;
 }
 
 const SettingsPage = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+  const [newPaymentMethod, setNewPaymentMethod] = useState({
+    cardNumber: "",
+    expiryDate: "",
+    cvv: "",
+    cardholderName: "",
+    isDefault: false,
+  });
 
   const user = useSelector((state: RootState) => state.user);
 
@@ -142,7 +117,7 @@ const SettingsPage = () => {
   });
 
   // Update initial address states to be empty
-  const [billingAddress, setBillingAddress] = useState<AddressInfo>({
+  const [billingAddress, setBillingAddress] = useState({
     street: "",
     city: "",
     state: "",
@@ -150,7 +125,7 @@ const SettingsPage = () => {
     country: "",
   });
 
-  const [shippingAddress, setShippingAddress] = useState<AddressInfo>({
+  const [shippingAddress, setShippingAddress] = useState({
     street: "",
     city: "",
     state: "",
@@ -158,7 +133,7 @@ const SettingsPage = () => {
     country: "",
   });
 
-  const [notifications, setNotifications] = useState<NotificationSettings>({
+  const [notifications, setNotifications] = useState({
     emailNotifications: true,
     pushNotifications: true,
     smsNotifications: false,
@@ -169,7 +144,7 @@ const SettingsPage = () => {
     priceAlerts: true,
   });
 
-  const [privacy, setPrivacy] = useState<PrivacySettings>({
+  const [privacy, setPrivacy] = useState({
     profileVisibility: "public",
     showEmail: false,
     showPhone: false,
@@ -178,11 +153,11 @@ const SettingsPage = () => {
     marketingEmails: true,
   });
 
-  const [appearance, setAppearance] = useState<AppearanceSettings>({
+  const [appearance, setAppearance] = useState({
     theme: "system",
     language: "en",
-    currency: "NGN", // Changed from USD to NGN
-    timezone: "Africa/Lagos", // Changed to Nigerian timezone
+    currency: "NGN",
+    timezone: "Africa/Lagos",
     soundEnabled: true,
     animations: true,
     compactMode: false,
@@ -214,14 +189,14 @@ const SettingsPage = () => {
     section: Section
   ) => {
     setProfile((prev) => {
-      const currentSection = prev[section] ?? {}; // if null, fallback to empty object
+      const currentSection = prev[section] ?? {};
 
       return {
         ...prev,
         [section]: {
           ...currentSection,
           [field]: value,
-        } as NonNullable<UserState[Section]>, // type assertion
+        } as NonNullable<UserState[Section]>,
       };
     });
   };
@@ -254,21 +229,21 @@ const SettingsPage = () => {
   };
 
   const handleNotificationUpdate = (
-    field: keyof NotificationSettings,
+    field: keyof typeof notifications,
     value: boolean
   ) => {
     setNotifications((prev) => ({ ...prev, [field]: value }));
   };
 
   const handlePrivacyUpdate = (
-    field: keyof PrivacySettings,
+    field: keyof typeof privacy,
     value: string | boolean
   ) => {
     setPrivacy((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleAppearanceUpdate = (
-    field: keyof AppearanceSettings,
+    field: keyof typeof appearance,
     value: string | boolean
   ) => {
     setAppearance((prev) => ({ ...prev, [field]: value }));
@@ -333,33 +308,8 @@ const SettingsPage = () => {
       console.log(`=== ${section.toUpperCase()} SETTINGS ===`);
       switch (section) {
         case "profile":
-          await authService.updatePrimaryInformation({
-            firstName: profile.primaryInformation?.firstName,
-            lastName: profile.primaryInformation?.lastName,
-            middleName: profile.primaryInformation?.middleName,
-            email: profile.primaryInformation?.email,
-            phone: profile.primaryInformation?.phone,
-            userType: profile.primaryInformation?.userType,
-            nameInitials: profile.primaryInformation?.nameInitials,
-            uniqueIdentifier: profile.primaryInformation?.uniqueIdentifier,
-            gender: profile.primaryInformation?.gender,
-            dateOfBirth: profile.primaryInformation?.dateOfBirth,
-            photoUrl: profile.primaryInformation?.photoUrl,
-            isLoggedIn: profile.primaryInformation?.isLoggedIn,
-            agreedToTerms: profile.primaryInformation?.agreedToTerms,
-            verifiedEmail: profile.primaryInformation?.verifiedEmail,
-            verifyPhoneNumber: profile.primaryInformation?.verifyPhoneNumber,
-            twoFactorSettings: profile.primaryInformation?.twoFactorSettings,
-            referralName: profile.primaryInformation?.referralName,
-            secondaryEmail: profile.primaryInformation?.secondaryEmail,
-            securityQuestion: profile.primaryInformation?.securityQuestion,
-            securityAnswer: profile.primaryInformation?.securityAnswer,
-            disability: profile.primaryInformation?.disability,
-            disabilityType: profile.primaryInformation?.disabilityType,
-            educationalLevel: profile.primaryInformation?.educationalLevel,
-            dateOfCreation: profile.primaryInformation?.dateOfCreation
-          }).then(() => {
-            store.dispatch(updatePrimaryInformationS({
+          await authService
+            .updatePrimaryInformation({
               firstName: profile.primaryInformation?.firstName,
               lastName: profile.primaryInformation?.lastName,
               middleName: profile.primaryInformation?.middleName,
@@ -383,50 +333,91 @@ const SettingsPage = () => {
               disability: profile.primaryInformation?.disability,
               disabilityType: profile.primaryInformation?.disabilityType,
               educationalLevel: profile.primaryInformation?.educationalLevel,
-              dateOfCreation: profile.primaryInformation?.dateOfCreation
-            }));
-            toast.success("Primary information updated successfully", {
-              style: { background: '#4BB543', color: '#fff' },
+              dateOfCreation: profile.primaryInformation?.dateOfCreation,
+            })
+            .then(() => {
+              store.dispatch(
+                updatePrimaryInformationS({
+                  firstName: profile.primaryInformation?.firstName,
+                  lastName: profile.primaryInformation?.lastName,
+                  middleName: profile.primaryInformation?.middleName,
+                  email: profile.primaryInformation?.email,
+                  phone: profile.primaryInformation?.phone,
+                  userType: profile.primaryInformation?.userType,
+                  nameInitials: profile.primaryInformation?.nameInitials,
+                  uniqueIdentifier:
+                    profile.primaryInformation?.uniqueIdentifier,
+                  gender: profile.primaryInformation?.gender,
+                  dateOfBirth: profile.primaryInformation?.dateOfBirth,
+                  photoUrl: profile.primaryInformation?.photoUrl,
+                  isLoggedIn: profile.primaryInformation?.isLoggedIn,
+                  agreedToTerms: profile.primaryInformation?.agreedToTerms,
+                  verifiedEmail: profile.primaryInformation?.verifiedEmail,
+                  verifyPhoneNumber:
+                    profile.primaryInformation?.verifyPhoneNumber,
+                  twoFactorSettings:
+                    profile.primaryInformation?.twoFactorSettings,
+                  referralName: profile.primaryInformation?.referralName,
+                  secondaryEmail: profile.primaryInformation?.secondaryEmail,
+                  securityQuestion:
+                    profile.primaryInformation?.securityQuestion,
+                  securityAnswer: profile.primaryInformation?.securityAnswer,
+                  disability: profile.primaryInformation?.disability,
+                  disabilityType: profile.primaryInformation?.disabilityType,
+                  educationalLevel:
+                    profile.primaryInformation?.educationalLevel,
+                  dateOfCreation: profile.primaryInformation?.dateOfCreation,
+                })
+              );
+              toast.success("Primary information updated successfully", {
+                style: { background: "#4BB543", color: "#fff" },
+              });
+            })
+            .catch(() => {
+              toast.error("Failed to update primary information", {
+                style: { background: "#ff4d4f", color: "#fff" },
+              });
             });
-          }).catch(() => {
-            toast.error("Failed to update primary information", {
-              style: { background: '#ff4d4f', color: '#fff' },
-            });
-          })
           break;
         case "addresses":
-          await authService.updateLocation({
-            streetNumber: profile.location?.streetNumber,
-            streetName: profile.location?.streetName,
-            city: profile.location?.city,
-            state: profile.location?.state,
-            country: profile.location?.country,
-            postalCode: profile.location?.postalCode,
-            geoCoordinates: {
-              latitude: user.location?.geoCoordinates?.latitude || "",
-              longitude: user.location?.geoCoordinates?.longitude || "",
-            }
-          }).then(() => {
-            store.dispatch(updateLocationS({
-              streetNumber: profile.location?.streetNumber || "",
-              streetName: profile.location?.streetName || "",
-              city: profile.location?.city || "",
-              state: profile.location?.state || "",
-              country: profile.location?.country || "",
-              postalCode: profile.location?.postalCode || "",
+          await authService
+            .updateLocation({
+              streetNumber: profile.location?.streetNumber,
+              streetName: profile.location?.streetName,
+              city: profile.location?.city,
+              state: profile.location?.state,
+              country: profile.location?.country,
+              postalCode: profile.location?.postalCode,
               geoCoordinates: {
-                latitude: profile.location?.geoCoordinates?.latitude || "",
-                longitude: profile.location?.geoCoordinates?.longitude || "",
-              }
-            }));
-            toast.success("Location information updated successfully", {
-              style: { background: '#4BB543', color: '#fff' },
+                latitude: user.location?.geoCoordinates?.latitude || "",
+                longitude: user.location?.geoCoordinates?.longitude || "",
+              },
+            })
+            .then(() => {
+              store.dispatch(
+                updateLocationS({
+                  streetNumber: profile.location?.streetNumber || "",
+                  streetName: profile.location?.streetName || "",
+                  city: profile.location?.city || "",
+                  state: profile.location?.state || "",
+                  country: profile.location?.country || "",
+                  postalCode: profile.location?.postalCode || "",
+                  geoCoordinates: {
+                    latitude: profile.location?.geoCoordinates?.latitude || "",
+                    longitude:
+                      profile.location?.geoCoordinates?.longitude || "",
+                  },
+                })
+              );
+              toast.success("Location information updated successfully", {
+                style: { background: "#4BB543", color: "#fff" },
+              });
+            })
+            .catch(() => {
+              toast.error("Failed to update Location information", {
+                style: { background: "#ff4d4f", color: "#fff" },
+              });
             });
-          }).catch(() => {
-            toast.error("Failed to update Location information", {
-              style: { background: '#ff4d4f', color: '#fff' },
-            });
-          })
           break;
         case "notifications":
           console.log("Notification Settings:", notifications);
@@ -438,7 +429,6 @@ const SettingsPage = () => {
           console.log("Appearance Settings:", appearance);
           break;
       }
-      // console.log("========================");
       toast.success(`${section} settings saved successfully`);
     } catch (error) {
       toast.error(`Failed to save ${section} settings`);
@@ -466,6 +456,157 @@ const SettingsPage = () => {
   const handleLogout = () => {
     console.log("User logged out");
     toast.success("Logged out successfully");
+  };
+
+  // Payment Methods Functions
+  const handleAddPaymentMethod = () => {
+    setShowPaymentModal(true);
+  };
+
+  const handleClosePaymentModal = () => {
+    setShowPaymentModal(false);
+    setNewPaymentMethod({
+      cardNumber: "",
+      expiryDate: "",
+      cvv: "",
+      cardholderName: "",
+      isDefault: false,
+    });
+  };
+
+  const handlePaymentInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    setNewPaymentMethod((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const formatCardNumber = (value: string) => {
+    const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
+    const matches = v.match(/\d{4,16}/g);
+    const match = (matches && matches[0]) || "";
+    const parts = [];
+
+    for (let i = 0, len = match.length; i < len; i += 4) {
+      parts.push(match.substring(i, i + 4));
+    }
+
+    if (parts.length) {
+      return parts.join(" ");
+    } else {
+      return value;
+    }
+  };
+
+  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formattedValue = formatCardNumber(e.target.value);
+    setNewPaymentMethod((prev) => ({
+      ...prev,
+      cardNumber: formattedValue,
+    }));
+  };
+
+  const formatExpiryDate = (value: string) => {
+    const v = value.replace(/\D/g, "").substring(0, 4);
+    if (v.length >= 3) {
+      return `${v.substring(0, 2)}/${v.substring(2)}`;
+    }
+    return value;
+  };
+
+  const handleExpiryDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formattedValue = formatExpiryDate(e.target.value);
+    setNewPaymentMethod((prev) => ({
+      ...prev,
+      expiryDate: formattedValue,
+    }));
+  };
+
+  const handleSubmitPaymentMethod = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Basic validation
+    if (
+      !newPaymentMethod.cardNumber ||
+      newPaymentMethod.cardNumber.replace(/\s/g, "").length !== 16
+    ) {
+      toast.error("Please enter a valid 16-digit card number");
+      return;
+    }
+
+    if (
+      !newPaymentMethod.expiryDate ||
+      !/^\d{2}\/\d{2}$/.test(newPaymentMethod.expiryDate)
+    ) {
+      toast.error("Please enter a valid expiry date (MM/YY)");
+      return;
+    }
+
+    if (!newPaymentMethod.cvv || newPaymentMethod.cvv.length < 3) {
+      toast.error("Please enter a valid CVV");
+      return;
+    }
+
+    if (!newPaymentMethod.cardholderName) {
+      toast.error("Please enter cardholder name");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Simulate API call to add payment method
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      // Extract last 4 digits and card brand
+      const last4 = newPaymentMethod.cardNumber.slice(-4);
+      const [expMonth, expYear] = newPaymentMethod.expiryDate.split("/");
+
+      // Create a mock payment method (in a real app, this would come from your payment processor)
+      const newMethod: PaymentMethod = {
+        id: `pm_${Math.random().toString(36).substr(2, 9)}`,
+        type: "card",
+        last4,
+        expMonth: parseInt(expMonth),
+        expYear: parseInt(expYear) + 2000, // Convert YY to YYYY
+        brand: "visa", // This would be detected from the card number in a real app
+        isDefault: newPaymentMethod.isDefault || paymentMethods.length === 0,
+      };
+
+      // If this is set as default, unset any existing default
+      if (newMethod.isDefault) {
+        setPaymentMethods((prev) =>
+          prev.map((pm) => ({ ...pm, isDefault: false }))
+        );
+      }
+
+      setPaymentMethods((prev) => [...prev, newMethod]);
+      toast.success("Payment method added successfully");
+      handleClosePaymentModal();
+    } catch (error) {
+      toast.error("Failed to add payment method");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRemovePaymentMethod = (id: string) => {
+    if (
+      window.confirm("Are you sure you want to remove this payment method?")
+    ) {
+      setPaymentMethods((prev) => prev.filter((pm) => pm.id !== id));
+      toast.success("Payment method removed");
+    }
+  };
+
+  const handleSetDefaultPaymentMethod = (id: string) => {
+    setPaymentMethods((prev) =>
+      prev.map((pm) => ({
+        ...pm,
+        isDefault: pm.id === id,
+      }))
+    );
+    toast.success("Default payment method updated");
   };
 
   const renderTabContent = () => {
@@ -1196,7 +1337,6 @@ const SettingsPage = () => {
               </div>
             </div>
 
-
             <div className="form-actions">
               <button
                 type="button"
@@ -1223,21 +1363,168 @@ const SettingsPage = () => {
             </div>
 
             <div className="payment-methods">
-              {/* Empty state for new users - no payment methods shown initially */}
-              <div className="empty-payment-state">
-                <CreditCard className="empty-state-icon" />
-                <h3>No payment methods added yet</h3>
-                <p>
-                  Add a payment method to make purchases and manage your
-                  billing.
-                </p>
-              </div>
+              {paymentMethods.length === 0 ? (
+                <div className="empty-payment-state">
+                  <CreditCard className="empty-state-icon" />
+                  <h3>No payment methods added yet</h3>
+                  <p>
+                    Add a payment method to make purchases and manage your
+                    billing.
+                  </p>
+                </div>
+              ) : (
+                paymentMethods.map((method) => (
+                  <div key={method.id} className="payment-card">
+                    <div className="card-info">
+                      <CreditCard className="card-icon" />
+                      <div>
+                        <h4>
+                          {method.brand.charAt(0).toUpperCase() +
+                            method.brand.slice(1)}{" "}
+                          •••• {method.last4}
+                        </h4>
+                        <p>
+                          Expires {method.expMonth.toString().padStart(2, "0")}/
+                          {method.expYear.toString().slice(2)}{" "}
+                          {method.isDefault && "(Default)"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="card-actions">
+                      {!method.isDefault && (
+                        <button
+                          type="button"
+                          className="edit-btn"
+                          onClick={() =>
+                            handleSetDefaultPaymentMethod(method.id)
+                          }
+                        >
+                          Set as Default
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className="remove-btn"
+                        onClick={() => handleRemovePaymentMethod(method.id)}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
 
-              <button type="button" className="add-payment-btn">
+              <button
+                type="button"
+                className="add-payment-btn"
+                onClick={handleAddPaymentMethod}
+              >
                 <CreditCard className="btn-icon" />
                 Add New Payment Method
               </button>
             </div>
+
+            {/* Payment Modal */}
+            {showPaymentModal && (
+              <div className="modal-overlay">
+                <div className="payment-modal">
+                  <div className="modal-header">
+                    <h3>Add Payment Method</h3>
+                    <button
+                      type="button"
+                      className="modal-close"
+                      onClick={handleClosePaymentModal}
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleSubmitPaymentMethod}>
+                    <div className="form-group">
+                      <label>Card Number</label>
+                      <input
+                        type="text"
+                        name="cardNumber"
+                        value={newPaymentMethod.cardNumber}
+                        onChange={handleCardNumberChange}
+                        placeholder="1234 5678 9012 3456"
+                        maxLength={19}
+                        required
+                      />
+                    </div>
+
+                    <div className="form-grid">
+                      <div className="form-group">
+                        <label>Expiry Date</label>
+                        <input
+                          type="text"
+                          name="expiryDate"
+                          value={newPaymentMethod.expiryDate}
+                          onChange={handleExpiryDateChange}
+                          placeholder="MM/YY"
+                          maxLength={5}
+                          required
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>CVV</label>
+                        <input
+                          type="password"
+                          name="cvv"
+                          value={newPaymentMethod.cvv}
+                          onChange={handlePaymentInputChange}
+                          placeholder="123"
+                          maxLength={4}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label>Cardholder Name</label>
+                      <input
+                        type="text"
+                        name="cardholderName"
+                        value={newPaymentMethod.cardholderName}
+                        onChange={handlePaymentInputChange}
+                        placeholder="Onyekachi Godswill"
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group checkbox-group">
+                      <label className="checkbox-label">
+                        <input
+                          type="checkbox"
+                          name="isDefault"
+                          checked={newPaymentMethod.isDefault}
+                          onChange={handlePaymentInputChange}
+                        />
+                        Set as default payment method
+                      </label>
+                    </div>
+
+                    <div className="modal-actions">
+                      <button
+                        type="button"
+                        className="cancel-btn"
+                        onClick={handleClosePaymentModal}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="save-btn"
+                        disabled={isLoading}
+                      >
+                        {isLoading ? "Adding..." : "Add Payment Method"}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
           </div>
         );
 

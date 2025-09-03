@@ -400,11 +400,11 @@ const Checkout = () => {
                   <div className="section-header">
                     <Truck className="section-icon" />
                     <h2>Shipping Information</h2>
-                    {user.isLoggedIn && (
+                    {/* {user.isLoggedIn && (
                       <span className="auto-filled-notice">
                         ✓ Information auto-filled from your profile
                       </span>
-                    )}
+                    )} */}
                   </div>
                   {/* Show profile completion warning for logged in users with incomplete profiles */}
                   {user.isLoggedIn && !profileCompletion.isComplete && (
@@ -644,11 +644,11 @@ const Checkout = () => {
                   <div className="section-header">
                     <CreditCard className="section-icon" />
                     <h2>Payment Information</h2>
-                    {user.isLoggedIn && (
+                    {/* {user.isLoggedIn && (
                       <span className="auto-filled-notice">
                         ✓ Information auto-filled from your profile
                       </span>
-                    )}
+                    )} */}
                   </div>
 
                   <form className="payment-form">
