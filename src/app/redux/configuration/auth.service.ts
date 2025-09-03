@@ -9,6 +9,7 @@ import { Friends } from "../../utils/types/friends/interface/friendInterface";
 import { Wallet } from "../../utils/types/wallets/interface/wallets";
 import { Product } from "../../types/product";
 import { setListedItems } from "../slice/products";
+import { updateCartSlice } from "../slice/cart";
 
 
 const getCurrentDateTime = (): string => {
@@ -222,12 +223,12 @@ export class AuthService {
                         },
                     },
                 },
-                cart: {} as Cart,
+                cart: [] as Cart[],
                 notifications: [] as Notification[],
                 orders: [] as OrderInter[],
                 reviews: [] as ReviewInter[],
                 myItems: [] as MyItems[],
-                friends: {} as Friends,
+                friends: [] as Friends[],
                 wallet: {} as Wallet,
             };
             await setDoc(userDocRef, nerveAccount);
@@ -279,12 +280,7 @@ export class AuthService {
                     },
                 }));
 
-
-
-                // await sendEmailVerification(user);
-                // await signOut(auth); // Prevent implicit navigation
-
-                toast.success(`Your D'roid Account has been successfully created`, {
+                toast.success(`Welcome to Nerves ${primaryInformation.firstName}`, {
                     style: { background: "#4BB543", color: "#fff" },
                 });
 
@@ -298,7 +294,7 @@ export class AuthService {
 
         }).catch((err) => {
             console.error("Error during registration:", err);
-            toast.error(`Error creating your D'roid Account 🚫`, {
+            toast.error(`Error creating your Account 🚫`, {
                 style: { background: "#ff4d4f", color: "#fff" },
             });
             return null;
@@ -327,6 +323,13 @@ export class AuthService {
             const fetchedUserData = userSnapshot.data();
             const primaryInformation = fetchedUserData.user.primaryInformation;
             const location = fetchedUserData.user.location;
+            const cart = fetchedUserData.cart;
+            const friends = fetchedUserData.friends;
+            const myItems = fetchedUserData.myItems;
+            const notifications = fetchedUserData.notifications;
+            const orders = fetchedUserData.orders;
+            const reviews = fetchedUserData.reviews;
+            const wallet = fetchedUserData.wallet;
 
             // 4️⃣ Update Redux store
             store.dispatch(setUser({
@@ -346,6 +349,8 @@ export class AuthService {
                     geoCoordinates: { latitude: "", longitude: "" },
                 },
             }));
+
+            store.dispatch(updateCartSlice(cart));
 
             toast.success(`Welcome back, ${primaryInformation.firstName}!`, {
                 style: { background: "#4BB543", color: "#fff" },
