@@ -35,9 +35,10 @@ import {
 } from "lucide-react";
 import "./settings.css";
 import { useSelector } from "react-redux";
-import { RootState } from "../../../redux/store";
-import { UserState } from "../../../redux/slice/user";
+import { RootState, store } from "../../../redux/store";
+import { updateLocationS, updatePrimaryInformationS, UserState } from "../../../redux/slice/user";
 import { countries, currencies } from "../../../utils/locationData";
+import { authService } from "../../../redux/configuration/auth.service";
 
 // interface UserProfile {
 //   firstName: string;
@@ -225,16 +226,31 @@ const SettingsPage = () => {
     });
   };
 
-  const handleAddressUpdate = (
-    type: "billing" | "shipping",
-    field: keyof AddressInfo,
-    value: string
+  const handleAddressUpdate = <
+    Field extends keyof NonNullable<UserState["location"]>
+  >(
+    field: Field,
+    value: NonNullable<UserState["location"]>[Field]
   ) => {
-    if (type === "billing") {
-      setBillingAddress((prev) => ({ ...prev, [field]: value }));
-    } else {
-      setShippingAddress((prev) => ({ ...prev, [field]: value }));
-    }
+    setProfile((prev) => {
+      const currentLocation = prev.location ?? {
+        streetNumber: "",
+        streetName: "",
+        city: "",
+        state: "",
+        country: "",
+        postalCode: "",
+        geoCoordinates: { latitude: "", longitude: "" },
+      };
+
+      return {
+        ...prev,
+        location: {
+          ...currentLocation,
+          [field]: value,
+        },
+      };
+    });
   };
 
   const handleNotificationUpdate = (
@@ -317,16 +333,100 @@ const SettingsPage = () => {
       console.log(`=== ${section.toUpperCase()} SETTINGS ===`);
       switch (section) {
         case "profile":
-          console.log("User Profile Details:", {
-            primaryInformation: profile.primaryInformation,
-            location: profile.location,
-          });
+          await authService.updatePrimaryInformation({
+            firstName: profile.primaryInformation?.firstName,
+            lastName: profile.primaryInformation?.lastName,
+            middleName: profile.primaryInformation?.middleName,
+            email: profile.primaryInformation?.email,
+            phone: profile.primaryInformation?.phone,
+            userType: profile.primaryInformation?.userType,
+            nameInitials: profile.primaryInformation?.nameInitials,
+            uniqueIdentifier: profile.primaryInformation?.uniqueIdentifier,
+            gender: profile.primaryInformation?.gender,
+            dateOfBirth: profile.primaryInformation?.dateOfBirth,
+            photoUrl: profile.primaryInformation?.photoUrl,
+            isLoggedIn: profile.primaryInformation?.isLoggedIn,
+            agreedToTerms: profile.primaryInformation?.agreedToTerms,
+            verifiedEmail: profile.primaryInformation?.verifiedEmail,
+            verifyPhoneNumber: profile.primaryInformation?.verifyPhoneNumber,
+            twoFactorSettings: profile.primaryInformation?.twoFactorSettings,
+            referralName: profile.primaryInformation?.referralName,
+            secondaryEmail: profile.primaryInformation?.secondaryEmail,
+            securityQuestion: profile.primaryInformation?.securityQuestion,
+            securityAnswer: profile.primaryInformation?.securityAnswer,
+            disability: profile.primaryInformation?.disability,
+            disabilityType: profile.primaryInformation?.disabilityType,
+            educationalLevel: profile.primaryInformation?.educationalLevel,
+            dateOfCreation: profile.primaryInformation?.dateOfCreation
+          }).then(() => {
+            store.dispatch(updatePrimaryInformationS({
+              firstName: profile.primaryInformation?.firstName,
+              lastName: profile.primaryInformation?.lastName,
+              middleName: profile.primaryInformation?.middleName,
+              email: profile.primaryInformation?.email,
+              phone: profile.primaryInformation?.phone,
+              userType: profile.primaryInformation?.userType,
+              nameInitials: profile.primaryInformation?.nameInitials,
+              uniqueIdentifier: profile.primaryInformation?.uniqueIdentifier,
+              gender: profile.primaryInformation?.gender,
+              dateOfBirth: profile.primaryInformation?.dateOfBirth,
+              photoUrl: profile.primaryInformation?.photoUrl,
+              isLoggedIn: profile.primaryInformation?.isLoggedIn,
+              agreedToTerms: profile.primaryInformation?.agreedToTerms,
+              verifiedEmail: profile.primaryInformation?.verifiedEmail,
+              verifyPhoneNumber: profile.primaryInformation?.verifyPhoneNumber,
+              twoFactorSettings: profile.primaryInformation?.twoFactorSettings,
+              referralName: profile.primaryInformation?.referralName,
+              secondaryEmail: profile.primaryInformation?.secondaryEmail,
+              securityQuestion: profile.primaryInformation?.securityQuestion,
+              securityAnswer: profile.primaryInformation?.securityAnswer,
+              disability: profile.primaryInformation?.disability,
+              disabilityType: profile.primaryInformation?.disabilityType,
+              educationalLevel: profile.primaryInformation?.educationalLevel,
+              dateOfCreation: profile.primaryInformation?.dateOfCreation
+            }));
+            toast.success("Primary information updated successfully", {
+              style: { background: '#4BB543', color: '#fff' },
+            });
+          }).catch(() => {
+            toast.error("Failed to update primary information", {
+              style: { background: '#ff4d4f', color: '#fff' },
+            });
+          })
           break;
         case "addresses":
-          console.log("Address Details:", {
-            billingAddress,
-            shippingAddress,
-          });
+          await authService.updateLocation({
+            streetNumber: profile.location?.streetNumber,
+            streetName: profile.location?.streetName,
+            city: profile.location?.city,
+            state: profile.location?.state,
+            country: profile.location?.country,
+            postalCode: profile.location?.postalCode,
+            geoCoordinates: {
+              latitude: user.location?.geoCoordinates?.latitude || "",
+              longitude: user.location?.geoCoordinates?.longitude || "",
+            }
+          }).then(() => {
+            store.dispatch(updateLocationS({
+              streetNumber: profile.location?.streetNumber || "",
+              streetName: profile.location?.streetName || "",
+              city: profile.location?.city || "",
+              state: profile.location?.state || "",
+              country: profile.location?.country || "",
+              postalCode: profile.location?.postalCode || "",
+              geoCoordinates: {
+                latitude: profile.location?.geoCoordinates?.latitude || "",
+                longitude: profile.location?.geoCoordinates?.longitude || "",
+              }
+            }));
+            toast.success("Location information updated successfully", {
+              style: { background: '#4BB543', color: '#fff' },
+            });
+          }).catch(() => {
+            toast.error("Failed to update Location information", {
+              style: { background: '#ff4d4f', color: '#fff' },
+            });
+          })
           break;
         case "notifications":
           console.log("Notification Settings:", notifications);
@@ -338,7 +438,7 @@ const SettingsPage = () => {
           console.log("Appearance Settings:", appearance);
           break;
       }
-      console.log("========================");
+      // console.log("========================");
       toast.success(`${section} settings saved successfully`);
     } catch (error) {
       toast.error(`Failed to save ${section} settings`);
@@ -916,21 +1016,34 @@ const SettingsPage = () => {
             </div>
 
             <div className="addresses-container">
+              {/* Shipping Address */}
               <div className="address-section">
                 <div className="address-header">
                   <h3>Shipping Address</h3>
                 </div>
 
                 <div className="form-grid">
-                  <div className="form-group full-width">
-                    <label>Street Address</label>
+                  <div className="form-group">
+                    <label>Street Number</label>
                     <input
                       type="text"
-                      value={billingAddress.street}
+                      value={profile.location?.streetNumber}
                       onChange={(e) =>
-                        handleAddressUpdate("billing", "street", e.target.value)
+                        handleAddressUpdate("streetNumber", e.target.value)
                       }
-                      placeholder="Enter street address"
+                      placeholder="Street number"
+                    />
+                  </div>
+
+                  <div className="form-group full-width">
+                    <label>Street Name</label>
+                    <input
+                      type="text"
+                      value={profile.location?.streetName}
+                      onChange={(e) =>
+                        handleAddressUpdate("streetName", e.target.value)
+                      }
+                      placeholder="Street name"
                     />
                   </div>
 
@@ -938,11 +1051,11 @@ const SettingsPage = () => {
                     <label>City</label>
                     <input
                       type="text"
-                      value={billingAddress.city}
+                      value={profile.location?.city}
                       onChange={(e) =>
-                        handleAddressUpdate("billing", "city", e.target.value)
+                        handleAddressUpdate("city", e.target.value)
                       }
-                      placeholder="Enter city"
+                      placeholder="City"
                     />
                   </div>
 
@@ -950,11 +1063,11 @@ const SettingsPage = () => {
                     <label>State/Province</label>
                     <input
                       type="text"
-                      value={billingAddress.state}
+                      value={profile.location?.state}
                       onChange={(e) =>
-                        handleAddressUpdate("billing", "state", e.target.value)
+                        handleAddressUpdate("state", e.target.value)
                       }
-                      placeholder="Enter state"
+                      placeholder="State"
                     />
                   </div>
 
@@ -962,45 +1075,37 @@ const SettingsPage = () => {
                     <label>ZIP/Postal Code</label>
                     <input
                       type="text"
-                      value={billingAddress.zipCode}
+                      value={profile.location?.postalCode}
                       onChange={(e) =>
-                        handleAddressUpdate(
-                          "billing",
-                          "zipCode",
-                          e.target.value
-                        )
+                        handleAddressUpdate("postalCode", e.target.value)
                       }
-                      placeholder="Enter ZIP code"
+                      placeholder="ZIP code"
                     />
                   </div>
 
                   <div className="form-group">
                     <label>Country</label>
                     <select
-                      value={billingAddress.country}
+                      value={profile.location?.country}
                       onChange={(e) =>
-                        handleAddressUpdate(
-                          "billing",
-                          "country",
-                          e.target.value
-                        )
+                        handleAddressUpdate("country", e.target.value)
                       }
                     >
-                      <option value="United States">United States</option>{" "}
-                      <option value="Canada">Canada</option>{" "}
-                      <option value="United Kingdom">United Kingdom</option>{" "}
-                      <option value="Australia">Australia</option>{" "}
-                      <option value="Germany">Germany</option>{" "}
+                      <option value="United States">United States</option>
+                      <option value="Canada">Canada</option>
+                      <option value="United Kingdom">United Kingdom</option>
+                      <option value="Australia">Australia</option>
+                      <option value="Germany">Germany</option>
                       <option value="France">France</option>
                     </select>
                   </div>
                 </div>
               </div>
 
+              {/* Billing Address */}
               <div className="address-section">
                 <div className="address-header">
                   <h3>Billing Address</h3>
-
                   <button
                     type="button"
                     className="copy-btn"
@@ -1009,20 +1114,29 @@ const SettingsPage = () => {
                     Copy from Shipping
                   </button>
                 </div>
+
                 <div className="form-grid">
-                  <div className="form-group full-width">
-                    <label>Street Address</label>
+                  <div className="form-group">
+                    <label>Street Number</label>
                     <input
                       type="text"
-                      value={shippingAddress.street}
+                      value={profile.location?.streetNumber}
                       onChange={(e) =>
-                        handleAddressUpdate(
-                          "shipping",
-                          "street",
-                          e.target.value
-                        )
+                        handleAddressUpdate("streetNumber", e.target.value)
                       }
-                      placeholder="Enter street address"
+                      placeholder="Street number"
+                    />
+                  </div>
+
+                  <div className="form-group full-width">
+                    <label>Street Name</label>
+                    <input
+                      type="text"
+                      value={profile.location?.streetName}
+                      onChange={(e) =>
+                        handleAddressUpdate("streetName", e.target.value)
+                      }
+                      placeholder="Street name"
                     />
                   </div>
 
@@ -1030,11 +1144,11 @@ const SettingsPage = () => {
                     <label>City</label>
                     <input
                       type="text"
-                      value={shippingAddress.city}
+                      value={profile.location?.city}
                       onChange={(e) =>
-                        handleAddressUpdate("shipping", "city", e.target.value)
+                        handleAddressUpdate("city", e.target.value)
                       }
-                      placeholder="Enter city"
+                      placeholder="City"
                     />
                   </div>
 
@@ -1042,11 +1156,11 @@ const SettingsPage = () => {
                     <label>State/Province</label>
                     <input
                       type="text"
-                      value={shippingAddress.state}
+                      value={profile.location?.state}
                       onChange={(e) =>
-                        handleAddressUpdate("shipping", "state", e.target.value)
+                        handleAddressUpdate("state", e.target.value)
                       }
-                      placeholder="Enter state"
+                      placeholder="State"
                     />
                   </div>
 
@@ -1054,41 +1168,34 @@ const SettingsPage = () => {
                     <label>ZIP/Postal Code</label>
                     <input
                       type="text"
-                      value={shippingAddress.zipCode}
+                      value={profile.location?.postalCode}
                       onChange={(e) =>
-                        handleAddressUpdate(
-                          "shipping",
-                          "zipCode",
-                          e.target.value
-                        )
+                        handleAddressUpdate("postalCode", e.target.value)
                       }
-                      placeholder="Enter ZIP code"
+                      placeholder="ZIP code"
                     />
                   </div>
 
                   <div className="form-group">
                     <label>Country</label>
                     <select
-                      value={shippingAddress.country}
+                      value={profile.location?.country}
                       onChange={(e) =>
-                        handleAddressUpdate(
-                          "shipping",
-                          "country",
-                          e.target.value
-                        )
+                        handleAddressUpdate("country", e.target.value)
                       }
                     >
-                      <option value="United States">United States</option>{" "}
-                      <option value="Canada">Canada</option>{" "}
-                      <option value="United Kingdom">United Kingdom</option>{" "}
-                      <option value="Australia">Australia</option>{" "}
-                      <option value="Germany">Germany</option>{" "}
+                      <option value="United States">United States</option>
+                      <option value="Canada">Canada</option>
+                      <option value="United Kingdom">United Kingdom</option>
+                      <option value="Australia">Australia</option>
+                      <option value="Germany">Germany</option>
                       <option value="France">France</option>
                     </select>
                   </div>
                 </div>
               </div>
             </div>
+
 
             <div className="form-actions">
               <button

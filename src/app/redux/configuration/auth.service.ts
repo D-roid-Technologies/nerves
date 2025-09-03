@@ -1,7 +1,7 @@
 import { sendEmailVerification, signInWithPopup, updateProfile } from "firebase/auth";
 import { auth, db, provider } from "../../firebase";
 import { LocationState } from "../slice/location";
-import { setUser } from "../slice/user";
+import { LocationS, PrimaryInformation, setUser } from "../slice/user";
 import { store } from "../store";
 import { collection, doc, getDoc, setDoc, updateDoc, arrayUnion, query, where, getDocs } from "firebase/firestore";
 import toast from "react-hot-toast";
@@ -378,6 +378,89 @@ export class AuthService {
             return [];
         }
     };
+    async updatePrimaryInformation(partialUpdateData: Partial<PrimaryInformation>) {
+        try {
+            const currentUser = auth.currentUser;
+            if (!currentUser) {
+                toast.error("User not authenticated", {
+                    style: { background: '#ff4d4f', color: '#fff' },
+                });
+                return;
+            }
+
+            const userId = currentUser.uid;
+            const userDocRef = doc(db, "nerveaccount", userId);
+            const userSnapshot = await getDoc(userDocRef);
+
+            if (!userSnapshot.exists()) {
+                toast.error("User not found", {
+                    style: { background: '#ff4d4f', color: '#fff' },
+                });
+                return;
+            }
+
+            const currentData = userSnapshot.data();
+
+            // ✅ Merge only primaryInformation
+            const updatedPrimaryInfo = {
+                ...currentData.user.primaryInformation,
+                ...partialUpdateData,
+            };
+
+            // Save back to Firestore
+            await updateDoc(userDocRef, {
+                "user.primaryInformation": updatedPrimaryInfo,
+            });
+
+            // console.log("Updated Primary Info:", updatedPrimaryInfo);
+            // toast.success("Profile updated successfully!");
+        } catch (error) {
+            // console.error("Error updating primary information:", error);
+            toast.error(`Failed to update profile: ${error}`);
+        }
+    }
+    async updateLocation(partialUpdateData: Partial<LocationS>) {
+        try {
+            const currentUser = auth.currentUser;
+            if (!currentUser) {
+                toast.error("User not authenticated", {
+                    style: { background: '#ff4d4f', color: '#fff' },
+                });
+                return;
+            }
+
+            const userId = currentUser.uid;
+            const userDocRef = doc(db, "nerveaccount", userId);
+            const userSnapshot = await getDoc(userDocRef);
+
+            if (!userSnapshot.exists()) {
+                toast.error("User not found", {
+                    style: { background: '#ff4d4f', color: '#fff' },
+                });
+                return;
+            }
+
+            const currentData = userSnapshot.data();
+
+            // ✅ Merge only location
+            const updatedLocation = {
+                ...currentData.user.location,
+                ...partialUpdateData,
+            };
+
+            // Save back to Firestore
+            await updateDoc(userDocRef, {
+                "user.location": updatedLocation,
+            });
+
+            // console.log("Updated Location:", updatedLocation);
+            // toast.success("Location updated successfully!");
+        } catch (error) {
+            // console.error("Error updating location:", error);
+            toast.error(`Failed to update location: ${error}`);
+        }
+    }
+
 }
 
 export const authService = new AuthService()
