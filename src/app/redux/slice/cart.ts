@@ -56,14 +56,14 @@ export const cartSlice = createSlice({
       },
     },
 
-    removeFromCart(state: CartState, action: PayloadAction<number>) {
+    removeFromCart(state, action: PayloadAction<number>) {
       state.items = state.items.filter(
         (item) => item.product.id !== action.payload
       );
     },
 
     updateQuantity(
-      state: CartState,
+      state,
       action: PayloadAction<{ id: number; quantity: number }>
     ) {
       const item = state.items.find(
@@ -75,12 +75,24 @@ export const cartSlice = createSlice({
       }
     },
 
-    clearCart(state: CartState) {
+    clearCart(state) {
       state.items = [];
     },
 
-    toggleCart(state: CartState) {
+    toggleCart(state) {
       state.isOpen = !state.isOpen;
+    },
+
+    // ✅ NEW: replace cart with backend data
+    updateCartSlice(state, action: PayloadAction<CartItem[]>) {
+      state.items = action.payload.map((item) => ({
+        ...item,
+        product: {
+          ...item.product,
+          // recalc total just in case backend didn't
+          total: item.product.price * item.quantity,
+        },
+      }));
     },
   },
 });
@@ -91,5 +103,7 @@ export const {
   updateQuantity,
   clearCart,
   toggleCart,
+  updateCartSlice,
 } = cartSlice.actions;
+
 export default cartSlice.reducer;
