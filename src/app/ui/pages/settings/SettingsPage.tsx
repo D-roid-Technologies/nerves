@@ -1,5 +1,5 @@
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import {
   User,
@@ -526,12 +526,22 @@ const SettingsPage = () => {
   const handleSubmitPaymentMethod = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Log card info to console
+    console.log("Card Information:", {
+      cardNumber: newPaymentMethod.cardNumber,
+      expiryDate: newPaymentMethod.expiryDate,
+      cardholderName: newPaymentMethod.cardholderName,
+      isDefault: newPaymentMethod.isDefault,
+    });
+
     // Basic validation
     if (
       !newPaymentMethod.cardNumber ||
       newPaymentMethod.cardNumber.replace(/\s/g, "").length !== 16
     ) {
-      toast.error("Please enter a valid 16-digit card number");
+      toast.error("Please enter a valid 16-digit card number", {
+        style: { background: "#ff4d4f", color: "#fff" },
+      });
       return;
     }
 
@@ -539,17 +549,23 @@ const SettingsPage = () => {
       !newPaymentMethod.expiryDate ||
       !/^\d{2}\/\d{2}$/.test(newPaymentMethod.expiryDate)
     ) {
-      toast.error("Please enter a valid expiry date (MM/YY)");
+      toast.error("Please enter a valid expiry date (MM/YY)", {
+        style: { background: "#ff4d4f", color: "#fff" },
+      });
       return;
     }
 
     if (!newPaymentMethod.cvv || newPaymentMethod.cvv.length < 3) {
-      toast.error("Please enter a valid CVV");
+      toast.error("Please enter a valid CVV", {
+        style: { background: "#ff4d4f", color: "#fff" },
+      });
       return;
     }
 
     if (!newPaymentMethod.cardholderName) {
-      toast.error("Please enter cardholder name");
+      toast.error("Please enter cardholder name", {
+        style: { background: "#ff4d4f", color: "#fff" },
+      });
       return;
     }
 
@@ -581,10 +597,14 @@ const SettingsPage = () => {
       }
 
       setPaymentMethods((prev) => [...prev, newMethod]);
-      toast.success("Payment method added successfully");
+      toast.success("Payment method added successfully", {
+        style: { background: "#4BB543", color: "#fff" },
+      });
       handleClosePaymentModal();
     } catch (error) {
-      toast.error("Failed to add payment method");
+      toast.error("Failed to add payment method", {
+        style: { background: "#ff4d4f", color: "#fff" },
+      });
     } finally {
       setIsLoading(false);
     }
@@ -595,7 +615,9 @@ const SettingsPage = () => {
       window.confirm("Are you sure you want to remove this payment method?")
     ) {
       setPaymentMethods((prev) => prev.filter((pm) => pm.id !== id));
-      toast.success("Payment method removed");
+      toast.success("Payment method removed", {
+        style: { background: "#4BB543", color: "#fff" },
+      });
     }
   };
 
@@ -606,9 +628,146 @@ const SettingsPage = () => {
         isDefault: pm.id === id,
       }))
     );
-    toast.success("Default payment method updated");
+    toast.success("Default payment method updated", {
+      style: { background: "#4BB543", color: "#fff" },
+    });
+  };
+  const [locationPermission, setLocationPermission] = useState<
+    "granted" | "denied" | "prompt"
+  >("prompt");
+  const [userCountry, setUserCountry] = useState<string>("");
+
+ useEffect(() => {
+   // Check if geolocation is available
+   if ("geolocation" in navigator) {
+     navigator.permissions.query({ name: "geolocation" }).then((result) => {
+       setLocationPermission(result.state);
+
+       // Listen for permission changes
+       result.onchange = () => {
+         setLocationPermission(result.state);
+         if (result.state === "granted") {
+           getUserCountry();
+         }
+       };
+
+       if (result.state === "granted") {
+         getUserCountry();
+       }
+     });
+   }
+ }, []);
+
+ const getUserCountry = () => {
+  if ("geolocation" in navigator) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+
+        // Use a geocoding service to get country from coordinates
+        fetch(
+          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.countryName) {
+              setUserCountry(data.countryName);
+              handleAddressUpdate("country", data.countryName);
+            }
+          })
+          .catch((error) => {
+            console.error("Error getting location:", error);
+            // Don't set to denied if the geocoding fails, just keep as granted
+          });
+      },
+      (error) => {
+        console.error("Error getting location:", error);
+        if (error.code === error.PERMISSION_DENIED) {
+          setLocationPermission("denied");
+        }
+      },
+      { timeout: 10000 }
+    );
+  }
+};
+const requestLocationPermission = () => {
+  if ("geolocation" in navigator) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocationPermission("granted");
+        getUserCountry();
+      },
+      (error) => {
+        // Handle different error types
+        if (error.code === error.PERMISSION_DENIED) {
+          setLocationPermission("denied");
+        } else {
+          // For other errors (timeout, position unavailable), keep as prompt
+          setLocationPermission("prompt");
+          toast.error("Could not get your location. Please try again.", {
+            style: { background: "#ff4d4f", color: "#fff" },
+          });
+        }
+      },
+      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+    );
+  }
+};
+  // List of countries by region (grouped by continent)
+  const countriesByRegion = {
+    Africa: [
+      "Nigeria",
+      "South Africa",
+      "Egypt",
+      "Kenya",
+      "Ghana",
+      "Morocco",
+      "Ethiopia",
+    ],
+    Asia: [
+      "China",
+      "India",
+      "Japan",
+      "South Korea",
+      "Indonesia",
+      "Thailand",
+      "Vietnam",
+    ],
+    Europe: [
+      "United Kingdom",
+      "Germany",
+      "France",
+      "Italy",
+      "Spain",
+      "Netherlands",
+      "Switzerland",
+    ],
+    "North America": [
+      "United States",
+      "Canada",
+      "Mexico",
+      "Costa Rica",
+      "Panama",
+    ],
+    "South America": ["Brazil", "Argentina", "Colombia", "Chile", "Peru"],
+    Oceania: ["Australia", "New Zealand", "Fiji", "Papua New Guinea"],
   };
 
+  // Get countries that are likely close to the user's detected country
+  const getNearbyCountries = () => {
+    if (!userCountry) return Object.values(countriesByRegion).flat();
+
+    // Find which region the user's country belongs to
+    for (const [region, countries] of Object.entries(countriesByRegion)) {
+      if (countries.includes(userCountry)) {
+        return countries;
+      }
+    }
+
+    return Object.values(countriesByRegion).flat();
+  };
+
+  const nearbyCountries = getNearbyCountries();
   const renderTabContent = () => {
     switch (activeTab) {
       case "profile":
@@ -1153,6 +1312,45 @@ const SettingsPage = () => {
               <div>
                 <h2>Address Management</h2>
                 <p>Manage your billing and shipping addresses</p>
+                {locationPermission === "prompt" && (
+                  <div className="location-permission-prompt">
+                    <p>
+                      Allow location access to automatically detect your country
+                      for faster address setup.
+                    </p>
+                    <button
+                      type="button"
+                      className="location-permission-btn"
+                      onClick={requestLocationPermission}
+                    >
+                      Allow Location Access
+                    </button>
+                  </div>
+                )}
+                {locationPermission === "denied" && (
+                  <div className="location-permission-denied">
+                    <p>
+                      Location access denied. Please enable location permissions
+                      in your browser settings to auto-detect your country.
+                    </p>
+                    <button
+                      type="button"
+                      className="location-permission-btn"
+                      onClick={() => {
+                        // Guide user to browser settings
+                        toast(
+                          "Please enable location permissions in your browser settings",
+                          {
+                            icon: "ℹ️",
+                            style: { background: "#3B82F6", color: "#fff" },
+                          }
+                        );
+                      }}
+                    >
+                      How to Enable Location
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1232,12 +1430,26 @@ const SettingsPage = () => {
                         handleAddressUpdate("country", e.target.value)
                       }
                     >
-                      <option value="United States">United States</option>
-                      <option value="Canada">Canada</option>
-                      <option value="United Kingdom">United Kingdom</option>
-                      <option value="Australia">Australia</option>
-                      <option value="Germany">Germany</option>
-                      <option value="France">France</option>
+                      <option value="">Select Country</option>
+                      {userCountry && (
+                        <option value={userCountry}>
+                          {userCountry} (Detected)
+                        </option>
+                      )}
+                      {nearbyCountries.map((country) => (
+                        <option key={country} value={country}>
+                          {country}
+                        </option>
+                      ))}
+                      <option disabled>--- Other Countries ---</option>
+                      {Object.values(countriesByRegion)
+                        .flat()
+                        .filter((country) => !nearbyCountries.includes(country))
+                        .map((country) => (
+                          <option key={country} value={country}>
+                            {country}
+                          </option>
+                        ))}
                     </select>
                   </div>
                 </div>
@@ -1325,12 +1537,26 @@ const SettingsPage = () => {
                         handleAddressUpdate("country", e.target.value)
                       }
                     >
-                      <option value="United States">United States</option>
-                      <option value="Canada">Canada</option>
-                      <option value="United Kingdom">United Kingdom</option>
-                      <option value="Australia">Australia</option>
-                      <option value="Germany">Germany</option>
-                      <option value="France">France</option>
+                      <option value="">Select Country</option>
+                      {userCountry && (
+                        <option value={userCountry}>
+                          {userCountry} (Detected)
+                        </option>
+                      )}
+                      {nearbyCountries.map((country) => (
+                        <option key={country} value={country}>
+                          {country}
+                        </option>
+                      ))}
+                      <option disabled>--- Other Countries ---</option>
+                      {Object.values(countriesByRegion)
+                        .flat()
+                        .filter((country) => !nearbyCountries.includes(country))
+                        .map((country) => (
+                          <option key={country} value={country}>
+                            {country}
+                          </option>
+                        ))}
                     </select>
                   </div>
                 </div>
@@ -1343,6 +1569,8 @@ const SettingsPage = () => {
                 className="save-btn"
                 onClick={() => handleSaveSettings("addresses")}
                 disabled={isLoading}
+                // Remove the location permission check from disabled state
+                // Users should be able to save addresses even without location access
               >
                 <Save className="btn-icon" />
                 {isLoading ? "Saving..." : "Save Addresses"}
