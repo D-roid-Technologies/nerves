@@ -25,6 +25,8 @@ import ReturnedOrders from "../ui/pages/orderPages/ReturnedOrders";
 import ReviewedOrders from "../ui/pages/orderPages/ReviewedOrders";
 import ViewAllOrders from "../ui/pages/orderPages/ViewAllOrders";
 import NotificationsPage from "../ui/pages/notification/NotificationsPage";
+import AllReviewsPage from "../ui/pages/allReviews/AllReviewsPage";
+import AllSalesPage from "../ui/pages/allSales/AllSalesPage";
 // import CheckoutPage from "../ui/components/checkout/Checkoutpage";
 
 const Index: React.FunctionComponent = () => {
@@ -58,7 +60,10 @@ const Index: React.FunctionComponent = () => {
         <Route path="/orders/returned" element={<ReturnedOrders />} />
         <Route path="/orders/reviewed" element={<ReviewedOrders />} />
         <Route path="/orders/all" element={<ViewAllOrders />} />
-
+        {/* review page */}
+        <Route path="/reviews/all" element={<AllReviewsPage />} />
+        {/* sales page */}
+        <Route path="/sales/all" element={<AllSalesPage />} />
         {/* <Route
         path="/products/:category/:productTitle"
         element={<ProductDetailsPage />}

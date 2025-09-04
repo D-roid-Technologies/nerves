@@ -96,6 +96,8 @@ export default function MyAccountPage() {
   const navigateToReturnedOrders = () => navigate("/orders/returned");
   const navigateToReviewedOrders = () => navigate("/orders/reviewed");
   const navigateToAllOrders = () => navigate("/orders/all");
+  const navigateToAllReviews = () => navigate("/reviews/all");
+  const navigateToAllSales = () => navigate("/sales/all");
   const earlyBirdReg = () => {
     navigate("/early-bird-registration");
   };
@@ -229,10 +231,18 @@ export default function MyAccountPage() {
       </div>
 
       <div className={styles["account-section"]}>
-        <h2 className={styles["account-h2"]}>My Reviews</h2>
+        <div className={styles["account-profile-header"]}>
+          <h2 className={styles["account-h2"]}>My Reviews</h2>
+          <button
+            className={styles["account-edit-btn"]}
+            onClick={navigateToAllReviews}
+          >
+            View All Reviews (6)
+          </button>
+        </div>
         {mockUser.reviews.length > 0 ? (
           <div className={styles["account-list"]}>
-            {mockUser.reviews.map((review) => (
+            {mockUser.reviews.slice(0, 3).map((review) => (
               <div
                 key={review.id}
                 className={`${styles["account-list-item"]} ${styles["account-review-item"]}`}
@@ -269,10 +279,18 @@ export default function MyAccountPage() {
       </div>
 
       <div className={styles["account-section"]}>
-        <h2 className={styles["account-h2"]}>My Sales</h2>
+        <div className={styles["account-profile-header"]}>
+          <h2 className={styles["account-h2"]}>My Sales</h2>
+          <button
+            className={styles["account-edit-btn"]}
+            onClick={navigateToAllSales}
+          >
+            View All Sales (6)
+          </button>
+        </div>
         {mockUser.sales.length > 0 ? (
           <div className={styles["account-list"]}>
-            {mockUser.sales.map((sale) => (
+            {mockUser.sales.slice(0, 3).map((sale) => (
               <div
                 key={sale.id}
                 className={`${styles["account-list-item"]} ${styles["account-sale-item"]}`}
@@ -301,9 +319,9 @@ export default function MyAccountPage() {
           </div>
         )}
       </div>
+
       <div className={styles["account-section"]}>
         <h2 className={styles["account-h2"]}>Create Items</h2>
-
         <div className={styles["account-empty-state"]}>
           <Package className={styles["account-empty-icon"]} />
           <p>You haven't created any items yet</p>
