@@ -204,8 +204,6 @@ const CreateItemPage = () => {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      // Log form data to console
-      console.log("=== ITEM CREATION DATA ===");
       console.log("Basic Info:", {
         name: formData.name,
         description: formData.description,
@@ -216,21 +214,14 @@ const CreateItemPage = () => {
         stock: Number.parseInt(formData.stock),
         isActive: formData.isActive,
         isFeatured: formData.isFeatured,
-      });
-      console.log("Tags:", formData.tags);
-      console.log(
-        "Specifications:",
-        formData.specifications.filter((spec) => spec.key && spec.value)
-      );
-      console.log(
-        "Images:",
-        formData.images.map((img) => ({
+        tags: formData.tags,
+        specification: formData.specifications.filter((spec) => spec.key && spec.value),
+        images: formData.images.map((img) => ({
           name: img.name,
           size: img.size,
           type: img.type,
         }))
-      );
-      console.log("========================");
+      });
 
       toast.success("Item created successfully! Check console for details.");
 
@@ -603,7 +594,7 @@ const CreateItemPage = () => {
       </div>
     </div>
   );
-  
+
 };
 
 export default CreateItemPage;
