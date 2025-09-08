@@ -187,6 +187,46 @@
   min-width: 0;
 }
 
+
+.notificationItem.success {
+  border-left: 4px solid #10b981;
+  background-color: #f0fdf4;
+}
+
+.notificationItem.success .notificationTitle {
+  color: #065f46;
+}
+
+.notificationItem.warning {
+  border-left: 4px solid #f59e0b;
+  background-color: #fffbeb;
+}
+
+.notificationItem.warning .notificationTitle {
+  color: #92400e;
+}
+
+.notificationItem.error {
+  border-left: 4px solid #ef4444;
+  background-color: #fef2f2;
+}
+
+.notificationItem.error .notificationTitle {
+  color: #991b1b;
+}
+
+.notificationItem.info {
+  border-left: 4px solid #3b82f6;
+  background-color: #eff6ff;
+}
+
+.notificationItem.info .notificationTitle {
+  color: #1e40af;
+}
+
+.notificationItem.onboarding .notificationTitle {
+  color: #5b21b6;
+} 
 .notificationTitle {
   font-weight: 600;
   color: #111827;

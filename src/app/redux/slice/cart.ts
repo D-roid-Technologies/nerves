@@ -1,4 +1,3 @@
-// redux/slice/cart.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Product } from "../../types/product";
 
@@ -30,7 +29,10 @@ export const cartSlice = createSlice({
     addToCart: {
       reducer(
         state,
-        action: PayloadAction<{ product: Product & { sellerId: string }; quantity: number }>
+        action: PayloadAction<{
+          product: Product & { sellerId: string };
+          quantity: number;
+        }>
       ) {
         const { product, quantity } = action.payload;
         const existingItem = state.items.find(
@@ -39,7 +41,8 @@ export const cartSlice = createSlice({
 
         if (existingItem) {
           existingItem.quantity += quantity;
-          existingItem.product.total = existingItem.quantity * existingItem.product.price;
+          existingItem.product.total =
+            existingItem.quantity * existingItem.product.price;
         } else {
           state.items.push({
             product: {

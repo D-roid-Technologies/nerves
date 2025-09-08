@@ -39,7 +39,7 @@ export const notificationSlice = createSlice({
             (item) => item.type === "onboarding"
           );
           if (existingOnboarding) {
-            return; // Don't add duplicate onboarding notification
+            return; 
           }
         }
 
@@ -104,7 +104,6 @@ export const notificationSlice = createSlice({
       }
     },
 
-    // In your notificationSlice.ts
     removeNotification(state, action: PayloadAction<string>) {
       const index = state.items.findIndex((item) => item.id === action.payload);
       if (index !== -1) {
@@ -119,7 +118,7 @@ export const notificationSlice = createSlice({
 
     clearAllNotifications(state) {
       state.items = [];
-      state.unreadCount = 0; // This should already be correct
+      state.unreadCount = 0;
     },
 
     clearReadNotifications(state) {
