@@ -33,6 +33,8 @@ import {
   LogOut,
   Key,
   X,
+  Copy,
+  Tag,
 } from "lucide-react";
 import "./settings.css";
 import { useSelector } from "react-redux";
@@ -767,6 +769,85 @@ const requestLocationPermission = () => {
     return Object.values(countriesByRegion).flat();
   };
 
+  // referral name genertor
+
+interface GenerateReferralNameParams {
+  firstName: string;
+  uniqueIdentifier: string;
+}
+
+const generateReferralName = (
+  firstName: GenerateReferralNameParams["firstName"],
+  uniqueIdentifier: GenerateReferralNameParams["uniqueIdentifier"]
+): string => {
+  if (!firstName || !uniqueIdentifier) return "";
+
+  // Clean and normalize the inputs
+  const cleanFirstName: string = firstName.trim().toLowerCase().replace(/[^a-z]/g, '');
+  const cleanUniqueId: string = uniqueIdentifier.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+
+  let namepart: string = cleanFirstName.substring(0, 4).padEnd(4, 'x');
+
+  let idPart: string = cleanUniqueId.length >= 6
+    ? cleanUniqueId.slice(-6)
+    : cleanUniqueId.padEnd(6, Math.random().toString(36).substring(2, 8));
+
+  const referralName: string = (namepart + idPart).substring(0, 10);
+
+  return referralName.toUpperCase();
+};
+// Add this useEffect to automatically generate and set referral name
+useEffect(() => {
+  const firstName = profile.primaryInformation?.firstName;
+  const uniqueIdentifier = profile.primaryInformation?.uniqueIdentifier;
+  
+  if (firstName && uniqueIdentifier && !profile.primaryInformation?.referralName) {
+    const generatedReferralName = generateReferralName(firstName, uniqueIdentifier);
+    handleProfileUpdate("referralName", generatedReferralName, "primaryInformation");
+  }
+}, [profile.primaryInformation?.firstName, profile.primaryInformation?.uniqueIdentifier]);
+
+// Add this function for copying to clipboard
+const copyReferralName = async () => {
+  const referralName = profile.primaryInformation?.referralName;
+  if (!referralName) {
+    toast.error("No referral name to copy", {
+      style: { background: "#ff4d4f", color: "#fff" },
+    });
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(referralName);
+    toast.success("Referral name copied to clipboard!", {
+      style: { background: "#4BB543", color: "#fff" },
+    });
+  } catch (err) {
+    // Fallback for browsers that don't support clipboard API
+    const textArea = document.createElement("textarea");
+    textArea.value = referralName;
+    textArea.style.position = "fixed";
+    textArea.style.left = "-999999px";
+    textArea.style.top = "-999999px";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+      document.execCommand('copy');
+      toast.success("Referral name copied to clipboard!", {
+        style: { background: "#4BB543", color: "#fff" },
+      });
+    } catch (err) {
+      toast.error("Failed to copy referral name", {
+        style: { background: "#ff4d4f", color: "#fff" },
+      });
+    }
+    
+    document.body.removeChild(textArea);
+  }
+};
+
   const nearbyCountries = getNearbyCountries();
   const renderTabContent = () => {
     switch (activeTab) {
@@ -1021,18 +1102,30 @@ const requestLocationPermission = () => {
 
               <div className="form-group">
                 <label>Referral Name</label>
-                <input
-                  type="text"
-                  value={profile.primaryInformation?.referralName || ""}
-                  onChange={(e) =>
-                    handleProfileUpdate(
-                      "referralName",
-                      e.target.value,
-                      "primaryInformation"
-                    )
-                  }
-                  placeholder="Enter referral name"
-                />
+                <div className="input-wrapper">
+                  <Tag className="input-icon"/>
+                  <input
+                    type="text"
+                    value={
+                      profile.primaryInformation?.referralName ||
+                      generateReferralName(
+                        profile.primaryInformation?.firstName ?? "",
+                        profile.primaryInformation?.uniqueIdentifier ?? ""
+                      )
+                    }
+                    readOnly
+                    placeholder="Auto-generated referral name"
+                    className="read-only-input"
+                  />
+                  <button
+                    type="button"
+                    className="copy-btn-input"
+                    onClick={copyReferralName}
+                    title="Copy referral name"
+                  >
+                    <Copy className="copy-icon" size={16} />
+                  </button>
+                </div>
               </div>
 
               <div className="form-group">

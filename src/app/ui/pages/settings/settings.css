@@ -279,7 +279,10 @@
 
 .input-wrapper {
   position: relative;
+  display: flex;
+  align-items: center;
 }
+
 
 .input-icon {
   position: absolute;
@@ -300,7 +303,47 @@
 .input-wrapper input:focus + .input-icon {
   color: #000;
 }
+.copy-btn-input {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
 
+.copy-btn-input:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.copy-btn-input:active {
+  background-color: #e0e0e0;
+  transform: scale(0.95);
+}
+
+.copy-icon {
+  pointer-events: none;
+}
+
+/* Adjust input padding to make room for the copy button */
+.input-wrapper input {
+  padding-right: 35px;
+}
+
+.form-help-text {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: #666;
+  font-style: italic;
+}
 .password-toggle {
   position: absolute;
   right: 16px;
