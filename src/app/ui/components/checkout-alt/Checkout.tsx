@@ -1,3 +1,4 @@
+// components/Checkout.tsx
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "../../../redux/store";
@@ -6,6 +7,7 @@ import {
   updateQuantity,
   clearCart,
 } from "../../../redux/slice/cart";
+import { addNotification } from "../../../redux/slice/notification";
 import { useNavigate } from "react-router-dom";
 import {
   CreditCard,
@@ -238,27 +240,105 @@ const Checkout = () => {
     }
     return true;
   };
-
   const handlePlaceOrder = async (e: any) => {
     e.preventDefault();
+    setIsProcessing(true);
+
     const payStack = new PayStackPop();
     payStack.newTransaction({
       key: "pk_test_db0145199289f83c428d57cf70755142bb0b8b28",
       email: paymentDetails.email,
       amount: Number(paymentDetails.amount) * 100,
       onSuccess: (res) => {
-        toast.success(`Payment success: ${res.message}`, {
-          style: { background: "#4BB543", color: "#fff" },
-          duration: 3000, // Show for 3 seconds
+        setIsProcessing(false);
+
+        // Create success notification for each item in cart
+        items.forEach((item) => {
+          dispatch(
+            addNotification(
+              "success",
+              "Order Successful!",
+              `${item.product.name} (Quantity: ${
+                item.quantity
+              }) purchased successfully for ${formatPrice(item.product.total)}`,
+              {
+                isPersistent: true,
+                expiresIn: 10000, // 10 seconds
+              }
+            )
+          );
         });
 
+        toast.success(`Payment success: ${res.message}`, {
+          style: {
+            background: "#10b981",  
+            color: "#fff",
+            border: "1px solid #059669",
+          },
+          icon: "✅",
+          duration: 3000,
+        });
+
+        // Clear cart after successful payment
+        dispatch(clearCart());
+
         setTimeout(() => {
-          dispatch(clearCart());
           navigate("/");
-        }, 3000); // Match the toast duration
+        }, 3000);
       },
       onCancel: () => {
+        setIsProcessing(false);
         console.log(`Payment cancelled`);
+
+        // Create cancellation notification
+        dispatch(
+          addNotification(
+            "warning",
+            "Payment Cancelled",
+            "Your payment was cancelled. Your cart items have been preserved.",
+            {
+              isPersistent: false,
+              expiresIn: 8000, // 8 seconds
+            }
+          )
+        );
+
+        toast("Payment was cancelled", {
+          style: {
+            background: "#f59e0b",
+            color: "#fff",
+            border: "1px solid #d97706",
+          },
+          icon: "⚠️",
+          duration: 3000,
+        });
+      },
+      onError: (error) => {
+        setIsProcessing(false);
+        console.log(`Payment error: ${error.message}`);
+
+        // Create error notification
+        dispatch(
+          addNotification(
+            "error",
+            "Payment Failed",
+            "There was an error processing your payment. Please try again.",
+            {
+              isPersistent: true,
+              expiresIn: 10000, // 10 seconds
+            }
+          )
+        );
+
+        toast.error(`Payment failed: ${error.message}`, {
+          style: {
+            background: "#ef4444",
+            color: "#fff",
+            border: "1px solid #dc2626",
+          },
+          icon: "❌",
+          duration: 3000,
+        });
       },
     });
   };
@@ -336,9 +416,6 @@ const Checkout = () => {
                     <h2>Review Your Order</h2>
                   </div>
 
-                  {/* Show login prompt if not logged in */}
-                  {/* {!user.isLoggedIn && renderLoginPrompt()} */}
-
                   <div className="cart-items-list">
                     {items.map((item) => (
                       <div key={item.product.id} className="cart-item">
@@ -400,11 +477,6 @@ const Checkout = () => {
                   <div className="section-header">
                     <Truck className="section-icon" />
                     <h2>Shipping Information</h2>
-                    {/* {user.isLoggedIn && (
-                      <span className="auto-filled-notice">
-                        ✓ Information auto-filled from your profile
-                      </span>
-                    )} */}
                   </div>
                   {/* Show profile completion warning for logged in users with incomplete profiles */}
                   {user.isLoggedIn && !profileCompletion.isComplete && (
@@ -644,11 +716,6 @@ const Checkout = () => {
                   <div className="section-header">
                     <CreditCard className="section-icon" />
                     <h2>Payment Information</h2>
-                    {/* {user.isLoggedIn && (
-                      <span className="auto-filled-notice">
-                        ✓ Information auto-filled from your profile
-                      </span>
-                    )} */}
                   </div>
 
                   <form className="payment-form">
