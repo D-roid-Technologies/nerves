@@ -350,7 +350,7 @@ export class AuthService {
                 },
             }));
 
-            store.dispatch(updateCartSlice(cart));
+            // store.dispatch(updateCartSlice(cart));
 
             toast.success(`Welcome back, ${primaryInformation.firstName}!`, {
                 style: { background: "#4BB543", color: "#fff" },
