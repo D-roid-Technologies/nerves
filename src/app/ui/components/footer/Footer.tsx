@@ -10,6 +10,7 @@ import {
   FaLinkedin,
 } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
+import { con_stants } from "../../../utils/constants";
 
 // Define the type for a single link in a footer group
 interface FooterLink {
@@ -132,8 +133,7 @@ const Footer: React.FC = () => {
 
       <div className="footer-bottom">
         <p className="copyright">
-          &copy; {new Date().getFullYear()} Nerve Systems Network Ltd. All rights
-          reserved.
+          &copy; {new Date().getFullYear()} Nerve Systems Network Ltd. All rights reserved. Version {con_stants.app_version}
         </p>
       </div>
     </footer>

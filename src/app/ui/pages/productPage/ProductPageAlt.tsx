@@ -52,7 +52,7 @@ const ProductPageAlt = () => {
 
   useEffect(() => {
     // authService.fetchAllListedItems()
-    console.log("fetch and store in slice", listedItems);
+    // console.log("fetch and store in slice", listedItems);
   }, []);
 
   useEffect(() => {
@@ -305,9 +305,8 @@ const ProductPageAlt = () => {
             <div className="filter-nav-inner">
               <div className="filter-dropdown">
                 <button
-                  className={`filter-dropdown-toggle ${
-                    activeDropdown === "categories" ? "active" : ""
-                  }`}
+                  className={`filter-dropdown-toggle ${activeDropdown === "categories" ? "active" : ""
+                    }`}
                   onClick={() => toggleDropdown("categories")}
                 >
                   Categories
@@ -359,9 +358,8 @@ const ProductPageAlt = () => {
 
               <div className="filter-dropdown">
                 <button
-                  className={`filter-dropdown-toggle ${
-                    activeDropdown === "price" ? "active" : ""
-                  }`}
+                  className={`filter-dropdown-toggle ${activeDropdown === "price" ? "active" : ""
+                    }`}
                   onClick={() => toggleDropdown("price")}
                 >
                   Price
@@ -399,9 +397,8 @@ const ProductPageAlt = () => {
 
               <div className="filter-dropdown">
                 <button
-                  className={`filter-dropdown-toggle ${
-                    activeDropdown === "rating" ? "active" : ""
-                  }`}
+                  className={`filter-dropdown-toggle ${activeDropdown === "rating" ? "active" : ""
+                    }`}
                   onClick={() => toggleDropdown("rating")}
                 >
                   Rating
@@ -446,9 +443,8 @@ const ProductPageAlt = () => {
 
               <div className="filter-dropdown">
                 <button
-                  className={`filter-dropdown-toggle ${
-                    activeDropdown === "sort" ? "active" : ""
-                  }`}
+                  className={`filter-dropdown-toggle ${activeDropdown === "sort" ? "active" : ""
+                    }`}
                   onClick={() => toggleDropdown("sort")}
                 >
                   Sort By
