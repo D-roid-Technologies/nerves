@@ -263,7 +263,7 @@ const Checkout = () => {
               }) purchased successfully for ${formatPrice(item.product.total)}`,
               {
                 isPersistent: true,
-                expiresIn: 10000, // 10 seconds
+                // expiresIn: 10000,
               }
             )
           );
@@ -298,7 +298,7 @@ const Checkout = () => {
             "Your payment was cancelled. Your cart items have been preserved.",
             {
               isPersistent: false,
-              expiresIn: 8000, // 8 seconds
+              // expiresIn: 8000,
             }
           )
         );
@@ -325,7 +325,7 @@ const Checkout = () => {
             "There was an error processing your payment. Please try again.",
             {
               isPersistent: true,
-              expiresIn: 10000, // 10 seconds
+              // expiresIn: 10000, 
             }
           )
         );
