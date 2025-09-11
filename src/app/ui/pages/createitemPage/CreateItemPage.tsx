@@ -134,8 +134,8 @@ const CreateItemPage = () => {
 
     const file = files[0];
 
-    if (file.size > 5 * 1024 * 1024) {
-      showErrorToast("Image is too large. Maximum 5MB allowed.");
+    if (file.size > 2 * 1024 * 1024) {
+      showErrorToast("Image is too large. Maximum 2MB allowed.");
       return;
     }
 
@@ -274,25 +274,24 @@ const CreateItemPage = () => {
       };
 
       // Log the data that would be sent to the API
-      console.log("=== ITEM CREATION DATA FOR DUMMYJSON API ===");
+      console.log("ITEM CREATION DATA");
       console.log("API Payload:", apiData);
-      console.log("========================");
 
       // Simulate API call to DummyJSON with a delay
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      const response = await fetch("https://dummyjson.com/products/add", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(apiData),
-      });
+      // const response = await fetch("https://dummyjson.com/products/add", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify(apiData),
+      // });
 
-      if (!response.ok) {
-        throw new Error("Failed to create product");
-      }
+      // if (!response.ok) {
+      //   throw new Error("Failed to create product");
+      // }
 
-      const result = await response.json();
-      console.log("API Response:", result);
+      // const result = await response.json();
+      // console.log("API Response:", result);
 
       showSuccessToast(
         "Product created successfully! Check console for details."
