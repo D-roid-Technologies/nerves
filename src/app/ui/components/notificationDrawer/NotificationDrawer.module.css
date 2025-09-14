@@ -1,4 +1,3 @@
-/* NotificationDrawer.module.css */
 .notificationDrawer {
   position: fixed;
   top: 0;
@@ -144,14 +143,14 @@
   background: #f9fafb;
 }
 
-.notificationItem.unread {
+/* .notificationItem.unread {
   background: #fef3f2;
   border-left: 4px solid #ef4444;
 }
 
 .notificationItem.unread:hover {
   background: #fef2f2;
-}
+} */
 
 .notificationItem.onboarding {
   background: linear-gradient(90deg, #fef7ff 0%, #f0f9ff 100%);
@@ -189,21 +188,21 @@
 
 
 .notificationItem.success {
-  border-left: 4px solid #10b981;
-  background-color: #f0fdf4;
+  border-left: 4px solid #10b981 !important;
+  background-color: #f0fdf4 !important;
 }
 
 .notificationItem.success .notificationTitle {
-  color: #065f46;
+  color: #065f46 !important;
 }
 
 .notificationItem.warning {
-  border-left: 4px solid #f59e0b;
-  background-color: #fffbeb;
+  border-left: 4px solid #f59e0b !important;
+  background-color: #fffbeb !important;
 }
 
 .notificationItem.warning .notificationTitle {
-  color: #92400e;
+  color: #92400e !important;
 }
 
 .notificationItem.error {

@@ -1,10 +1,8 @@
 import type React from "react";
-
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { toast } from "react-hot-toast";
 import {
   Package,
-  DollarSign,
   FileText,
   ImageIcon,
   Tag,
@@ -14,61 +12,114 @@ import {
   Upload,
   Eye,
   EyeOff,
+  Percent,
+  Box,
+  Star,
+  Link,
+  Loader,
 } from "lucide-react";
-import "./create-item.css";
+import styles from "./CreateItemPage.module.css"; 
 
 interface ItemFormData {
-  name: string;
+  title: string;
   description: string;
-  price: string;
-  category: string;
+  price: number;
+  discountPercentage: number;
+  rating: number;
+  stock: number;
   brand: string;
-  sku: string;
-  stock: string;
-  images: File[];
-  tags: string[];
-  specifications: { key: string; value: string }[];
-  isActive: boolean;
-  isFeatured: boolean;
+  category: string;
+  thumbnail: string;
+  images: string[];
 }
 
 const CreateItemPage = () => {
   const [formData, setFormData] = useState<ItemFormData>({
-    name: "",
+    title: "",
     description: "",
-    price: "",
-    category: "",
+    price: 0,
+    discountPercentage: 0,
+    rating: 0,
+    stock: 0,
     brand: "",
-    sku: "",
-    stock: "",
+    category: "",
+    thumbnail: "",
     images: [],
-    tags: [],
-    specifications: [{ key: "", value: "" }],
-    isActive: true,
-    isFeatured: false,
   });
 
-  const [currentTag, setCurrentTag] = useState("");
-  const [imagePreview, setImagePreview] = useState<string[]>([]);
+  const [currentImageUrl, setCurrentImageUrl] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [uploadMethod, setUploadMethod] = useState<"url" | "file">("url");
+  const [showLoadingScreen, setShowLoadingScreen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const categories = [
-    "Electronics",
-    "Clothing",
-    "Home & Garden",
-    "Sports & Outdoors",
-    "Books",
-    "Toys & Games",
-    "Health & Beauty",
-    "Automotive",
-    "Food & Beverages",
-    "Other",
+    "smartphones",
+    "laptops",
+    "fragrances",
+    "skincare",
+    "groceries",
+    "home-decoration",
+    "furniture",
+    "tops",
+    "womens-dresses",
+    "womens-shoes",
+    "mens-shirts",
+    "mens-shoes",
+    "mens-watches",
+    "womens-watches",
+    "womens-bags",
+    "womens-jewellery",
+    "sunglasses",
+    "automotive",
+    "motorcycle",
+    "lighting",
   ];
+
+  // Custom toast functions with colors
+  const showSuccessToast = (message: string) => {
+    toast.success(message, {
+      style: {
+        background: "#10B981",
+        color: "#fff",
+        fontWeight: "bold",
+      },
+      iconTheme: {
+        primary: "#fff",
+        secondary: "#10B981",
+      },
+    });
+  };
+
+  const showErrorToast = (message: string) => {
+    toast.error(message, {
+      style: {
+        background: "#EF4444",
+        color: "#fff",
+        fontWeight: "bold",
+      },
+      iconTheme: {
+        primary: "#fff",
+        secondary: "#EF4444",
+      },
+    });
+  };
+
+  const showWarningToast = (message: string) => {
+    toast(message, {
+      icon: "⚠️",
+      style: {
+        background: "#F59E0B",
+        color: "#fff",
+        fontWeight: "bold",
+      },
+    });
+  };
 
   const handleInputChange = (
     field: keyof ItemFormData,
-    value: string | boolean
+    value: string | number
   ) => {
     setFormData((prev) => ({
       ...prev,
@@ -79,112 +130,118 @@ const CreateItemPage = () => {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
 
-    if (files.length + formData.images.length > 5) {
-      toast.error("Maximum 5 images allowed");
+    if (files.length === 0) return;
+
+    const file = files[0];
+
+    if (file.size > 2 * 1024 * 1024) {
+      showErrorToast("Image is too large. Maximum 2MB allowed.");
       return;
     }
 
-    const validFiles = files.filter((file) => {
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error(`${file.name} is too large. Maximum 5MB per image.`);
-        return false;
+    if (!file.type.startsWith("image/")) {
+      showErrorToast("Please select a valid image file.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string;
+
+      if (!formData.thumbnail) {
+        // Set as thumbnail if none is set
+        setFormData((prev) => ({
+          ...prev,
+          thumbnail: dataUrl,
+        }));
+        showSuccessToast("Image set as thumbnail");
+      } else {
+        // Add to images array
+        setFormData((prev) => ({
+          ...prev,
+          images: [...prev.images, dataUrl],
+        }));
+        showSuccessToast("Image added to gallery");
       }
-      if (!file.type.startsWith("image/")) {
-        toast.error(`${file.name} is not a valid image file.`);
-        return false;
-      }
-      return true;
-    });
+    };
+    reader.readAsDataURL(file);
 
-    setFormData((prev) => ({
-      ...prev,
-      images: [...prev.images, ...validFiles],
-    }));
-
-    // Create preview URLs
-    validFiles.forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview((prev) => [...prev, e.target?.result as string]);
-      };
-      reader.readAsDataURL(file);
-    });
-
-    toast.success(`${validFiles.length} image(s) uploaded successfully`);
-  };
-
-  const removeImage = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index),
-    }));
-    setImagePreview((prev) => prev.filter((_, i) => i !== index));
-    toast.success("Image removed");
-  };
-
-  const addTag = () => {
-    if (currentTag.trim() && !formData.tags.includes(currentTag.trim())) {
-      setFormData((prev) => ({
-        ...prev,
-        tags: [...prev.tags, currentTag.trim()],
-      }));
-      setCurrentTag("");
-      toast.success("Tag added");
-    } else if (formData.tags.includes(currentTag.trim())) {
-      toast.error("Tag already exists");
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
-  const removeTag = (tagToRemove: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      tags: prev.tags.filter((tag) => tag !== tagToRemove),
-    }));
-    toast.success("Tag removed");
+  const handleAddImageUrl = () => {
+    if (
+      currentImageUrl.trim() &&
+      !formData.images.includes(currentImageUrl.trim()) &&
+      currentImageUrl.trim() !== formData.thumbnail
+    ) {
+      if (!formData.thumbnail) {
+        // Set as thumbnail if none is set
+        setFormData((prev) => ({
+          ...prev,
+          thumbnail: currentImageUrl.trim(),
+        }));
+        showSuccessToast("Image URL set as thumbnail");
+      } else {
+        // Add to images array
+        setFormData((prev) => ({
+          ...prev,
+          images: [...prev.images, currentImageUrl.trim()],
+        }));
+        showSuccessToast("Image URL added to gallery");
+      }
+
+      setCurrentImageUrl("");
+    } else if (
+      formData.images.includes(currentImageUrl.trim()) ||
+      currentImageUrl.trim() === formData.thumbnail
+    ) {
+      showWarningToast("This image is already added");
+    }
   };
 
-  const addSpecification = () => {
-    setFormData((prev) => ({
-      ...prev,
-      specifications: [...prev.specifications, { key: "", value: "" }],
-    }));
-  };
-
-  const updateSpecification = (
-    index: number,
-    field: "key" | "value",
-    value: string
-  ) => {
-    setFormData((prev) => ({
-      ...prev,
-      specifications: prev.specifications.map((spec, i) =>
-        i === index ? { ...spec, [field]: value } : spec
-      ),
-    }));
-  };
-
-  const removeSpecification = (index: number) => {
-    if (formData.specifications.length > 1) {
+  const removeImage = (index: number, isThumbnail: boolean = false) => {
+    if (isThumbnail) {
       setFormData((prev) => ({
         ...prev,
-        specifications: prev.specifications.filter((_, i) => i !== index),
+        thumbnail: "",
       }));
-      toast.success("Specification removed");
+      showSuccessToast("Thumbnail removed");
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        images: prev.images.filter((_, i) => i !== index),
+      }));
+      showSuccessToast("Image removed from gallery");
     }
+  };
+
+  const setAsThumbnail = (url: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      thumbnail: url,
+      images: prev.images.filter((img) => img !== url), // Remove from images if it was there
+    }));
+    showSuccessToast("Set as main thumbnail");
   };
 
   const validateForm = () => {
     const errors = [];
 
-    if (!formData.name.trim()) errors.push("Product name is required");
+    if (!formData.title.trim()) errors.push("Product title is required");
     if (!formData.description.trim()) errors.push("Description is required");
-    if (!formData.price || Number.parseFloat(formData.price) <= 0)
-      errors.push("Valid price is required");
+    if (formData.price <= 0) errors.push("Valid price is required");
+    if (formData.discountPercentage < 0 || formData.discountPercentage > 100)
+      errors.push("Discount must be between 0 and 100");
+    if (formData.rating <= 0 || formData.rating > 5)
+      errors.push("Rating must be between 1 and 5");
+    if (formData.stock < 0) errors.push("Valid stock quantity is required");
+    if (!formData.brand.trim()) errors.push("Brand name is required");
     if (!formData.category) errors.push("Category is required");
-    if (!formData.stock || Number.parseInt(formData.stock) < 0)
-      errors.push("Valid stock quantity is required");
-    if (formData.images.length === 0)
-      errors.push("At least one image is required");
+    if (!formData.thumbnail) errors.push("Thumbnail image is required");
 
     return errors;
   };
@@ -194,75 +251,99 @@ const CreateItemPage = () => {
 
     const errors = validateForm();
     if (errors.length > 0) {
-      errors.forEach((error) => toast.error(error));
+      errors.forEach((error) => showErrorToast(error));
       return;
     }
 
     setIsSubmitting(true);
+    setShowLoadingScreen(true);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      console.log("Basic Info:", {
-        name: formData.name,
+      // Prepare data for DummyJSON API
+      const apiData = {
+        title: formData.title,
         description: formData.description,
-        price: Number.parseFloat(formData.price),
-        category: formData.category,
+        price: formData.price,
+        discountPercentage: formData.discountPercentage,
+        rating: formData.rating,
+        stock: formData.stock,
         brand: formData.brand,
-        sku: formData.sku,
-        stock: Number.parseInt(formData.stock),
-        isActive: formData.isActive,
-        isFeatured: formData.isFeatured,
-        tags: formData.tags,
-        specification: formData.specifications.filter((spec) => spec.key && spec.value),
-        images: formData.images.map((img) => ({
-          name: img.name,
-          size: img.size,
-          type: img.type,
-        }))
-      });
+        category: formData.category,
+        thumbnail: formData.thumbnail,
+        images: formData.images,
+      };
 
-      toast.success("Item created successfully! Check console for details.");
+      // Log the data that would be sent to the API
+      console.log("ITEM CREATION DATA");
+      console.log("API Payload:", apiData);
+
+      // Simulate API call to DummyJSON with a delay
+      // await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // const response = await fetch("https://dummyjson.com/products/add", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify(apiData),
+      // });
+
+      // if (!response.ok) {
+      //   throw new Error("Failed to create product");
+      // }
+
+      // const result = await response.json();
+      // console.log("API Response:", result);
+
+      showSuccessToast(
+        "Product created successfully! Check console for details."
+      );
 
       // Reset form
       setFormData({
-        name: "",
+        title: "",
         description: "",
-        price: "",
-        category: "",
+        price: 0,
+        discountPercentage: 0,
+        rating: 0,
+        stock: 0,
         brand: "",
-        sku: "",
-        stock: "",
+        category: "",
+        thumbnail: "",
         images: [],
-        tags: [],
-        specifications: [{ key: "", value: "" }],
-        isActive: true,
-        isFeatured: false,
       });
-      setImagePreview([]);
-      setCurrentTag("");
+      setCurrentImageUrl("");
     } catch (error) {
-      toast.error("Failed to create item. Please try again.");
-      console.error("Error creating item:", error);
+      showErrorToast("Failed to create product. Please try again.");
+      console.error("Error creating product:", error);
     } finally {
       setIsSubmitting(false);
+      setShowLoadingScreen(false);
     }
   };
 
   return (
-    <div className="create-item-container">
-      <div className="create-item-header">
-        <div className="header-content">
-          <Package className="header-icon" />
+    <div className={styles.container}>
+      {/* Loading Screen */}
+      {showLoadingScreen && (
+        <div className={styles.loadingScreen}>
+          <div className={styles.loadingContent}>
+            <Loader className={styles.loadingSpinner} size={48} />
+            <h2>Creating Product...</h2>
+            <p>Please wait while we process your request</p>
+          </div>
+        </div>
+      )}
+
+      <div className={styles.header}>
+        <div className={styles.headerContent}>
+          <Package className={styles.headerIcon} />
           <div>
-            <h1>Create New Item</h1>
-            <p>Add a new product to your inventory</p>
+            <h1>Create New Product</h1>
+            <p>Add a new product to your catalog</p>
           </div>
         </div>
         <button
           type="button"
-          className="preview-btn"
+          className={styles.previewBtn}
           onClick={() => setShowPreview(!showPreview)}
         >
           {showPreview ? <EyeOff /> : <Eye />}
@@ -270,29 +351,29 @@ const CreateItemPage = () => {
         </button>
       </div>
 
-      <div className="create-item-content">
-        <form onSubmit={handleSubmit} className="item-form">
+      <div className={styles.content}>
+        <form onSubmit={handleSubmit} className={styles.form}>
           {/* Basic Information */}
-          <div className="form-section">
-            <div className="section-header">
-              <FileText className="section-icon" />
+          <div className={styles.section}>
+            <div className={styles.sectionHeader}>
+              <FileText className={styles.sectionIcon} />
               <h2>Basic Information</h2>
             </div>
 
-            <div className="form-grid">
-              <div className="form-group full-width">
-                <label htmlFor="name">Product Name *</label>
+            <div className={styles.formGrid}>
+              <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+                <label htmlFor="title">Product Title *</label>
                 <input
                   type="text"
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange("name", e.target.value)}
-                  placeholder="Enter product name"
+                  id="title"
+                  value={formData.title}
+                  onChange={(e) => handleInputChange("title", e.target.value)}
+                  placeholder="Enter product title"
                   required
                 />
               </div>
 
-              <div className="form-group full-width">
+              <div className={`${styles.formGroup} ${styles.fullWidth}`}>
                 <label htmlFor="description">Description *</label>
                 <textarea
                   id="description"
@@ -306,24 +387,86 @@ const CreateItemPage = () => {
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="price">Price *</label>
-                <div className="input-wrapper">
-                  <DollarSign className="input-icon" />
-                  <input
-                    type="number"
-                    id="price"
-                    value={formData.price}
-                    onChange={(e) => handleInputChange("price", e.target.value)}
-                    placeholder="0.00"
-                    step="0.01"
-                    min="0"
-                    required
-                  />
-                </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="price">Price (₦) *</label>
+                <input
+                  type="number"
+                  id="price"
+                  value={formData.price || ""}
+                  onChange={(e) =>
+                    handleInputChange("price", parseFloat(e.target.value) || 0)
+                  }
+                  placeholder="0.00"
+                  step="0.01"
+                  min="0"
+                  required
+                />
               </div>
 
-              <div className="form-group">
+              <div className={styles.formGroup}>
+                <label htmlFor="discount">Discount Percentage</label>
+                <input
+                  type="number"
+                  id="discount"
+                  value={formData.discountPercentage || ""}
+                  onChange={(e) =>
+                    handleInputChange(
+                      "discountPercentage",
+                      parseFloat(e.target.value) || 0
+                    )
+                  }
+                  placeholder="0"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="rating">Rating (1-5) *</label>
+                <input
+                  type="number"
+                  id="rating"
+                  value={formData.rating || ""}
+                  onChange={(e) =>
+                    handleInputChange("rating", parseFloat(e.target.value) || 0)
+                  }
+                  placeholder="0.0"
+                  step="0.1"
+                  min="1"
+                  max="5"
+                  required
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="stock">Stock Quantity *</label>
+                <input
+                  type="number"
+                  id="stock"
+                  value={formData.stock || ""}
+                  onChange={(e) =>
+                    handleInputChange("stock", parseInt(e.target.value) || 0)
+                  }
+                  placeholder="0"
+                  min="0"
+                  required
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="brand">Brand *</label>
+                <input
+                  type="text"
+                  id="brand"
+                  value={formData.brand}
+                  onChange={(e) => handleInputChange("brand", e.target.value)}
+                  placeholder="Brand name"
+                  required
+                />
+              </div>
+
+              <div className={styles.formGroup}>
                 <label htmlFor="category">Category *</label>
                 <select
                   id="category"
@@ -336,257 +479,200 @@ const CreateItemPage = () => {
                   <option value="">Select category</option>
                   {categories.map((cat) => (
                     <option key={cat} value={cat}>
-                      {cat}
+                      {cat.charAt(0).toUpperCase() +
+                        cat.slice(1).replace("-", " ")}
                     </option>
                   ))}
                 </select>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="brand">Brand</label>
-                <input
-                  type="text"
-                  id="brand"
-                  value={formData.brand}
-                  onChange={(e) => handleInputChange("brand", e.target.value)}
-                  placeholder="Brand name"
-                />
-              </div>
-
-              {/* <div className="form-group">
-                <label htmlFor="sku">SKU</label>
-                <input
-                  type="text"
-                  id="sku"
-                  value={formData.sku}
-                  onChange={(e) => handleInputChange("sku", e.target.value)}
-                  placeholder="Stock Keeping Unit"
-                />
-              </div> */}
-
-              <div className="form-group">
-                <label htmlFor="stock">Stock Quantity *</label>
-                <input
-                  type="number"
-                  id="stock"
-                  value={formData.stock}
-                  onChange={(e) => handleInputChange("stock", e.target.value)}
-                  placeholder="0"
-                  min="0"
-                  required
-                />
               </div>
             </div>
           </div>
 
           {/* Images */}
-          <div className="form-section">
-            <div className="section-header">
-              <ImageIcon className="section-icon" />
+          <div className={styles.section}>
+            <div className={styles.sectionHeader}>
+              <ImageIcon className={styles.sectionIcon} />
               <h2>Product Images</h2>
             </div>
 
-            <div className="image-upload-area">
-              <input
-                type="file"
-                id="images"
-                multiple
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="file-input"
-              />
-              <label htmlFor="images" className="upload-label">
-                <Upload className="upload-icon" />
-                <span>Click to upload images</span>
-                <small>Maximum 5 images, 5MB each</small>
-              </label>
-            </div>
-
-            {imagePreview.length > 0 && (
-              <div className="image-preview-grid">
-                {imagePreview.map((preview, index) => (
-                  <div key={index} className="image-preview-item">
-                    <img
-                      src={preview || "/placeholder.svg"}
-                      alt={`Preview ${index + 1}`}
-                    />
-                    <button
-                      type="button"
-                      className="remove-image-btn"
-                      onClick={() => removeImage(index)}
-                    >
-                      <X />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Tags */}
-          <div className="form-section">
-            <div className="section-header">
-              <Tag className="section-icon" />
-              <h2>Tags</h2>
-            </div>
-
-            <div className="tag-input-area">
-              <div className="tag-input-wrapper">
-                <input
-                  type="text"
-                  value={currentTag}
-                  onChange={(e) => setCurrentTag(e.target.value)}
-                  placeholder="Add a tag"
-                  onKeyPress={(e) =>
-                    e.key === "Enter" && (e.preventDefault(), addTag())
-                  }
-                />
-                <button type="button" onClick={addTag} className="add-tag-btn">
-                  Add
+            <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+              <label>Add Images</label>
+              <div className={styles.uploadMethodToggle}>
+                <button
+                  type="button"
+                  className={uploadMethod === "url" ? styles.active : ""}
+                  onClick={() => setUploadMethod("url")}
+                >
+                  <Link size={16} />
+                  URL
+                </button>
+                <button
+                  type="button"
+                  className={uploadMethod === "file" ? styles.active : ""}
+                  onClick={() => setUploadMethod("file")}
+                >
+                  <Upload size={16} />
+                  Upload File
                 </button>
               </div>
 
-              {formData.tags.length > 0 && (
-                <div className="tags-list">
-                  {formData.tags.map((tag, index) => (
-                    <span key={index} className="tag-item">
-                      {tag}
-                      <button
-                        type="button"
-                        onClick={() => removeTag(tag)}
-                        className="remove-tag-btn"
-                      >
-                        <X />
-                      </button>
-                    </span>
-                  ))}
+              {uploadMethod === "url" ? (
+                <div className={styles.imageInputArea}>
+                  <input
+                    type="url"
+                    value={currentImageUrl}
+                    onChange={(e) => setCurrentImageUrl(e.target.value)}
+                    placeholder="https://example.com/image.jpg"
+                    className={styles.imageUrlInput}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddImageUrl}
+                    className={styles.addImageBtn}
+                    disabled={!currentImageUrl.trim()}
+                  >
+                    Add Image
+                  </button>
+                </div>
+              ) : (
+                <div className={styles.fileUploadArea}>
+                  <input
+                    type="file"
+                    id="file-upload"
+                    ref={fileInputRef}
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className={styles.fileInput}
+                  />
+                  <label htmlFor="file-upload" className={styles.uploadLabel}>
+                    <Upload size={20} />
+                    <span>Choose an image file</span>
+                    <small>Max 5MB, JPG, PNG, or GIF</small>
+                  </label>
                 </div>
               )}
             </div>
-          </div>
 
-          {/* Specifications */}
-          <div className="form-section">
-            <div className="section-header">
-              <Layers className="section-icon" />
-              <h2>Specifications</h2>
-            </div>
-
-            <div className="specifications-list">
-              {formData.specifications.map((spec, index) => (
-                <div key={index} className="specification-item">
-                  <input
-                    type="text"
-                    value={spec.key}
-                    onChange={(e) =>
-                      updateSpecification(index, "key", e.target.value)
-                    }
-                    placeholder="Property name"
-                  />
-                  <input
-                    type="text"
-                    value={spec.value}
-                    onChange={(e) =>
-                      updateSpecification(index, "value", e.target.value)
-                    }
-                    placeholder="Property value"
-                  />
-                  {formData.specifications.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeSpecification(index)}
-                      className="remove-spec-btn"
-                    >
-                      <X />
-                    </button>
-                  )}
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={addSpecification}
-                className="add-spec-btn"
-              >
-                Add Specification
-              </button>
-            </div>
-          </div>
-
-          {/* Settings */}
-          <div className="form-section">
-            <div className="section-header">
-              <h2>Settings</h2>
-            </div>
-
-            <div className="settings-grid">
-              <label className="checkbox-wrapper">
-                <input
-                  type="checkbox"
-                  checked={formData.isActive}
-                  onChange={(e) =>
-                    handleInputChange("isActive", e.target.checked)
-                  }
-                />
-                <span className="checkbox-label">Active Product</span>
-                <small>Product will be visible to customers</small>
-              </label>
-
-              <label className="checkbox-wrapper">
-                <input
-                  type="checkbox"
-                  checked={formData.isFeatured}
-                  onChange={(e) =>
-                    handleInputChange("isFeatured", e.target.checked)
-                  }
-                />
-                <span className="checkbox-label">Featured Product</span>
-                <small>Product will appear in featured sections</small>
-              </label>
+            <div className={styles.imageStatus}>
+              <p>
+                <strong>Thumbnail:</strong>{" "}
+                {formData.thumbnail ? "✓ Set" : "✗ Not set"}
+              </p>
+              <p>
+                <strong>Gallery images:</strong> {formData.images.length} added
+              </p>
             </div>
           </div>
 
           {/* Submit Button */}
-          <div className="form-actions">
+          <div className={styles.formActions}>
             <button
               type="submit"
-              className="submit-btn"
+              className={styles.submitBtn}
               disabled={isSubmitting}
             >
-              <Save className="btn-icon" />
-              {isSubmitting ? "Creating Item..." : "Create Item"}
+              <Save className={styles.btnIcon} />
+              {isSubmitting ? "Creating Product..." : "Create Product"}
             </button>
           </div>
         </form>
 
         {/* Preview Panel */}
         {showPreview && (
-          <div className="preview-panel">
-            <h3>Preview</h3>
-            <div className="preview-content">
-              <div className="preview-images">
-                {imagePreview.length > 0 ? (
-                  <img
-                    src={imagePreview[0] || "/placeholder.svg"}
-                    alt="Main preview"
-                  />
+          <div className={styles.previewPanel}>
+            <h3>Product Preview</h3>
+            <div className={styles.previewContent}>
+              <div className={styles.previewImages}>
+                {formData.thumbnail ? (
+                  <div className={styles.previewImageContainer}>
+                    <img src={formData.thumbnail} alt="Product thumbnail" />
+                    <button
+                      type="button"
+                      className={styles.previewRemoveBtn}
+                      onClick={() => removeImage(0, true)}
+                      title="Remove thumbnail"
+                    >
+                      <X size={16} />
+                    </button>
+                    <span className={styles.thumbnailBadge}>Main Image</span>
+                  </div>
                 ) : (
-                  <div className="no-image">No image</div>
+                  <div className={styles.noImage}>No thumbnail set</div>
+                )}
+
+                {formData.images.length > 0 && (
+                  <div className={styles.previewGallery}>
+                    <h4>Gallery Images ({formData.images.length})</h4>
+                    <div className={styles.galleryGrid}>
+                      {formData.images.map((img, index) => (
+                        <div
+                          key={index}
+                          className={styles.previewImageContainer}
+                        >
+                          <img src={img} alt={`Gallery ${index + 1}`} />
+                          <button
+                            type="button"
+                            className={styles.previewRemoveBtn}
+                            onClick={() => removeImage(index)}
+                            title="Remove image"
+                          >
+                            <X size={14} />
+                          </button>
+                          <button
+                            type="button"
+                            className={styles.previewSetThumbnailBtn}
+                            onClick={() => setAsThumbnail(img)}
+                            title="Set as main image"
+                          >
+                            Set as Main
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
-              <div className="preview-details">
-                <h4>{formData.name || "Product Name"}</h4>
-                <p className="preview-price">${formData.price || "0.00"}</p>
-                <p className="preview-description">
-                  {formData.description ||
-                    "Product description will appear here..."}
+              <div className={styles.previewDetails}>
+                <h4>{formData.title || "Product Title"}</h4>
+                <p className={styles.previewPrice}>
+                  ₦{formData.price || "0.00"}
                 </p>
-                <div className="preview-tags">
-                  {formData.tags.map((tag, index) => (
-                    <span key={index} className="preview-tag">
-                      {tag}
-                    </span>
+                {formData.discountPercentage > 0 && (
+                  <p className={styles.previewDiscount}>
+                    {formData.discountPercentage}% OFF
+                  </p>
+                )}
+                <div className={styles.previewRating}>
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      size={16}
+                      fill={
+                        i < Math.floor(formData.rating) ? "#FFD700" : "none"
+                      }
+                      color={
+                        i < Math.floor(formData.rating) ? "#FFD700" : "#ccc"
+                      }
+                    />
                   ))}
+                  <span>({formData.rating || "0"})</span>
                 </div>
+                <p className={styles.previewStock}>
+                  {formData.stock || "0"} in stock
+                </p>
+                <p className={styles.previewBrand}>
+                  <strong>Brand:</strong> {formData.brand || "Not specified"}
+                </p>
+                <p className={styles.previewCategory}>
+                  <strong>Category:</strong>{" "}
+                  {formData.category
+                    ? formData.category.charAt(0).toUpperCase() +
+                      formData.category.slice(1).replace("-", " ")
+                    : "Not specified"}
+                </p>
+                <p className={styles.previewDescription}>
+                  {formData.description || "No description provided."}
+                </p>
               </div>
             </div>
           </div>
@@ -594,7 +680,6 @@ const CreateItemPage = () => {
       </div>
     </div>
   );
-
 };
 
 export default CreateItemPage;

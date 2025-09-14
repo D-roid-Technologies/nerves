@@ -169,7 +169,7 @@ export const notificationSlice = createSlice({
           isRead: false,
           isPersistent: true,
           createdAt: new Date().toISOString(),
-          actionUrl: "/account",
+          actionUrl: "/settings",
           actionText: "Complete Profile",
         };
 
