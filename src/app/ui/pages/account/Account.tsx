@@ -18,7 +18,6 @@ import { RootState } from "../../../redux/store";
 import styles from "./account.module.css";
 import { useNavigate } from "react-router-dom";
 import OrderStatus from "../orderPages/OrderStatus";
-import { mockOrders } from "../orderPages/mockOrders";
 
 const mockUser = {
   firstName: "John",
@@ -67,22 +66,22 @@ interface OrderStatusProps {
 
 export default function MyAccountPage() {
   const user = useSelector((state: RootState) => state.user);
+  const paidOrders = useSelector((state: RootState) => state.paidOrders);
   const navigate = useNavigate();
 
   const getOrderCountsByStatus = () => {
+    const orders = paidOrders.orders;
+
     return {
-      paid: mockOrders.filter((order) => order.status === "paid").length,
-      sealed: mockOrders.filter((order) => order.status === "sealed").length,
-      dispatched: mockOrders.filter((order) => order.status === "dispatched")
+      paid: orders.filter((order) => order.status === "paid").length,
+      sealed: orders.filter((order) => order.status === "sealed").length,
+      dispatched: orders.filter((order) => order.status === "dispatched")
         .length,
-      arrived: mockOrders.filter((order) => order.status === "arrived").length,
-      confirmed: mockOrders.filter((order) => order.status === "confirmed")
-        .length,
-      returned: mockOrders.filter((order) => order.status === "returned")
-        .length,
-      reviewed: mockOrders.filter((order) => order.status === "reviewed")
-        .length,
-      total: mockOrders.length,
+      arrived: orders.filter((order) => order.status === "arrived").length,
+      confirmed: orders.filter((order) => order.status === "confirmed").length,
+      returned: orders.filter((order) => order.status === "returned").length,
+      reviewed: orders.filter((order) => order.status === "reviewed").length,
+      total: orders.length,
     };
   };
 

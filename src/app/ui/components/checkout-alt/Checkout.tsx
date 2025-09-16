@@ -8,6 +8,11 @@ import {
   clearCart,
 } from "../../../redux/slice/cart";
 import { addNotification } from "../../../redux/slice/notification";
+import {
+  addPaidOrder,
+  PaidOrder,
+  PaidOrderItem,
+} from "../../../redux/slice/paidOrders";
 import { useNavigate } from "react-router-dom";
 import {
   CreditCard,
@@ -240,6 +245,14 @@ const Checkout = () => {
     }
     return true;
   };
+
+  // Helper function to generate unique order ID
+  const generateOrderId = () => {
+    const timestamp = new Date().getTime();
+    const randomNum = Math.floor(Math.random() * 1000);
+    return `ORD-${timestamp}-${randomNum}`;
+  };
+
   const handlePlaceOrder = async (e: any) => {
     e.preventDefault();
     setIsProcessing(true);
@@ -252,26 +265,63 @@ const Checkout = () => {
       onSuccess: (res) => {
         setIsProcessing(false);
 
-        // Create success notification for each item in cart
-        items.forEach((item) => {
-          dispatch(
-            addNotification(
-              "success",
-              "Order Successful!",
-              `${item.product.name} (Quantity: ${
-                item.quantity
-              }) purchased successfully for ${formatPrice(item.product.total)}`,
-              {
-                isPersistent: true,
-                // expiresIn: 10000,
-              }
-            )
-          );
-        });
+        // Generate unique order ID
+        const orderId = generateOrderId();
+        const currentDate = new Date().toISOString();
+
+        // Transform cart items to paid order items
+        const paidOrderItems: PaidOrderItem[] = items.map((item) => ({
+          id: item.product.id,
+          name: item.product.name,
+          price: item.product.price,
+          discountPrice: item.product.discountPrice,
+          image: item.product.image,
+          quantity: item.quantity,
+          total:
+            (item.product.discountPrice || item.product.price) * item.quantity,
+        }));
+
+        // Create paid order object
+        const paidOrder: PaidOrder = {
+          id: res.reference || orderId,
+          orderId: orderId,
+          items: paidOrderItems,
+          shippingDetails: { ...shippingDetails },
+          paymentDetails: {
+            ...paymentDetails,
+            reference: res.reference || orderId,
+            transactionDate: currentDate,
+          },
+          shippingMethod,
+          shippingCost,
+          tax,
+          subtotal,
+          total,
+          status: "paid",
+          createdAt: currentDate,
+          updatedAt: currentDate,
+        };
+
+        // Add to paid orders slice
+        dispatch(addPaidOrder(paidOrder));
+
+        // Create success notification for the entire order
+        dispatch(
+          addNotification(
+            "success",
+            "Order Successful!",
+            `Your order #${orderId} has been placed successfully. Total: ${formatPrice(
+              total
+            )}`,
+            {
+              isPersistent: true,
+            }
+          )
+        );
 
         toast.success(`Payment success: ${res.message}`, {
           style: {
-            background: "#10b981",  
+            background: "#10b981",
             color: "#fff",
             border: "1px solid #059669",
           },
@@ -298,7 +348,6 @@ const Checkout = () => {
             "Your payment was cancelled. Your cart items have been preserved.",
             {
               isPersistent: false,
-              // expiresIn: 8000,
             }
           )
         );
@@ -325,7 +374,6 @@ const Checkout = () => {
             "There was an error processing your payment. Please try again.",
             {
               isPersistent: true,
-              // expiresIn: 10000, 
             }
           )
         );

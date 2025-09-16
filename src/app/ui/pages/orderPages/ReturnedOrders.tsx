@@ -10,7 +10,7 @@ const ReturnedOrders: React.FC = () => {
   return (
     <OrderList
       title="Returned Orders"
-      description="Orders that have been returned"
+      // description="Orders that have been returned"
       orders={returnedOrders}
       showStatus={true}
     />

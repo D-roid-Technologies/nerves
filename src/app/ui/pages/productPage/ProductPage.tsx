@@ -563,8 +563,8 @@ const ProductPage = () => {
                     key={product.id}
                     product={{
                       ...product,
-                      sellerId: product.sellerId || "000000", // ensure sellerId exists
-                      category: product.category || "uncategorized", // ensure category exists
+                      sellerId: product.sellerId || "000000", 
+                      category: product.category || "uncategorized",
                     }}
                   />
                 ))}

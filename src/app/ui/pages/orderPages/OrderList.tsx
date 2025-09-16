@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 interface OrderListProps {
   title: string;
-  description: string;
+  description?: string;
   orders: any[];
   showStatus?: boolean;
 }
