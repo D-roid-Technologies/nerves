@@ -38,16 +38,13 @@ const Footer: React.FC = () => {
       title: "Company",
       links: [
         { name: "About", href: "/aboutus" },
-        { name: "Careers", href: "/careers" },
-        // { name: "Brand Center", href: "#" },
-        { name: "Blog", href: "/more/blog" },
+        { name: "Twitter", href: "https://x.com/technologi73683" },
       ],
     },
     {
       title: "Help Center",
       links: [
         // { name: "Discord", href: "#" },
-        { name: "Twitter", href: "https://x.com/technologi73683" },
         { name: "FAQ", href: "/contact#faq" },
         { name: "Contact Us", href: "/contact" },
       ],
