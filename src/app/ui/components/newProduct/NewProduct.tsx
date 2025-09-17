@@ -9,6 +9,7 @@ import {
 import { useDispatch } from "react-redux";
 import { addToCart } from "../../../redux/slice/cart";
 import styles from "./NewProduct.module.css";
+import { useNavigate } from "react-router-dom";
 
 interface Product {
   id: number;
@@ -32,6 +33,7 @@ function NewProduct() {
   const [isPaused, setIsPaused] = useState(false);
   const sliderRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+const navigate = useNavigate();
 
   // Fetch products from DummyJSON API
   useEffect(() => {
@@ -184,7 +186,10 @@ function NewProduct() {
                 <small>Seconds</small>
               </div>
             </div>
-            <button className={styles.ctaButton}>
+            <button
+              className={styles.ctaButton}
+              onClick={() => navigate("/products")}
+            >
               <ShoppingBag size={16} />
               Shop Now
             </button>
