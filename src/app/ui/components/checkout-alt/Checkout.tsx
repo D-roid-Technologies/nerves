@@ -65,9 +65,8 @@ const Checkout = () => {
         lastName: user.primaryInformation.lastName || "",
         email: user.primaryInformation.email || "",
         phone: user.primaryInformation.phone || "",
-        address: `${user.location.streetNumber || ""} ${
-          user.location.streetName || ""
-        }`.trim(),
+        address: `${user.location.streetNumber || ""} ${user.location.streetName || ""
+          }`.trim(),
         city: user.location.city || "",
         state: user.location.state || "",
         zipCode: user.location.postalCode || "",
@@ -165,8 +164,8 @@ const Checkout = () => {
     return new Intl.NumberFormat("en-NG", {
       style: "currency",
       currency: "NGN",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(price);
   };
 
@@ -190,8 +189,8 @@ const Checkout = () => {
     shippingMethod === "express"
       ? 1599
       : shippingMethod === "overnight"
-      ? 2999
-      : 599;
+        ? 2999
+        : 599;
   const tax = subtotal * 0.08;
   const total = subtotal + shippingCost + tax;
 
@@ -827,11 +826,11 @@ const Checkout = () => {
                         <input
                           type="number"
                           id="amount"
-                          value={paymentDetails.amount}
+                          value={Number(paymentDetails.amount).toFixed(2)}
                           onChange={(e) =>
                             handlePaymentChange("amount", e.target.value)
                           }
-                          placeholder={Math.round(total).toString()}
+                          placeholder={total.toFixed(2)}
                           min="1"
                           required
                           readOnly
@@ -919,8 +918,8 @@ const Checkout = () => {
                 }
               >
                 {currentStep === 2 &&
-                user.isLoggedIn &&
-                !profileCompletion.isComplete
+                  user.isLoggedIn &&
+                  !profileCompletion.isComplete
                   ? "Complete Profile First"
                   : "Continue"}
               </button>
@@ -955,7 +954,7 @@ const Checkout = () => {
                   <span className="item-price">
                     {formatPrice(
                       (item.product.discountPrice || item.product.price) *
-                        item.quantity
+                      item.quantity
                     )}
                   </span>
                 </div>
