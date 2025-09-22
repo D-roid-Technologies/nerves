@@ -66,7 +66,7 @@ interface OrderStatusProps {
 
 export default function MyAccountPage() {
   const user = useSelector((state: RootState) => state.user);
-  const userType = user.primaryInformation?.userType || "user";
+  const userType = user.primaryInformation?.userType || "both";
   const isSeller = userType === "seller";
   const isBoth = userType === "both";
   // Show sections for both sellers and regular users
