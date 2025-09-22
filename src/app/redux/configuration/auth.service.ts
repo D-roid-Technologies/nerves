@@ -173,8 +173,7 @@ interface Cart {
     items: CartItem[];
 }
 
-
-export class AuthService {
+ export class AuthService {
     async handleGoogleSignin() {
         const currentDateTime = getCurrentDateTime();
         const signInData = signInWithPopup(auth, provider).then(async (res: { user: { refreshToken: string; providerData: { photoURL: any; }[]; uid: any; }; }) => {
@@ -246,7 +245,7 @@ export class AuthService {
                         middleName: "",
                         email: providerData.email || "",
                         phone: providerData.phoneNumber || "",
-                        userType: "user",
+                        userType: "both",
                         nameInitials: `${(gottenNames[0]?.[0] || "").toUpperCase()}${(gottenNames[1]?.[0] || "").toUpperCase()}`,
                         uniqueIdentifier: providerData.uid || "",
                         gender: "",

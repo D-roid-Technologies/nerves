@@ -12,7 +12,7 @@ export interface LocationS {
     geoCoordinates: {
         latitude: string;
         longitude: string;
-    };
+    }; 
 }
 
 export interface PrimaryInformation {
@@ -21,7 +21,7 @@ export interface PrimaryInformation {
     middleName: string;
     email: string;
     phone: string;
-    userType: string; // user, seller, buyer, admin
+    userType: string; // both, seller, buyer, admin
     nameInitials: string;
     uniqueIdentifier: string;
     gender: string;

@@ -118,14 +118,16 @@ const ProductDetailsPage = () => {
     setQuantity(newQuantity);
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-NG", {
-      style: "currency",
-      currency: "NGN",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
+ const formatPrice = (price: number) => {
+   const hasDecimals = price % 1 !== 0;
+
+   return new Intl.NumberFormat("en-NG", {
+     style: "currency",
+     currency: "NGN",
+     minimumFractionDigits: hasDecimals ? 2 : 0,
+     maximumFractionDigits: hasDecimals ? 2 : 0,
+   }).format(price);
+ };
 
   if (loading) {
     return (

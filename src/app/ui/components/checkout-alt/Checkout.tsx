@@ -65,8 +65,9 @@ const Checkout = () => {
         lastName: user.primaryInformation.lastName || "",
         email: user.primaryInformation.email || "",
         phone: user.primaryInformation.phone || "",
-        address: `${user.location.streetNumber || ""} ${user.location.streetName || ""
-          }`.trim(),
+        address: `${user.location.streetNumber || ""} ${
+          user.location.streetName || ""
+        }`.trim(),
         city: user.location.city || "",
         state: user.location.state || "",
         zipCode: user.location.postalCode || "",
@@ -189,8 +190,8 @@ const Checkout = () => {
     shippingMethod === "express"
       ? 1599
       : shippingMethod === "overnight"
-        ? 2999
-        : 599;
+      ? 2999
+      : 599;
   const tax = subtotal * 0.08;
   const total = subtotal + shippingCost + tax;
 
@@ -795,7 +796,7 @@ const Checkout = () => {
                           onChange={(e) =>
                             handlePaymentChange("lastName", e.target.value)
                           }
-                          placeholder="Oyekachi"
+                          placeholder="Onyekachi"
                           required
                         />
                       </div>
@@ -827,7 +828,7 @@ const Checkout = () => {
                         <input
                           type="number"
                           id="amount"
-                          value={Number(paymentDetails.amount).toFixed(2)}
+                          value={formatPrice(total)}
                           onChange={(e) =>
                             handlePaymentChange("amount", e.target.value)
                           }
@@ -919,8 +920,8 @@ const Checkout = () => {
                 }
               >
                 {currentStep === 2 &&
-                  user.isLoggedIn &&
-                  !profileCompletion.isComplete
+                user.isLoggedIn &&
+                !profileCompletion.isComplete
                   ? "Complete Profile First"
                   : "Continue"}
               </button>
@@ -955,7 +956,7 @@ const Checkout = () => {
                   <span className="item-price">
                     {formatPrice(
                       (item.product.discountPrice || item.product.price) *
-                      item.quantity
+                        item.quantity
                     )}
                   </span>
                 </div>
