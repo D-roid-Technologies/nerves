@@ -258,8 +258,8 @@ const Checkout = () => {
 
     const payStack = new PayStackPop();
     payStack.newTransaction({
-      // key: "pk_test_db0145199289f83c428d57cf70755142bb0b8b28",
-      key: "pk_live_d2b967eddda456841f504b85549767fc33cc9fd4",
+      key: "pk_test_db0145199289f83c428d57cf70755142bb0b8b28",
+      // key: "pk_live_d2b967eddda456841f504b85549767fc33cc9fd4",
       email: paymentDetails.email,
       amount: Number(paymentDetails.amount) * 100,
       onSuccess: (res) => {
