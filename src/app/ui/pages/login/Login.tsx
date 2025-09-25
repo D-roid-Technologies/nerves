@@ -10,7 +10,7 @@ const Login: React.FunctionComponent = () => {
   });
 
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [text, setText] = useState<string>("Google");
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -20,12 +20,12 @@ const Login: React.FunctionComponent = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    // setIsLoading(true);
 
     // Simulate login process
     setTimeout(() => {
       console.log("Login attempt:", formData);
-      setIsLoading(false);
+      // setIsLoading(false);
     }, 2000);
   };
 
@@ -66,6 +66,18 @@ const Login: React.FunctionComponent = () => {
     </svg>
   );
 
+  const handleGoogleLogin = () => {
+    setText("Contacting Google...")
+    setTimeout(() => {
+      authService.handleUserLogin().then(() => {
+        setText("Login Successful!")
+        setTimeout(() => {
+          navigate("/shop")
+        }, 3000)
+      })
+    }, 3000)
+  }
+
   // const AppleIcon = () => (
   //   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
   //     <path
@@ -104,12 +116,10 @@ const Login: React.FunctionComponent = () => {
             <button
               type="button"
               className="social-button google"
-              onClick={() => authService.handleUserLogin().then(() => {
-                navigate("/shop")
-              })}
+              onClick={() => { handleGoogleLogin() }}
             >
               <GoogleIcon />
-              <span>Google</span>
+              <span>{text}</span>
             </button>
             {/* <button
               type="button"
