@@ -314,28 +314,27 @@ const Checkout = () => {
             `Your order #${orderId} has been placed successfully. Total: ${formatPrice(
               total
             )}`,
-            {
-              isPersistent: true,
-            }
+            { isPersistent: true }
           )
         );
-
-        toast.success(`Payment success: ${res.message}`, {
-          style: {
-            background: "#10b981",
-            color: "#fff",
-            border: "1px solid #059669",
-          },
-          icon: "✅",
-          duration: 3000,
-        });
 
         // Clear cart after successful payment
         dispatch(clearCart());
 
-        setTimeout(() => {
-          navigate("/");
-        }, 3000);
+        // Navigate to success page with order details
+        navigate("/order-status", {
+          state: {
+            status: "success",
+            orderId: orderId,
+            amount: total,
+            email: paymentDetails.email,
+            transactionRef: res.reference,
+          },
+          replace: true,
+        });
+
+        // Alternative: Navigate with URL parameters
+        // navigate(`/order-status?status=success&orderId=${orderId}&amount=${total}&email=${encodeURIComponent(paymentDetails.email)}&ref=${res.reference}`, { replace: true });
       },
       onCancel: () => {
         setIsProcessing(false);
@@ -347,11 +346,20 @@ const Checkout = () => {
             "warning",
             "Payment Cancelled",
             "Your payment was cancelled. Your cart items have been preserved.",
-            {
-              isPersistent: false,
-            }
+            { isPersistent: false }
           )
         );
+
+        // Navigate to cancelled status page
+        navigate("/order-status", {
+          state: {
+            status: "cancelled",
+            orderId: generateOrderId(), // Generate ID for tracking even cancelled orders
+            amount: total,
+            email: paymentDetails.email,
+          },
+          replace: true,
+        });
 
         toast("Payment was cancelled", {
           style: {
@@ -373,11 +381,21 @@ const Checkout = () => {
             "error",
             "Payment Failed",
             "There was an error processing your payment. Please try again.",
-            {
-              isPersistent: true,
-            }
+            { isPersistent: true }
           )
         );
+
+        // Navigate to failed status page
+        navigate("/order-status", {
+          state: {
+            status: "failed",
+            orderId: generateOrderId(), // Generate ID for tracking failed attempts
+            amount: total,
+            email: paymentDetails.email,
+            error: error.message,
+          },
+          replace: true,
+        });
 
         toast.error(`Payment failed: ${error.message}`, {
           style: {
@@ -391,7 +409,6 @@ const Checkout = () => {
       },
     });
   };
-
   const nextStep = () => {
     // Check profile completion when trying to proceed from step 2
     if (currentStep === 2 && user.isLoggedIn && !profileCompletion.isComplete) {

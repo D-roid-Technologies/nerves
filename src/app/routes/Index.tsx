@@ -31,6 +31,7 @@ import TermsAndConditions from "../ui/pages/footerLinksPages/TermsAndConditions"
 import PrivacyPolicy from "../ui/pages/footerLinksPages/PrivacyPolicy";
 import FAQ from "../ui/pages/footerLinksPages/FAQ";
 import ContactUs from "../ui/pages/footerLinksPages/ContactUs";
+import OrderStatus from "../ui/pages/orderStatus/OrderStatus";
 // import CheckoutPage from "../ui/components/checkout/Checkoutpage";
 
 const Index: React.FunctionComponent = () => {
@@ -56,6 +57,8 @@ const Index: React.FunctionComponent = () => {
           element={<EarlyBirdRegistration />}
         />
         {/* oreder pages  */}
+
+        <Route path="/order-status" element={<OrderStatus />} />
         <Route path="/orders/paid" element={<PaidOrders />} />
         <Route path="/orders/sealed" element={<SealedOrders />} />
         <Route path="/orders/dispatched" element={<DispatchedOrders />} />
