@@ -7,7 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "./signup.css";
 import { authService } from "../../../redux/configuration/auth.service";
 
-const SignUp: React.FunctionComponent = () => {
+const SignUp: React.FunctionComponent = () => { 
   const [formData, setFormData] = useState({
     firstName: "",
     middleName: "",
@@ -15,7 +15,7 @@ const SignUp: React.FunctionComponent = () => {
     email: "",
     password: "",
     confirmPassword: "",
-  });
+  }); 
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);

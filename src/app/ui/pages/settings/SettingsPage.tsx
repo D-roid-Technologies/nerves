@@ -83,7 +83,7 @@ const SettingsPage = () => {
       middleName: user.primaryInformation?.middleName || "",
       email: user.primaryInformation?.email || "",
       phone: user.primaryInformation?.phone || "",
-      userType: user.primaryInformation?.userType || "user",
+      userType: user.primaryInformation?.userType || "both",
       nameInitials: user.primaryInformation?.nameInitials || "",
       uniqueIdentifier: user.primaryInformation?.uniqueIdentifier || "",
       gender: user.primaryInformation?.gender || "",
@@ -431,7 +431,7 @@ const SettingsPage = () => {
           console.log("Appearance Settings:", appearance);
           break;
       }
-      toast.success(`${section} settings saved successfully`);
+      // toast.success(`${section} settings saved successfully`);
     } catch (error) {
       toast.error(`Failed to save ${section} settings`);
     } finally {
@@ -639,82 +639,82 @@ const SettingsPage = () => {
   >("prompt");
   const [userCountry, setUserCountry] = useState<string>("");
 
- useEffect(() => {
-   // Check if geolocation is available
-   if ("geolocation" in navigator) {
-     navigator.permissions.query({ name: "geolocation" }).then((result) => {
-       setLocationPermission(result.state);
+  useEffect(() => {
+    // Check if geolocation is available
+    if ("geolocation" in navigator) {
+      navigator.permissions.query({ name: "geolocation" }).then((result) => {
+        setLocationPermission(result.state);
 
-       // Listen for permission changes
-       result.onchange = () => {
-         setLocationPermission(result.state);
-         if (result.state === "granted") {
-           getUserCountry();
-         }
-       };
+        // Listen for permission changes
+        result.onchange = () => {
+          setLocationPermission(result.state);
+          if (result.state === "granted") {
+            getUserCountry();
+          }
+        };
 
-       if (result.state === "granted") {
-         getUserCountry();
-       }
-     });
-   }
- }, []);
-
- const getUserCountry = () => {
-  if ("geolocation" in navigator) {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-
-        // Use a geocoding service to get country from coordinates
-        fetch(
-          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
-        )
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.countryName) {
-              setUserCountry(data.countryName);
-              handleAddressUpdate("country", data.countryName);
-            }
-          })
-          .catch((error) => {
-            console.error("Error getting location:", error);
-            // Don't set to denied if the geocoding fails, just keep as granted
-          });
-      },
-      (error) => {
-        console.error("Error getting location:", error);
-        if (error.code === error.PERMISSION_DENIED) {
-          setLocationPermission("denied");
+        if (result.state === "granted") {
+          getUserCountry();
         }
-      },
-      { timeout: 10000 }
-    );
-  }
-};
-const requestLocationPermission = () => {
-  if ("geolocation" in navigator) {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLocationPermission("granted");
-        getUserCountry();
-      },
-      (error) => {
-        // Handle different error types
-        if (error.code === error.PERMISSION_DENIED) {
-          setLocationPermission("denied");
-        } else {
-          // For other errors (timeout, position unavailable), keep as prompt
-          setLocationPermission("prompt");
-          toast.error("Could not get your location. Please try again.", {
-            style: { background: "#ff4d4f", color: "#fff" },
-          });
-        }
-      },
-      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-    );
-  }
-};
+      });
+    }
+  }, []);
+
+  const getUserCountry = () => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+
+          // Use a geocoding service to get country from coordinates
+          fetch(
+            `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+          )
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.countryName) {
+                setUserCountry(data.countryName);
+                handleAddressUpdate("country", data.countryName);
+              }
+            })
+            .catch((error) => {
+              console.error("Error getting location:", error);
+              // Don't set to denied if the geocoding fails, just keep as granted
+            });
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+          if (error.code === error.PERMISSION_DENIED) {
+            setLocationPermission("denied");
+          }
+        },
+        { timeout: 10000 }
+      );
+    }
+  };
+  const requestLocationPermission = () => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocationPermission("granted");
+          getUserCountry();
+        },
+        (error) => {
+          // Handle different error types
+          if (error.code === error.PERMISSION_DENIED) {
+            setLocationPermission("denied");
+          } else {
+            // For other errors (timeout, position unavailable), keep as prompt
+            setLocationPermission("prompt");
+            toast.error("Could not get your location. Please try again.", {
+              style: { background: "#ff4d4f", color: "#fff" },
+            });
+          }
+        },
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+      );
+    }
+  };
   // List of countries by region (grouped by continent)
   const countriesByRegion = {
     Africa: [
@@ -771,82 +771,103 @@ const requestLocationPermission = () => {
 
   // referral name genertor
 
-interface GenerateReferralNameParams {
-  firstName: string;
-  uniqueIdentifier: string;
-}
-
-const generateReferralName = (
-  firstName: GenerateReferralNameParams["firstName"],
-  uniqueIdentifier: GenerateReferralNameParams["uniqueIdentifier"]
-): string => {
-  if (!firstName || !uniqueIdentifier) return "";
-
-  // Clean and normalize the inputs
-  const cleanFirstName: string = firstName.trim().toLowerCase().replace(/[^a-z]/g, '');
-  const cleanUniqueId: string = uniqueIdentifier.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-
-  let namepart: string = cleanFirstName.substring(0, 4).padEnd(4, 'x');
-
-  let idPart: string = cleanUniqueId.length >= 6
-    ? cleanUniqueId.slice(-6)
-    : cleanUniqueId.padEnd(6, Math.random().toString(36).substring(2, 8));
-
-  const referralName: string = (namepart + idPart).substring(0, 10);
-
-  return referralName.toUpperCase();
-};
-// Add this useEffect to automatically generate and set referral name
-useEffect(() => {
-  const firstName = profile.primaryInformation?.firstName;
-  const uniqueIdentifier = profile.primaryInformation?.uniqueIdentifier;
-  
-  if (firstName && uniqueIdentifier && !profile.primaryInformation?.referralName) {
-    const generatedReferralName = generateReferralName(firstName, uniqueIdentifier);
-    handleProfileUpdate("referralName", generatedReferralName, "primaryInformation");
-  }
-}, [profile.primaryInformation?.firstName, profile.primaryInformation?.uniqueIdentifier]);
-
-// Add this function for copying to clipboard
-const copyReferralName = async () => {
-  const referralName = profile.primaryInformation?.referralName;
-  if (!referralName) {
-    toast.error("No referral name to copy", {
-      style: { background: "#ff4d4f", color: "#fff" },
-    });
-    return;
+  interface GenerateReferralNameParams {
+    firstName: string;
+    uniqueIdentifier: string;
   }
 
-  try {
-    await navigator.clipboard.writeText(referralName);
-    toast.success("Referral name copied to clipboard!", {
-      style: { background: "#4BB543", color: "#fff" },
-    });
-  } catch (err) {
-    // Fallback for browsers that don't support clipboard API
-    const textArea = document.createElement("textarea");
-    textArea.value = referralName;
-    textArea.style.position = "fixed";
-    textArea.style.left = "-999999px";
-    textArea.style.top = "-999999px";
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.select();
-    
+  const generateReferralName = (
+    firstName: GenerateReferralNameParams["firstName"],
+    uniqueIdentifier: GenerateReferralNameParams["uniqueIdentifier"]
+  ): string => {
+    if (!firstName || !uniqueIdentifier) return "";
+
+    // Clean and normalize the inputs
+    const cleanFirstName: string = firstName
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z]/g, "");
+    const cleanUniqueId: string = uniqueIdentifier
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "");
+
+    let namepart: string = cleanFirstName.substring(0, 4).padEnd(4, "x");
+
+    let idPart: string =
+      cleanUniqueId.length >= 6
+        ? cleanUniqueId.slice(-6)
+        : cleanUniqueId.padEnd(6, Math.random().toString(36).substring(2, 8));
+
+    const referralName: string = (namepart + idPart).substring(0, 10);
+
+    return referralName.toUpperCase();
+  };
+  // Add this useEffect to automatically generate and set referral name
+  useEffect(() => {
+    const firstName = profile.primaryInformation?.firstName;
+    const uniqueIdentifier = profile.primaryInformation?.uniqueIdentifier;
+
+    if (
+      firstName &&
+      uniqueIdentifier &&
+      !profile.primaryInformation?.referralName
+    ) {
+      const generatedReferralName = generateReferralName(
+        firstName,
+        uniqueIdentifier
+      );
+      handleProfileUpdate(
+        "referralName",
+        generatedReferralName,
+        "primaryInformation"
+      );
+    }
+  }, [
+    profile.primaryInformation?.firstName,
+    profile.primaryInformation?.uniqueIdentifier,
+  ]);
+
+  // Add this function for copying to clipboard
+  const copyReferralName = async () => {
+    const referralName = profile.primaryInformation?.referralName;
+    if (!referralName) {
+      toast.error("No referral name to copy", {
+        style: { background: "#ff4d4f", color: "#fff" },
+      });
+      return;
+    }
+
     try {
-      document.execCommand('copy');
+      await navigator.clipboard.writeText(referralName);
       toast.success("Referral name copied to clipboard!", {
         style: { background: "#4BB543", color: "#fff" },
       });
     } catch (err) {
-      toast.error("Failed to copy referral name", {
-        style: { background: "#ff4d4f", color: "#fff" },
-      });
+      // Fallback for browsers that don't support clipboard API
+      const textArea = document.createElement("textarea");
+      textArea.value = referralName;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-999999px";
+      textArea.style.top = "-999999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      try {
+        document.execCommand("copy");
+        toast.success("Referral name copied to clipboard!", {
+          style: { background: "#4BB543", color: "#fff" },
+        });
+      } catch (err) {
+        toast.error("Failed to copy referral name", {
+          style: { background: "#ff4d4f", color: "#fff" },
+        });
+      }
+
+      document.body.removeChild(textArea);
     }
-    
-    document.body.removeChild(textArea);
-  }
-};
+  };
 
   const nearbyCountries = getNearbyCountries();
   const renderTabContent = () => {
@@ -994,7 +1015,7 @@ const copyReferralName = async () => {
               <div className="form-group">
                 <label>User Type</label>
                 <select
-                  value={profile.primaryInformation?.userType || "user"}
+                  value={profile.primaryInformation?.userType || "both"}
                   onChange={(e) =>
                     handleProfileUpdate(
                       "userType",
@@ -1005,7 +1026,7 @@ const copyReferralName = async () => {
                 >
                   <option value="buyer">Buyer</option>
                   <option value="seller">Seller</option>
-                  <option value="user">User</option>
+                  <option value="both">Both</option>
                 </select>
               </div>
 
@@ -1103,7 +1124,7 @@ const copyReferralName = async () => {
               <div className="form-group">
                 <label>Referral Name</label>
                 <div className="input-wrapper">
-                  <Tag className="input-icon"/>
+                  <Tag className="input-icon" />
                   <input
                     type="text"
                     value={

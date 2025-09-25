@@ -65,8 +65,9 @@ const Checkout = () => {
         lastName: user.primaryInformation.lastName || "",
         email: user.primaryInformation.email || "",
         phone: user.primaryInformation.phone || "",
-        address: `${user.location.streetNumber || ""} ${user.location.streetName || ""
-          }`.trim(),
+        address: `${user.location.streetNumber || ""} ${
+          user.location.streetName || ""
+        }`.trim(),
         city: user.location.city || "",
         state: user.location.state || "",
         zipCode: user.location.postalCode || "",
@@ -189,8 +190,8 @@ const Checkout = () => {
     shippingMethod === "express"
       ? 1599
       : shippingMethod === "overnight"
-        ? 2999
-        : 599;
+      ? 2999
+      : 599;
   const tax = subtotal * 0.08;
   const total = subtotal + shippingCost + tax;
 
@@ -313,28 +314,27 @@ const Checkout = () => {
             `Your order #${orderId} has been placed successfully. Total: ${formatPrice(
               total
             )}`,
-            {
-              isPersistent: true,
-            }
+            { isPersistent: true }
           )
         );
-
-        toast.success(`Payment success: ${res.message}`, {
-          style: {
-            background: "#10b981",
-            color: "#fff",
-            border: "1px solid #059669",
-          },
-          icon: "✅",
-          duration: 3000,
-        });
 
         // Clear cart after successful payment
         dispatch(clearCart());
 
-        setTimeout(() => {
-          navigate("/");
-        }, 3000);
+        // Navigate to success page with order details
+        navigate("/order-status", {
+          state: {
+            status: "success",
+            orderId: orderId,
+            amount: total,
+            email: paymentDetails.email,
+            transactionRef: res.reference,
+          },
+          replace: true,
+        });
+
+        // Alternative: Navigate with URL parameters
+        // navigate(`/order-status?status=success&orderId=${orderId}&amount=${total}&email=${encodeURIComponent(paymentDetails.email)}&ref=${res.reference}`, { replace: true });
       },
       onCancel: () => {
         setIsProcessing(false);
@@ -346,11 +346,20 @@ const Checkout = () => {
             "warning",
             "Payment Cancelled",
             "Your payment was cancelled. Your cart items have been preserved.",
-            {
-              isPersistent: false,
-            }
+            { isPersistent: false }
           )
         );
+
+        // Navigate to cancelled status page
+        navigate("/order-status", {
+          state: {
+            status: "cancelled",
+            orderId: generateOrderId(), // Generate ID for tracking even cancelled orders
+            amount: total,
+            email: paymentDetails.email,
+          },
+          replace: true,
+        });
 
         toast("Payment was cancelled", {
           style: {
@@ -372,11 +381,21 @@ const Checkout = () => {
             "error",
             "Payment Failed",
             "There was an error processing your payment. Please try again.",
-            {
-              isPersistent: true,
-            }
+            { isPersistent: true }
           )
         );
+
+        // Navigate to failed status page
+        navigate("/order-status", {
+          state: {
+            status: "failed",
+            orderId: generateOrderId(), // Generate ID for tracking failed attempts
+            amount: total,
+            email: paymentDetails.email,
+            error: error.message,
+          },
+          replace: true,
+        });
 
         toast.error(`Payment failed: ${error.message}`, {
           style: {
@@ -390,7 +409,6 @@ const Checkout = () => {
       },
     });
   };
-
   const nextStep = () => {
     // Check profile completion when trying to proceed from step 2
     if (currentStep === 2 && user.isLoggedIn && !profileCompletion.isComplete) {
@@ -795,7 +813,7 @@ const Checkout = () => {
                           onChange={(e) =>
                             handlePaymentChange("lastName", e.target.value)
                           }
-                          placeholder="Oyekachi"
+                          placeholder="Onyekachi"
                           required
                         />
                       </div>
@@ -827,7 +845,7 @@ const Checkout = () => {
                         <input
                           type="number"
                           id="amount"
-                          value={Number(paymentDetails.amount).toFixed(2)}
+                          value={formatPrice(total)}
                           onChange={(e) =>
                             handlePaymentChange("amount", e.target.value)
                           }
@@ -919,8 +937,8 @@ const Checkout = () => {
                 }
               >
                 {currentStep === 2 &&
-                  user.isLoggedIn &&
-                  !profileCompletion.isComplete
+                user.isLoggedIn &&
+                !profileCompletion.isComplete
                   ? "Complete Profile First"
                   : "Continue"}
               </button>
@@ -955,7 +973,7 @@ const Checkout = () => {
                   <span className="item-price">
                     {formatPrice(
                       (item.product.discountPrice || item.product.price) *
-                      item.quantity
+                        item.quantity
                     )}
                   </span>
                 </div>

@@ -66,6 +66,11 @@ interface OrderStatusProps {
 
 export default function MyAccountPage() {
   const user = useSelector((state: RootState) => state.user);
+  const userType = user.primaryInformation?.userType || "both";
+  const isSeller = userType === "seller";
+  const isBoth = userType === "both";
+  // Show sections for both sellers and regular users
+  const showSections = isSeller || isBoth;
   const paidOrders = useSelector((state: RootState) => state.paidOrders);
   const navigate = useNavigate();
 
@@ -119,7 +124,6 @@ export default function MyAccountPage() {
           </div>
         </div>
       </div>
-
       <div className={styles["account-section"]}>
         <div className={styles["account-profile-header"]}>
           <h2 className={styles["account-h2"]}>Profile Information</h2>
@@ -172,7 +176,6 @@ export default function MyAccountPage() {
           </div>
         </div>
       </div>
-
       <div className={styles["account-section"]}>
         <div className={styles["account-profile-header"]}>
           <h2 className={styles["account-h2"]}>Order Status</h2>
@@ -228,111 +231,116 @@ export default function MyAccountPage() {
           />
         </div>
       </div>
-
-      <div className={styles["account-section"]}>
-        <div className={styles["account-profile-header"]}>
-          <h2 className={styles["account-h2"]}>My Reviews</h2>
-          <button
-            className={styles["account-edit-btn"]}
-            onClick={navigateToAllReviews}
-          >
-            View All Reviews (6)
-          </button>
-        </div>
-        {mockUser.reviews.length > 0 ? (
-          <div className={styles["account-list"]}>
-            {mockUser.reviews.slice(0, 3).map((review) => (
-              <div
-                key={review.id}
-                className={`${styles["account-list-item"]} ${styles["account-review-item"]}`}
-              >
-                <div className={styles["account-review-header"]}>
-                  <h3 className={styles["account-review-title"]}>
-                    {review.item}
-                  </h3>
-                  <span className={styles["account-review-date"]}>
-                    {review.date}
-                  </span>
-                </div>
-                <div className={styles["account-review-stars"]}>
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={styles["account-review-star"]}
-                      fill={i < review.rating ? "currentColor" : "none"}
-                    />
-                  ))}
-                </div>
-                <p className={styles["account-review-comment"]}>
-                  {review.comment}
-                </p>
-              </div>
-            ))}
+      {showSections &&(
+        <div className={styles["account-section"]}>
+          <div className={styles["account-profile-header"]}>
+            <h2 className={styles["account-h2"]}>My Reviews</h2>
+            <button
+              className={styles["account-edit-btn"]}
+              onClick={navigateToAllReviews}
+            >
+              View All Reviews (6)
+            </button>
           </div>
-        ) : (
-          <div className={styles["account-empty-state"]}>
-            <MessageSquare className={styles["account-empty-icon"]} />
-            <p>You haven't reviewed any products yet</p>
-          </div>
-        )}
-      </div>
-
-      <div className={styles["account-section"]}>
-        <div className={styles["account-profile-header"]}>
-          <h2 className={styles["account-h2"]}>My Sales</h2>
-          <button
-            className={styles["account-edit-btn"]}
-            onClick={navigateToAllSales}
-          >
-            View All Sales (6)
-          </button>
-        </div>
-        {mockUser.sales.length > 0 ? (
-          <div className={styles["account-list"]}>
-            {mockUser.sales.slice(0, 3).map((sale) => (
-              <div
-                key={sale.id}
-                className={`${styles["account-list-item"]} ${styles["account-sale-item"]}`}
-              >
-                <div className={styles["account-sale-info"]}>
-                  <div className={styles["account-sale-image"]}>
-                    <ImageIcon size={24} color="#9ca3af" />
+          {mockUser.reviews.length > 0 ? (
+            <div className={styles["account-list"]}>
+              {mockUser.reviews.slice(0, 3).map((review) => (
+                <div
+                  key={review.id}
+                  className={`${styles["account-list-item"]} ${styles["account-review-item"]}`}
+                >
+                  <div className={styles["account-review-header"]}>
+                    <h3 className={styles["account-review-title"]}>
+                      {review.item}
+                    </h3>
+                    <span className={styles["account-review-date"]}>
+                      {review.date}
+                    </span>
                   </div>
-                  <div>
-                    <div>{sale.item}</div>
-                    <div style={{ fontSize: "0.875rem", color: "#6b7280" }}>
-                      {sale.price}
+                  <div className={styles["account-review-stars"]}>
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={styles["account-review-star"]}
+                        fill={i < review.rating ? "currentColor" : "none"}
+                      />
+                    ))}
+                  </div>
+                  <p className={styles["account-review-comment"]}>
+                    {review.comment}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className={styles["account-empty-state"]}>
+              <MessageSquare className={styles["account-empty-icon"]} />
+              <p>You haven't reviewed any products yet</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* replaace isSeller with showSections to render a section for both a user and seller user type */}
+      {showSections &&(
+        <div className={styles["account-section"]}>
+          <div className={styles["account-profile-header"]}>
+            <h2 className={styles["account-h2"]}>My Sales</h2>
+            <button
+              className={styles["account-edit-btn"]}
+              onClick={navigateToAllSales}
+            >
+              View All Sales (6)
+            </button>
+          </div>
+          {mockUser.sales.length > 0 ? (
+            <div className={styles["account-list"]}>
+              {mockUser.sales.slice(0, 3).map((sale) => (
+                <div
+                  key={sale.id}
+                  className={`${styles["account-list-item"]} ${styles["account-sale-item"]}`}
+                >
+                  <div className={styles["account-sale-info"]}>
+                    <div className={styles["account-sale-image"]}>
+                      <ImageIcon size={24} color="#9ca3af" />
+                    </div>
+                    <div>
+                      <div>{sale.item}</div>
+                      <div style={{ fontSize: "0.875rem", color: "#6b7280" }}>
+                        {sale.price}
+                      </div>
                     </div>
                   </div>
+                  <span className={styles["account-sale-status"]}>
+                    {sale.status}
+                  </span>
                 </div>
-                <span className={styles["account-sale-status"]}>
-                  {sale.status}
-                </span>
-              </div>
-            ))}
-          </div>
-        ) : (
+              ))}
+            </div>
+          ) : (
+            <div className={styles["account-empty-state"]}>
+              <Package className={styles["account-empty-icon"]} />
+              <p>You haven't sold any items yet</p>
+            </div>
+          )}
+        </div>
+      )}
+      {showSections &&(
+        <div className={styles["account-section"]}>
+          <h2 className={styles["account-h2"]}>Create Items</h2>
           <div className={styles["account-empty-state"]}>
             <Package className={styles["account-empty-icon"]} />
-            <p>You haven't sold any items yet</p>
+            <p>You haven't created any items yet</p>
+            <button
+              className={styles["account-edit-btn"]}
+              onClick={() => navigate("/create")}
+            >
+              <Plus size={16} style={{ marginRight: "8px" }} />
+              Create Item
+            </button>
           </div>
-        )}
-      </div>
-
-      <div className={styles["account-section"]}>
-        <h2 className={styles["account-h2"]}>Create Items</h2>
-        <div className={styles["account-empty-state"]}>
-          <Package className={styles["account-empty-icon"]} />
-          <p>You haven't created any items yet</p>
-          <button
-            className={styles["account-edit-btn"]}
-            onClick={() => navigate("/create")}
-          >
-            <Plus size={16} style={{ marginRight: "8px" }} />
-            Create Item
-          </button>
         </div>
-      </div>
+      )}
     </div>
   );
 }

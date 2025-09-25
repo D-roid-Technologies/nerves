@@ -27,6 +27,11 @@ import ViewAllOrders from "../ui/pages/orderPages/ViewAllOrders";
 import NotificationsPage from "../ui/pages/notification/NotificationsPage";
 import AllReviewsPage from "../ui/pages/allReviews/AllReviewsPage";
 import AllSalesPage from "../ui/pages/allSales/AllSalesPage";
+import TermsAndConditions from "../ui/pages/footerLinksPages/TermsAndConditions";
+import PrivacyPolicy from "../ui/pages/footerLinksPages/PrivacyPolicy";
+import FAQ from "../ui/pages/footerLinksPages/FAQ";
+import ContactUs from "../ui/pages/footerLinksPages/ContactUs";
+import OrderStatus from "../ui/pages/orderStatus/OrderStatus";
 // import CheckoutPage from "../ui/components/checkout/Checkoutpage";
 
 const Index: React.FunctionComponent = () => {
@@ -52,6 +57,8 @@ const Index: React.FunctionComponent = () => {
           element={<EarlyBirdRegistration />}
         />
         {/* oreder pages  */}
+
+        <Route path="/order-status" element={<OrderStatus />} />
         <Route path="/orders/paid" element={<PaidOrders />} />
         <Route path="/orders/sealed" element={<SealedOrders />} />
         <Route path="/orders/dispatched" element={<DispatchedOrders />} />
@@ -64,6 +71,11 @@ const Index: React.FunctionComponent = () => {
         <Route path="/reviews/all" element={<AllReviewsPage />} />
         {/* sales page */}
         <Route path="/sales/all" element={<AllSalesPage />} />
+        {/* footer links pages */}
+        <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/faq" element={<FAQ />} />
+        <Route path="/contact" element={<ContactUs />} />
         {/* <Route
         path="/products/:category/:productTitle"
         element={<ProductDetailsPage />}

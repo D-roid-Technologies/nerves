@@ -1,8 +1,6 @@
-// @ts-nocheck
-
+// Footer.tsx
 import React from "react";
-import "./Footer.css"; // We'll create this CSS file
-import { Assets } from "../../../utils/constant/Assets";
+import "./Footer.css";
 import {
   FaFacebook,
   FaGithub,
@@ -12,26 +10,22 @@ import {
 import { FaXTwitter } from "react-icons/fa6";
 import { con_stants } from "../../../utils/constants";
 
-// Define the type for a single link in a footer group
 interface FooterLink {
   name: string;
   href: string;
 }
 
-// Define the type for a group of footer links
 interface FooterLinkGroup {
   title: string;
   links: FooterLink[];
 }
 
-// Define the type for a single social media link
 interface SocialLink {
   name: string;
   href: string;
-  icon: React.ReactNode; // `icon` can be any valid React node (SVG, JSX, etc.)
+  icon: React.ReactNode;
 }
 
-// Define the component
 const Footer: React.FC = () => {
   const footerLinks: FooterLinkGroup[] = [
     {
@@ -44,8 +38,7 @@ const Footer: React.FC = () => {
     {
       title: "Help Center",
       links: [
-        // { name: "Discord", href: "#" },
-        { name: "FAQ", href: "/contact#faq" },
+        { name: "FAQ", href: "/faq" },
         { name: "Contact Us", href: "/contact" },
       ],
     },
@@ -53,8 +46,7 @@ const Footer: React.FC = () => {
       title: "Legal",
       links: [
         { name: "Privacy Policy", href: "/privacy-policy" },
-        // { name: "Licensing", href: "#" },
-        { name: "Terms", href: "/terms-and-condition" },
+        { name: "Terms", href: "/terms-and-conditions" },
       ],
     },
   ];
@@ -92,15 +84,14 @@ const Footer: React.FC = () => {
       <div className="footer-container">
         <div className="footer-brand">
           <h2 className="footer-logo">Nerve Systems Network Ltd</h2>
-          <p className="footer-description">
-            All you need when you need it.
-          </p>
+          <p className="footer-description">All you need when you need it.</p>
           <div className="footer-social">
             {socialLinks.map((link, index) => (
               <a
                 key={index}
                 href={link.href}
                 target="_blank"
+                rel="noopener noreferrer"
                 className="social-link"
                 aria-label={link.name}
               >
@@ -130,7 +121,8 @@ const Footer: React.FC = () => {
 
       <div className="footer-bottom">
         <p className="copyright">
-          &copy; {new Date().getFullYear()} Nerve Systems Network Ltd. All rights reserved. Version {con_stants.app_version}
+          &copy; {new Date().getFullYear()} Nerve Systems Network Ltd. All
+          rights reserved. Version {con_stants.app_version}
         </p>
       </div>
     </footer>

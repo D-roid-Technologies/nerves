@@ -19,6 +19,11 @@ const Navbar = () => {
   const user = useSelector((state: RootState) => state.user);
   const cart = useSelector((state: RootState) => state.cart);
   const notification = useSelector((state: RootState) => state.notification);
+  const userType = user.primaryInformation?.userType || "both";
+  const isSeller = userType === "seller";
+  const isBuyer = userType === "buyer" || userType === "user";
+  const isBoth = userType === "both";
+  const showSections = isSeller || isBoth;
 
   // Create a ref for the dropdown container
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -278,13 +283,24 @@ const Navbar = () => {
                         >
                           My Account
                         </Link>
-                        <Link
-                          to="/orders/all"
-                          className={styles.dropdownItem}
-                          onClick={handleDropdownItemClick}
-                        >
-                          My Orders
-                        </Link>
+                        {isBuyer && (
+                          <Link
+                            to="/orders/all"
+                            className={styles.dropdownItem}
+                            onClick={handleDropdownItemClick}
+                          >
+                            My Orders
+                          </Link>
+                        )}
+                        {showSections && (
+                          <Link
+                            to="/orders/all"
+                            className={styles.dropdownItem}
+                            onClick={handleDropdownItemClick}
+                          >
+                            My Items
+                          </Link>
+                        )}
                         <Link
                           to="/notifications"
                           className={styles.dropdownItem}
@@ -292,13 +308,22 @@ const Navbar = () => {
                         >
                           Notifications
                         </Link>
-                        <Link
+                        {showSections && (
+                          <Link
+                            to="/create"
+                            className={styles.dropdownItem}
+                            onClick={handleDropdownItemClick}
+                          >
+                            Create Items
+                          </Link>
+                        )}
+                        {/* <Link
                           to="/create"
                           className={styles.dropdownItem}
                           onClick={handleDropdownItemClick}
                         >
                           Create Items
-                        </Link>
+                        </Link> */}
                         <Link
                           to="/settings"
                           className={styles.dropdownItem}
@@ -453,13 +478,24 @@ const Navbar = () => {
                   >
                     My Account
                   </Link>
-                  <Link
-                    to="/orders/all"
-                    className={styles.modalItem}
-                    onClick={closeUserModal}
-                  >
-                    My Orders
-                  </Link>
+                  {isBuyer && (
+                    <Link
+                      to="/orders/all"
+                      className={styles.dropdownItem}
+                      onClick={handleDropdownItemClick}
+                    >
+                      My Orders
+                    </Link>
+                  )}
+                  {showSections && (
+                    <Link
+                      to="/orders/all"
+                      className={styles.dropdownItem}
+                      onClick={handleDropdownItemClick}
+                    >
+                      My Items
+                    </Link>
+                  )}
                   <Link
                     to="/notifications"
                     className={styles.modalItem}
@@ -467,13 +503,15 @@ const Navbar = () => {
                   >
                     Notifications
                   </Link>
-                  <Link
-                    to="/create"
-                    className={styles.modalItem}
-                    onClick={closeUserModal}
-                  >
-                    Create Items
-                  </Link>
+                  {showSections && (
+                    <Link
+                      to="/create"
+                      className={styles.dropdownItem}
+                      onClick={handleDropdownItemClick}
+                    >
+                      Create Items
+                    </Link>
+                  )}
                   <Link
                     to="/settings"
                     className={styles.modalItem}

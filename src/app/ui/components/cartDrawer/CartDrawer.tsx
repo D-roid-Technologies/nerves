@@ -19,14 +19,16 @@ const CartDrawer: React.FunctionComponent = () => {
   );
   const navigate = useNavigate();
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-NG", {
-      style: "currency",
-      currency: "NGN",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
+ const formatPrice = (price: number) => {
+   const hasDecimals = price % 1 !== 0;
+
+   return new Intl.NumberFormat("en-NG", {
+     style: "currency",
+     currency: "NGN",
+     minimumFractionDigits: hasDecimals ? 2 : 0,
+     maximumFractionDigits: hasDecimals ? 2 : 0,
+   }).format(price);
+ };
 
   const totalPrice = items.reduce((sum, item) => {
     // Ensure we're working with numbers and handle precision
