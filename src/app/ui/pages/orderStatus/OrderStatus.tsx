@@ -81,19 +81,19 @@ const OrderStatus: React.FC<OrderStatusProps> = ({
   useEffect(() => {
     setIsLoading(false);
 
-    if (status === "success") {
-      const timer = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev <= 1) {
-            navigate("/orders/paid", { replace: true });
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
+    // if (status === "success") {
+    //   const timer = setInterval(() => {
+    //     setCountdown((prev) => {
+    //       if (prev <= 1) {
+    //         navigate("/orders/paid", { replace: true });
+    //         return 0;
+    //       }
+    //       return prev - 1;
+    //     });
+    //   }, 1000);
 
-      return () => clearInterval(timer);
-    }
+    //   return () => clearInterval(timer);
+    // }
   }, [status, navigate]);
 
   const getStatusConfig = () => {
@@ -234,16 +234,72 @@ const OrderStatus: React.FC<OrderStatusProps> = ({
         </div>
 
         {/* Success-specific countdown timer */}
-        {status === "success" && countdown > 0 && (
+        {/* {status === "success" && countdown > 0 && (
           <div className={styles["order-timer"]}>
-            <p className={styles["order-timer-text"]}>
-              Redirecting in:
-            </p>
+            <p className={styles["order-timer-text"]}>Redirecting in:</p>
             <div className={styles["order-countdown"]}>{countdown}s</div>
           </div>
-        )}
+        )} */}
 
-      
+        <div className={styles["order-status-actions"]}>
+          {status === "success" && (
+            <>
+              <button
+                onClick={() => navigate("/shop", { replace: true })}
+                className={`${styles["order-status-btn"]} ${styles["order-status-btn-primary"]}`}
+              >
+                <Home className={styles["order-status-btn-icon"]} />
+                Continue Shopping
+              </button>
+              <button
+                onClick={() => navigate("/orders/paid")}
+                className={`${styles["order-status-btn"]} ${styles["order-status-btn-success"]}`}
+              >
+                <Receipt className={styles["order-status-btn-icon"]} />
+                View Order History
+              </button>
+            </>
+          )}
+
+          {status === "failed" && (
+            <>
+              <button
+                onClick={() => navigate("/checkout")}
+                className={`${styles["order-status-btn"]} ${styles["order-status-btn-primary"]}`}
+              >
+                <ArrowRight className={styles["order-status-btn-icon"]} />
+                Try Again
+              </button>
+              <button
+                onClick={() => navigate("/contact")}
+                className={`${styles["order-status-btn"]} ${styles["order-status-btn-secondary"]}`}
+              >
+                <MessageCircle className={styles["order-status-btn-icon"]} />
+                Contact Support
+              </button>
+            </>
+          )}
+
+          {status === "cancelled" && (
+            <>
+              <button
+                onClick={() => navigate("/checkout")}
+                className={`${styles["order-status-btn"]} ${styles["order-status-btn-warning"]}`}
+              >
+                <ShoppingBag className={styles["order-status-btn-icon"]} />
+                Return to Checkout
+              </button>
+              <button
+                onClick={() => navigate("/shop")}
+                className={`${styles["order-status-btn"]} ${styles["order-status-btn-secondary"]}`}
+              >
+                <Home className={styles["order-status-btn-icon"]} />
+                Continue Shopping
+              </button>
+            </>
+          )}
+        </div>
+
         {/* Support Information */}
         {(status === "failed" || status === "cancelled") && (
           <div className={styles["order-support-info"]}>
