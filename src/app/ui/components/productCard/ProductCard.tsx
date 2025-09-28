@@ -54,13 +54,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   const discountPercentage = product.discountPrice
     ? Math.round(
-        ((product.price - product.discountPrice) / product.price) * 100
-      )
+      ((product.price - product.discountPrice) / product.price) * 100
+    )
     : 0;
 
   return (
     <Link
-      to={`/products/${product.name.toLowerCase().replace(/\s+/g, "-")}`}
+      to={`/products/${product.name
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/[^a-z0-9\-]/g, "")}`}
       className="product-card"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

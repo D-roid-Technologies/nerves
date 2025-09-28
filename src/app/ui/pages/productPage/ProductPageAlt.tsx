@@ -12,21 +12,24 @@ import { authService } from "../../../redux/configuration/auth.service";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 
-interface Product {
+export interface Product {
   id: number;
   name: string;
   price: number;
   slug?: string;
   discountPrice?: number;
   rating: number;
-  reviewCount: number;
+  reviewCount?: number;
   description?: string;
   details?: string[];
-  image: string;
   isNew?: boolean;
   isFeatured?: boolean;
   category?: string;
   sellerId: string; // <- add this
+  stock: number,
+  brand: string,
+  thumbnail: string,
+  images: string[],
 }
 
 const ProductPageAlt = () => {
@@ -51,28 +54,34 @@ const ProductPageAlt = () => {
   );
 
   useEffect(() => {
-    // authService.fetchAllListedItems()
-    // console.log("fetch and store in slice", listedItems);
-  }, []);
-
-  useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch("https://dummyjson.com/products");
-        const data = await response.json();
+        const allItems = await authService.fetchAllListedItems();
 
-        const transformed = data.products.map((product: any) => ({
-          id: product.id,
-          name: product.title, // ← mapping title to name
-          price: product.price,
-          discountPrice: product.price * (1 - product.discountPercentage / 100),
-          rating: product.rating,
-          category: product.category,
-          reviewCount: Math.floor(Math.random() * 1000),
-          image: product.thumbnail,
-          isNew: product.stock > 50,
+        const transformed: Product[] = allItems.map((product: any, index: number) => ({
+          id: index,
+          name: product.title ?? `Product ${index}`,
+          price: product.price ?? 0,
+          discountPrice:
+            product.price && product.discountPercentage
+              ? product.price * (1 - product.discountPercentage / 100)
+              : undefined,
+          rating: product.rating ?? 0,
+          category: product.category ?? "uncategorized",
+          reviewCount: Math.floor(Math.random() * 100),
+          image: product.thumbnail ?? "",
+          isNew: (product.stock ?? 0) > 50,
+          sellerId: product.sellerId?.email ?? "",
+          stock: product.stock ?? 0,
+          brand: product.brand ?? "Unknown",
+          thumbnail: product.thumbnail ?? "",
+          images: product.images ?? [],
+          slug: (product.title ?? `product-${index}`)
+            .toLowerCase()
+            .replace(/\s+/g, "-")
+            .replace(/[^a-z0-9\-]/g, ""),
         }));
-
+        // console.log("category", transformed[0]?.category);
         setProducts(transformed);
         setFilteredProducts(transformed);
       } catch (error) {
@@ -188,7 +197,7 @@ const ProductPageAlt = () => {
             <Search size={18} color="#666" />
             <input
               type="text"
-              placeholder="Search products..."
+              placeholder="Search products, then hit enter"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={handleSearchKeyPress}
@@ -547,13 +556,23 @@ const ProductPageAlt = () => {
                   <ProductCard
                     key={product.id}
                     product={{
-                      ...product,
-                      sellerId: product.sellerId || "000000", // ensure sellerId exists
-                      category: product.category || "uncategorized", // ensure category exists
+                      id: product.id,
+                      name: product.name,
+                      price: product.price,
+                      discountPrice: product.discountPrice,
+                      rating: product.rating,
+                      category: product.category || "uncategorized",
+                      reviewCount: product.reviewCount ?? 0,
+                      image: product.thumbnail, // ensure this exists
+                      isNew: product.isNew ?? false,
+                      sellerId: product.sellerId || "unknown@example.com",
+                      total: product.price, // optional, if needed
+                      // addedAt: product.addedAt, // optional, if needed
                     }}
                   />
                 ))}
               </div>
+
 
               {/* {totalPages > 1 && (
                 <Pagination

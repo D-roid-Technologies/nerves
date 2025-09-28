@@ -154,7 +154,7 @@ interface SoldItem {
 }
 
 // Group all myItems together
-interface MyItems {
+export interface MyItems {
     listedForSale: ListedItem[];
     purchased: PurchasedItem[];
     sold: SoldItem[];
@@ -173,7 +173,7 @@ interface Cart {
     items: CartItem[];
 }
 
- export class AuthService {
+export class AuthService {
     async handleGoogleSignin() {
         const currentDateTime = getCurrentDateTime();
         const signInData = signInWithPopup(auth, provider).then(async (res: { user: { refreshToken: string; providerData: { photoURL: any; }[]; uid: any; }; }) => {
@@ -367,11 +367,11 @@ interface Cart {
     async fetchAllListedItems() {
         try {
             const usersSnapshot = await getDocs(collection(db, "nerveaccount"));
-            const allUsers: any = usersSnapshot.docs.map(doc => doc.data());
+            const allUsers: any[] = usersSnapshot.docs.map(doc => doc.data());
 
-            // Flatten all listed items
-            const allListedItems: ListedItem[] = allUsers.flatMap((user: { myItems: any[]; }) =>
-                user.myItems.flatMap(myItem => myItem.listedForSale)
+            // ✅ Flatten myItems directly from every user
+            const allListedItems: MyItems[] = allUsers.flatMap((user) =>
+                user.myItems ?? []
             );
 
             // Store in Redux
@@ -381,7 +381,9 @@ interface Cart {
             console.error("Error fetching all listed items:", err);
             return [];
         }
-    };
+    }
+
+
     async updatePrimaryInformation(partialUpdateData: Partial<PrimaryInformation>) {
         try {
             const currentUser = auth.currentUser;
@@ -462,6 +464,42 @@ interface Cart {
         } catch (error) {
             // console.error("Error updating location:", error);
             toast.error(`Failed to update location: ${error}`);
+        }
+    }
+
+    async addMyItem(newItem: any) {
+        try {
+            const currentUser = auth.currentUser;
+            if (!currentUser) {
+                toast.error("User not authenticated", {
+                    style: { background: "#ff4d4f", color: "#fff" },
+                });
+                return;
+            }
+
+            const userId = currentUser.uid;
+            const userDocRef = doc(db, "nerveaccount", userId);
+            const userSnapshot = await getDoc(userDocRef);
+
+            if (!userSnapshot.exists()) {
+                toast.error("User not found", {
+                    style: { background: "#ff4d4f", color: "#fff" },
+                });
+                return;
+            }
+
+            // ✅ Push item into Firestore array
+            await updateDoc(userDocRef, {
+                myItems: arrayUnion(newItem),
+            });
+
+            toast.success("Item added successfully! 🎉", {
+                style: { background: "#4BB543", color: "#fff" },
+            });
+        } catch (error: any) {
+            toast.error(`Failed to add item: ${error.message}`, {
+                style: { background: "#ff4d4f", color: "#fff" },
+            });
         }
     }
 

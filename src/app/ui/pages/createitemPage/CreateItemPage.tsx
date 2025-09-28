@@ -18,7 +18,11 @@ import {
   Link,
   Loader,
 } from "lucide-react";
-import styles from "./CreateItemPage.module.css"; 
+import styles from "./CreateItemPage.module.css";
+import { authService } from "../../../redux/configuration/auth.service";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux/store";
+import { Product } from "../productPage/ProductPageAlt";
 
 interface ItemFormData {
   title: string;
@@ -53,6 +57,8 @@ const CreateItemPage = () => {
   const [uploadMethod, setUploadMethod] = useState<"url" | "file">("url");
   const [showLoadingScreen, setShowLoadingScreen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const user = useSelector((state: RootState) => state.user.primaryInformation);
 
   const categories = [
     "smartphones",
@@ -260,57 +266,41 @@ const CreateItemPage = () => {
 
     try {
       // Prepare data for DummyJSON API
-      const apiData = {
-        title: formData.title,
+      const itemData: Product = {
+        id: Date.now(),
+        name: formData.title,
         description: formData.description,
         price: formData.price,
-        discountPercentage: formData.discountPercentage,
+        discountPrice: formData.discountPercentage,
         rating: formData.rating,
         stock: formData.stock,
         brand: formData.brand,
         category: formData.category,
         thumbnail: formData.thumbnail,
         images: formData.images,
+        sellerId: `${user?.email}`,
       };
 
-      // Log the data that would be sent to the API
-      console.log("ITEM CREATION DATA");
-      console.log("API Payload:", apiData);
+      authService.addMyItem(itemData).then(() => {
+        console.log("API Payload:", itemData);
+        showSuccessToast(
+          "Product created successfully! Check console for details."
+        );
+        setFormData({
+          title: "",
+          description: "",
+          price: 0,
+          discountPercentage: 0,
+          rating: 0,
+          stock: 0,
+          brand: "",
+          category: "",
+          thumbnail: "",
+          images: [],
+        });
+        setCurrentImageUrl("");
+      })
 
-      // Simulate API call to DummyJSON with a delay
-      // await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // const response = await fetch("https://dummyjson.com/products/add", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(apiData),
-      // });
-
-      // if (!response.ok) {
-      //   throw new Error("Failed to create product");
-      // }
-
-      // const result = await response.json();
-      // console.log("API Response:", result);
-
-      showSuccessToast(
-        "Product created successfully! Check console for details."
-      );
-
-      // Reset form
-      setFormData({
-        title: "",
-        description: "",
-        price: 0,
-        discountPercentage: 0,
-        rating: 0,
-        stock: 0,
-        brand: "",
-        category: "",
-        thumbnail: "",
-        images: [],
-      });
-      setCurrentImageUrl("");
     } catch (error) {
       showErrorToast("Failed to create product. Please try again.");
       console.error("Error creating product:", error);
@@ -667,7 +657,7 @@ const CreateItemPage = () => {
                   <strong>Category:</strong>{" "}
                   {formData.category
                     ? formData.category.charAt(0).toUpperCase() +
-                      formData.category.slice(1).replace("-", " ")
+                    formData.category.slice(1).replace("-", " ")
                     : "Not specified"}
                 </p>
                 <p className={styles.previewDescription}>
