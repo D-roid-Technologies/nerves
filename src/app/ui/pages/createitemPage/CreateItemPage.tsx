@@ -1,24 +1,25 @@
-import type React from "react";
-import { useState, useRef } from "react";
-import { toast } from "react-hot-toast";
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { toast, Toaster } from "react-hot-toast";
 import {
   Package,
   FileText,
   ImageIcon,
-  Tag,
-  Layers,
   Save,
   X,
   Upload,
   Eye,
   EyeOff,
-  Percent,
-  Box,
-  Star,
   Link,
   Loader,
+  Edit,
+  Star,
 } from "lucide-react";
-import styles from "./CreateItemPage.module.css"; 
+import styles from "./CreateItemPage.module.css";
+import { authService } from "../../../redux/configuration/auth.service";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux/store";
+import { Product } from "../productPage/ProductPageAlt";
 
 interface ItemFormData {
   title: string;
@@ -34,6 +35,11 @@ interface ItemFormData {
 }
 
 const CreateItemPage = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { editItem } = location.state || {};
+  const isEditMode = Boolean(editItem);
+
   const [formData, setFormData] = useState<ItemFormData>({
     title: "",
     description: "",
@@ -52,7 +58,9 @@ const CreateItemPage = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [uploadMethod, setUploadMethod] = useState<"url" | "file">("url");
   const [showLoadingScreen, setShowLoadingScreen] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const user = useSelector((state: RootState) => state.user.primaryInformation);
 
   const categories = [
     "smartphones",
@@ -77,7 +85,23 @@ const CreateItemPage = () => {
     "lighting",
   ];
 
-  // Custom toast functions with colors
+  useEffect(() => {
+    if (editItem) {
+      setFormData({
+        title: editItem.title || editItem.name || "",
+        description: editItem.description || "",
+        price: editItem.price || 0,
+        discountPercentage: editItem.discountPercentage || 0,
+        rating: editItem.rating || 0,
+        stock: editItem.stock || 0,
+        brand: editItem.brand || "",
+        category: editItem.category || "",
+        thumbnail: editItem.thumbnail || editItem.image || "",
+        images: editItem.images || [],
+      });
+    }
+  }, [editItem]);
+
   const showSuccessToast = (message: string) => {
     toast.success(message, {
       style: {
@@ -149,14 +173,12 @@ const CreateItemPage = () => {
       const dataUrl = e.target?.result as string;
 
       if (!formData.thumbnail) {
-        // Set as thumbnail if none is set
         setFormData((prev) => ({
           ...prev,
           thumbnail: dataUrl,
         }));
         showSuccessToast("Image set as thumbnail");
       } else {
-        // Add to images array
         setFormData((prev) => ({
           ...prev,
           images: [...prev.images, dataUrl],
@@ -166,7 +188,6 @@ const CreateItemPage = () => {
     };
     reader.readAsDataURL(file);
 
-    // Reset file input
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -179,14 +200,12 @@ const CreateItemPage = () => {
       currentImageUrl.trim() !== formData.thumbnail
     ) {
       if (!formData.thumbnail) {
-        // Set as thumbnail if none is set
         setFormData((prev) => ({
           ...prev,
           thumbnail: currentImageUrl.trim(),
         }));
         showSuccessToast("Image URL set as thumbnail");
       } else {
-        // Add to images array
         setFormData((prev) => ({
           ...prev,
           images: [...prev.images, currentImageUrl.trim()],
@@ -223,7 +242,7 @@ const CreateItemPage = () => {
     setFormData((prev) => ({
       ...prev,
       thumbnail: url,
-      images: prev.images.filter((img) => img !== url), // Remove from images if it was there
+      images: prev.images.filter((img) => img !== url),
     }));
     showSuccessToast("Set as main thumbnail");
   };
@@ -259,11 +278,15 @@ const CreateItemPage = () => {
     setShowLoadingScreen(true);
 
     try {
-      // Prepare data for DummyJSON API
-      const apiData = {
-        title: formData.title,
+      const itemData = {
+        id: isEditMode ? editItem.id : Date.now(),
+        name: formData.title,
         description: formData.description,
         price: formData.price,
+        discountPrice:
+          formData.discountPercentage > 0
+            ? formData.price * (1 - formData.discountPercentage / 100)
+            : undefined,
         discountPercentage: formData.discountPercentage,
         rating: formData.rating,
         stock: formData.stock,
@@ -271,63 +294,81 @@ const CreateItemPage = () => {
         category: formData.category,
         thumbnail: formData.thumbnail,
         images: formData.images,
+        sellerId: user?.email, // Make sure this is set correctly
+        reviewCount: 0,
+        slug: formData.title
+          .toLowerCase()
+          .replace(/\s+/g, "-")
+          .replace(/[^a-z0-9\-]/g, ""),
+        // Add these fields to match Product interface
+        isNew: true,
+        isFeatured: false,
       };
 
-      // Log the data that would be sent to the API
-      console.log("ITEM CREATION DATA");
-      console.log("API Payload:", apiData);
+      if (isEditMode) {
+        await authService.deleteMyItem(editItem.id);
+        await authService.addMyItem(itemData);
+      } else {
+        await authService.addMyItem(itemData);
+      }
 
-      // Simulate API call to DummyJSON with a delay
-      // await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // const response = await fetch("https://dummyjson.com/products/add", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(apiData),
-      // });
-
-      // if (!response.ok) {
-      //   throw new Error("Failed to create product");
-      // }
-
-      // const result = await response.json();
-      // console.log("API Response:", result);
+      // ✅ CRITICAL: Refresh all items and wait for completion
+      await authService.fetchAllListedItems();
 
       showSuccessToast(
-        "Product created successfully! Check console for details."
+        isEditMode
+          ? "Product updated successfully!"
+          : "Product created successfully!"
       );
 
-      // Reset form
-      setFormData({
-        title: "",
-        description: "",
-        price: 0,
-        discountPercentage: 0,
-        rating: 0,
-        stock: 0,
-        brand: "",
-        category: "",
-        thumbnail: "",
-        images: [],
-      });
-      setCurrentImageUrl("");
+      if (isEditMode) {
+        navigate("/account");
+      } else {
+        // Clear form and navigate
+        setFormData({
+          title: "",
+          description: "",
+          price: 0,
+          discountPercentage: 0,
+          rating: 0,
+          stock: 0,
+          brand: "",
+          category: "",
+          thumbnail: "",
+          images: [],
+        });
+
+        setTimeout(() => {
+          navigate("/products");
+        }, 1500);
+      }
     } catch (error) {
-      showErrorToast("Failed to create product. Please try again.");
-      console.error("Error creating product:", error);
+      showErrorToast("Failed to process product. Please try again.");
+      console.error("Error processing product:", error);
     } finally {
       setIsSubmitting(false);
       setShowLoadingScreen(false);
     }
   };
 
+  const calculateDiscountedPrice = () => {
+    if (formData.discountPercentage > 0 && formData.price > 0) {
+      return formData.price * (1 - formData.discountPercentage / 100);
+    }
+    return formData.price;
+  };
+
   return (
     <div className={styles.container}>
-      {/* Loading Screen */}
+      <Toaster position="top-center" reverseOrder={false} />
+
       {showLoadingScreen && (
         <div className={styles.loadingScreen}>
           <div className={styles.loadingContent}>
             <Loader className={styles.loadingSpinner} size={48} />
-            <h2>Creating Product...</h2>
+            <h2>
+              {isEditMode ? "Updating Product..." : "Creating Product..."}
+            </h2>
             <p>Please wait while we process your request</p>
           </div>
         </div>
@@ -337,8 +378,12 @@ const CreateItemPage = () => {
         <div className={styles.headerContent}>
           <Package className={styles.headerIcon} />
           <div>
-            <h1>Create New Product</h1>
-            <p>Add a new product to your catalog</p>
+            <h1>{isEditMode ? "Edit Product" : "Create New Product"}</h1>
+            <p>
+              {isEditMode
+                ? "Update your product details"
+                : "Add a new product to your catalog"}
+            </p>
           </div>
         </div>
         <button
@@ -353,7 +398,6 @@ const CreateItemPage = () => {
 
       <div className={styles.content}>
         <form onSubmit={handleSubmit} className={styles.form}>
-          {/* Basic Information */}
           <div className={styles.section}>
             <div className={styles.sectionHeader}>
               <FileText className={styles.sectionIcon} />
@@ -420,6 +464,17 @@ const CreateItemPage = () => {
                   min="0"
                   max="100"
                 />
+                {formData.discountPercentage > 0 && formData.price > 0 && (
+                  <small
+                    style={{
+                      color: "#10B981",
+                      marginTop: "4px",
+                      display: "block",
+                    }}
+                  >
+                    Discounted price: ₦{calculateDiscountedPrice().toFixed(2)}
+                  </small>
+                )}
               </div>
 
               <div className={styles.formGroup}>
@@ -488,7 +543,6 @@ const CreateItemPage = () => {
             </div>
           </div>
 
-          {/* Images */}
           <div className={styles.section}>
             <div className={styles.sectionHeader}>
               <ImageIcon className={styles.sectionIcon} />
@@ -564,20 +618,28 @@ const CreateItemPage = () => {
             </div>
           </div>
 
-          {/* Submit Button */}
           <div className={styles.formActions}>
             <button
               type="submit"
               className={styles.submitBtn}
               disabled={isSubmitting}
             >
-              <Save className={styles.btnIcon} />
-              {isSubmitting ? "Creating Product..." : "Create Product"}
+              {isEditMode ? (
+                <Edit className={styles.btnIcon} />
+              ) : (
+                <Save className={styles.btnIcon} />
+              )}
+              {isSubmitting
+                ? isEditMode
+                  ? "Updating Product..."
+                  : "Creating Product..."
+                : isEditMode
+                ? "Update Product"
+                : "Create Product"}
             </button>
           </div>
         </form>
 
-        {/* Preview Panel */}
         {showPreview && (
           <div className={styles.previewPanel}>
             <h3>Product Preview</h3>
@@ -635,7 +697,30 @@ const CreateItemPage = () => {
               <div className={styles.previewDetails}>
                 <h4>{formData.title || "Product Title"}</h4>
                 <p className={styles.previewPrice}>
-                  ₦{formData.price || "0.00"}
+                  {formData.discountPercentage > 0 ? (
+                    <>
+                      <span
+                        style={{
+                          color: "#10B981",
+                          fontSize: "1.5rem",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        ₦{calculateDiscountedPrice().toFixed(2)}
+                      </span>
+                      <span
+                        style={{
+                          textDecoration: "line-through",
+                          color: "#999",
+                          marginLeft: "8px",
+                        }}
+                      >
+                        ₦{formData.price.toFixed(2)}
+                      </span>
+                    </>
+                  ) : (
+                    <span>₦{formData.price.toFixed(2) || "0.00"}</span>
+                  )}
                 </p>
                 {formData.discountPercentage > 0 && (
                   <p className={styles.previewDiscount}>

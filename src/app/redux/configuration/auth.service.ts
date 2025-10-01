@@ -154,7 +154,7 @@ interface SoldItem {
 }
 
 // Group all myItems together
-interface MyItems {
+export interface MyItems {
     listedForSale: ListedItem[];
     purchased: PurchasedItem[];
     sold: SoldItem[];
@@ -173,298 +173,430 @@ interface Cart {
     items: CartItem[];
 }
 
- export class AuthService {
-    async handleGoogleSignin() {
-        const currentDateTime = getCurrentDateTime();
-        const signInData = signInWithPopup(auth, provider).then(async (res: { user: { refreshToken: string; providerData: { photoURL: any; }[]; uid: any; }; }) => {
-            const providerData = res.user.providerData[0] as FirebaseProviderData;
-            const userDocRef = doc(collection(db, "nerveaccount"), res.user.uid);
-            const gottenNames: string[] = splitFullNameBySpace(providerData.displayName);
-            const allInitials: string[] = getFirstInitials(gottenNames);
-            const nerveAccount = {
-                user: {
-                    primaryInformation: {
-                        firstName: capitalizeFirstLetter(gottenNames[0]),
-                        lastName: capitalizeFirstLetter(gottenNames[1]),
-                        middleName: "",
-                        email: providerData.email,
-                        phone: "",
-                        userType: "Buyer",
-                        nameInitials: `${allInitials[0].toUpperCase()}${allInitials[1].toUpperCase()}`,
-                        uniqueIdentifier: res.user.uid,
-                        gender: "",
-                        dateOfBirth: "",
-                        photoUrl: providerData.photoURL,
-                        isLoggedIn: true,
-                        agreedToTerms: true,
-                        verifiedEmail: false,
-                        verifyPhoneNumber: false,
-                        twoFactorSettings: false,
-                        referralName: "",
-                        secondaryEmail: "",
-                        securityQuestion: "",
-                        securityAnswer: "",
-                        disability: false,
-                        disabilityType: "",
-                        educationalLevel: "",
-                        dateOfCreation: currentDateTime,
-                    },
-                    location: {
-                        streetNumber: "",
-                        streetName: "",
-                        city: "",
-                        state: "",
-                        country: "",
-                        postalCode: "",
-                        geoCoordinates: {
-                            latitude: "",
-                            longitude: "",
-                        },
-                    },
+export class AuthService {
+  async handleGoogleSignin() {
+    const currentDateTime = getCurrentDateTime();
+    const signInData = signInWithPopup(auth, provider)
+      .then(
+        async (res: {
+          user: {
+            refreshToken: string;
+            providerData: { photoURL: any }[];
+            uid: any;
+          };
+        }) => {
+          const providerData = res.user.providerData[0] as FirebaseProviderData;
+          const userDocRef = doc(collection(db, "nerveaccount"), res.user.uid);
+          const gottenNames: string[] = splitFullNameBySpace(
+            providerData.displayName
+          );
+          const allInitials: string[] = getFirstInitials(gottenNames);
+          const nerveAccount = {
+            user: {
+              primaryInformation: {
+                firstName: capitalizeFirstLetter(gottenNames[0]),
+                lastName: capitalizeFirstLetter(gottenNames[1]),
+                middleName: "",
+                email: providerData.email,
+                phone: "",
+                userType: "Buyer",
+                nameInitials: `${allInitials[0].toUpperCase()}${allInitials[1].toUpperCase()}`,
+                uniqueIdentifier: res.user.uid,
+                gender: "",
+                dateOfBirth: "",
+                photoUrl: providerData.photoURL,
+                isLoggedIn: true,
+                agreedToTerms: true,
+                verifiedEmail: false,
+                verifyPhoneNumber: false,
+                twoFactorSettings: false,
+                referralName: "",
+                secondaryEmail: "",
+                securityQuestion: "",
+                securityAnswer: "",
+                disability: false,
+                disabilityType: "",
+                educationalLevel: "",
+                dateOfCreation: currentDateTime,
+              },
+              location: {
+                streetNumber: "",
+                streetName: "",
+                city: "",
+                state: "",
+                country: "",
+                postalCode: "",
+                geoCoordinates: {
+                  latitude: "",
+                  longitude: "",
                 },
-                cart: [] as Cart[],
-                notifications: [] as Notification[],
-                orders: [] as OrderInter[],
-                reviews: [] as ReviewInter[],
-                myItems: [] as MyItems[],
-                friends: [] as Friends[],
-                wallet: {} as Wallet,
-            };
-            await setDoc(userDocRef, nerveAccount);
-            const userSnapshot = await getDoc(userDocRef);
-            if (userSnapshot.exists()) {
-                const fetchedUserData = userSnapshot.data();
-                const primaryInformation = fetchedUserData.user.primaryInformation;
-
-                store.dispatch(setUser({
-                    providerId: providerData.providerId || "",
-                    uid: providerData.uid || "",
-                    primaryInformation: {
-                        firstName: capitalizeFirstLetter(gottenNames[0] || ""),
-                        lastName: capitalizeFirstLetter(gottenNames[1] || ""),
-                        middleName: "",
-                        email: providerData.email || "",
-                        phone: providerData.phoneNumber || "",
-                        userType: "both",
-                        nameInitials: `${(gottenNames[0]?.[0] || "").toUpperCase()}${(gottenNames[1]?.[0] || "").toUpperCase()}`,
-                        uniqueIdentifier: providerData.uid || "",
-                        gender: "",
-                        dateOfBirth: "",
-                        photoUrl: providerData.photoURL || "",
-                        isLoggedIn: true,
-                        agreedToTerms: true,
-                        verifiedEmail: false,
-                        verifyPhoneNumber: false,
-                        twoFactorSettings: false,
-                        referralName: "",
-                        secondaryEmail: "",
-                        securityQuestion: "",
-                        securityAnswer: "",
-                        disability: false,
-                        disabilityType: "",
-                        educationalLevel: "",
-                        dateOfCreation: getCurrentDateTime(),
-                    },
-                    location: {
-                        streetNumber: "",
-                        streetName: "",
-                        city: "",
-                        state: "",
-                        country: "",
-                        postalCode: "",
-                        geoCoordinates: {
-                            latitude: "",
-                            longitude: "",
-                        },
-                    },
-                }));
-
-                toast.success(`Welcome to Nerves ${primaryInformation.firstName}`, {
-                    style: { background: "#4BB543", color: "#fff" },
-                });
-
-                return { success: true };
-            } else {
-                toast.error("User Information does not exist 🚫", {
-                    style: { background: "#ff4d4f", color: "#fff" },
-                });
-                return null;
-            }
-
-        }).catch((err) => {
-            console.error("Error during registration:", err);
-            toast.error(`Error creating your Account 🚫`, {
-                style: { background: "#ff4d4f", color: "#fff" },
-            });
-            return null;
-        })
-        return signInData
-    }
-    async handleUserLogin() {
-        try {
-            // 1️⃣ Sign in with Google
-            const result = await signInWithPopup(auth, provider);
-            const user = result.user;
-            const providerData = user.providerData[0] as FirebaseProviderData;
-
-            // 2️⃣ Reference Firestore document
-            const userDocRef = doc(collection(db, "nerveaccount"), user.uid);
-            const userSnapshot = await getDoc(userDocRef);
-
-            if (!userSnapshot.exists()) {
-                toast.error("User account does not exist. Please sign up first 🚫", {
-                    style: { background: "#ff4d4f", color: "#fff" },
-                });
-                return null;
-            }
-
-            // 3️⃣ Fetch user data from Firestore
+              },
+            },
+            cart: [] as Cart[],
+            notifications: [] as Notification[],
+            orders: [] as OrderInter[],
+            reviews: [] as ReviewInter[],
+            myItems: [] as MyItems[],
+            friends: [] as Friends[],
+            wallet: {} as Wallet,
+          };
+          await setDoc(userDocRef, nerveAccount);
+          const userSnapshot = await getDoc(userDocRef);
+          if (userSnapshot.exists()) {
             const fetchedUserData = userSnapshot.data();
             const primaryInformation = fetchedUserData.user.primaryInformation;
-            const location = fetchedUserData.user.location;
-            const cart = fetchedUserData.cart;
-            const friends = fetchedUserData.friends;
-            const myItems = fetchedUserData.myItems;
-            const notifications = fetchedUserData.notifications;
-            const orders = fetchedUserData.orders;
-            const reviews = fetchedUserData.reviews;
-            const wallet = fetchedUserData.wallet;
 
-            // 4️⃣ Update Redux store
-            store.dispatch(setUser({
+            store.dispatch(
+              setUser({
                 providerId: providerData.providerId || "",
-                uid: user.uid || "",
+                uid: providerData.uid || "",
                 primaryInformation: {
-                    ...primaryInformation,
-                    isLoggedIn: true, // ensure user is marked as logged in
+                  firstName: capitalizeFirstLetter(gottenNames[0] || ""),
+                  lastName: capitalizeFirstLetter(gottenNames[1] || ""),
+                  middleName: "",
+                  email: providerData.email || "",
+                  phone: providerData.phoneNumber || "",
+                  userType: "both",
+                  nameInitials: `${(gottenNames[0]?.[0] || "").toUpperCase()}${(
+                    gottenNames[1]?.[0] || ""
+                  ).toUpperCase()}`,
+                  uniqueIdentifier: providerData.uid || "",
+                  gender: "",
+                  dateOfBirth: "",
+                  photoUrl: providerData.photoURL || "",
+                  isLoggedIn: true,
+                  agreedToTerms: true,
+                  verifiedEmail: false,
+                  verifyPhoneNumber: false,
+                  twoFactorSettings: false,
+                  referralName: "",
+                  secondaryEmail: "",
+                  securityQuestion: "",
+                  securityAnswer: "",
+                  disability: false,
+                  disabilityType: "",
+                  educationalLevel: "",
+                  dateOfCreation: getCurrentDateTime(),
                 },
-                location: location || {
-                    streetNumber: "",
-                    streetName: "",
-                    city: "",
-                    state: "",
-                    country: "",
-                    postalCode: "",
-                    geoCoordinates: { latitude: "", longitude: "" },
+                location: {
+                  streetNumber: "",
+                  streetName: "",
+                  city: "",
+                  state: "",
+                  country: "",
+                  postalCode: "",
+                  geoCoordinates: {
+                    latitude: "",
+                    longitude: "",
+                  },
                 },
-            }));
+              })
+            );
 
-            // store.dispatch(updateCartSlice(cart));
-
-            toast.success(`Welcome back, ${primaryInformation.firstName}!`, {
-                style: { background: "#4BB543", color: "#fff" },
+            toast.success(`Welcome to Nerves ${primaryInformation.firstName}`, {
+              style: { background: "#4BB543", color: "#fff" },
             });
 
             return { success: true };
-        } catch (err) {
-            console.error("Error during login:", err);
-            toast.error(`Error logging in 🚫`, {
-                style: { background: "#ff4d4f", color: "#fff" },
+          } else {
+            toast.error("User Information does not exist 🚫", {
+              style: { background: "#ff4d4f", color: "#fff" },
             });
             return null;
+          }
         }
+      )
+      .catch((err) => {
+        console.error("Error during registration:", err);
+        toast.error(`Error creating your Account 🚫`, {
+          style: { background: "#ff4d4f", color: "#fff" },
+        });
+        return null;
+      });
+    return signInData;
+  }
+  async handleUserLogin() {
+    try {
+      // 1️⃣ Sign in with Google
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      const providerData = user.providerData[0] as FirebaseProviderData;
+
+      // 2️⃣ Reference Firestore document
+      const userDocRef = doc(collection(db, "nerveaccount"), user.uid);
+      const userSnapshot = await getDoc(userDocRef);
+
+      if (!userSnapshot.exists()) {
+        toast.error("User account does not exist. Please sign up first 🚫", {
+          style: { background: "#ff4d4f", color: "#fff" },
+        });
+        return null;
+      }
+
+      // 3️⃣ Fetch user data from Firestore
+      const fetchedUserData = userSnapshot.data();
+      const primaryInformation = fetchedUserData.user.primaryInformation;
+      const location = fetchedUserData.user.location;
+      const cart = fetchedUserData.cart;
+      const friends = fetchedUserData.friends;
+      const myItems = fetchedUserData.myItems;
+      const notifications = fetchedUserData.notifications;
+      const orders = fetchedUserData.orders;
+      const reviews = fetchedUserData.reviews;
+      const wallet = fetchedUserData.wallet;
+
+      // 4️⃣ Update Redux store
+      store.dispatch(
+        setUser({
+          providerId: providerData.providerId || "",
+          uid: user.uid || "",
+          primaryInformation: {
+            ...primaryInformation,
+            isLoggedIn: true, // ensure user is marked as logged in
+          },
+          location: location || {
+            streetNumber: "",
+            streetName: "",
+            city: "",
+            state: "",
+            country: "",
+            postalCode: "",
+            geoCoordinates: { latitude: "", longitude: "" },
+          },
+        })
+      );
+
+      // store.dispatch(updateCartSlice(cart));
+
+      toast.success(`Welcome back, ${primaryInformation.firstName}!`, {
+        style: { background: "#4BB543", color: "#fff" },
+      });
+
+      return { success: true };
+    } catch (err) {
+      console.error("Error during login:", err);
+      toast.error(`Error logging in 🚫`, {
+        style: { background: "#ff4d4f", color: "#fff" },
+      });
+      return null;
     }
-    async fetchAllListedItems() {
-        try {
-            const usersSnapshot = await getDocs(collection(db, "nerveaccount"));
-            const allUsers: any = usersSnapshot.docs.map(doc => doc.data());
+  }
+  async fetchAllListedItems() {
+    try {
+      const usersSnapshot = await getDocs(collection(db, "nerveaccount"));
+      const allUsers: any[] = usersSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
-            // Flatten all listed items
-            const allListedItems: ListedItem[] = allUsers.flatMap((user: { myItems: any[]; }) =>
-                user.myItems.flatMap(myItem => myItem.listedForSale)
-            );
+      // ✅ PROPERLY extract myItems from ALL users and flatten the array
+      const allListedItems = allUsers.flatMap((user) => {
+        // Ensure myItems exists and is an array
+        const userItems = user.myItems || [];
 
-            // Store in Redux
-            store.dispatch(setListedItems(allListedItems));
-            return allListedItems;
-        } catch (err) {
-            console.error("Error fetching all listed items:", err);
-            return [];
-        }
-    };
-    async updatePrimaryInformation(partialUpdateData: Partial<PrimaryInformation>) {
-        try {
-            const currentUser = auth.currentUser;
-            if (!currentUser) {
-                toast.error("User not authenticated", {
-                    style: { background: '#ff4d4f', color: '#fff' },
-                });
-                return;
-            }
+        // Add user info to each item for consistency
+        return userItems.map((item: any) => ({
+          ...item,
+          // Ensure sellerId is properly set
+          sellerId:
+            item.sellerId || user.user?.primaryInformation?.email || user.id,
+        }));
+      });
 
-            const userId = currentUser.uid;
-            const userDocRef = doc(db, "nerveaccount", userId);
-            const userSnapshot = await getDoc(userDocRef);
+      console.log("📦 Fetched all listed items:", allListedItems.length);
+      console.log("🔍 Sample items:", allListedItems.slice(0, 2));
 
-            if (!userSnapshot.exists()) {
-                toast.error("User not found", {
-                    style: { background: '#ff4d4f', color: '#fff' },
-                });
-                return;
-            }
-
-            const currentData = userSnapshot.data();
-
-            // ✅ Merge only primaryInformation
-            const updatedPrimaryInfo = {
-                ...currentData.user.primaryInformation,
-                ...partialUpdateData,
-            };
-
-            // Save back to Firestore
-            await updateDoc(userDocRef, {
-                "user.primaryInformation": updatedPrimaryInfo,
-            });
-
-            // console.log("Updated Primary Info:", updatedPrimaryInfo);
-            // toast.success("Profile updated successfully!");
-        } catch (error) {
-            // console.error("Error updating primary information:", error);
-            toast.error(`Failed to update profile: ${error}`);
-        }
+      // Store in Redux
+      store.dispatch(setListedItems(allListedItems));
+      return allListedItems;
+    } catch (err) {
+      console.error("Error fetching all listed items:", err);
+      return [];
     }
-    async updateLocation(partialUpdateData: Partial<LocationS>) {
-        try {
-            const currentUser = auth.currentUser;
-            if (!currentUser) {
-                toast.error("User not authenticated", {
-                    style: { background: '#ff4d4f', color: '#fff' },
-                });
-                return;
-            }
+  }
 
-            const userId = currentUser.uid;
-            const userDocRef = doc(db, "nerveaccount", userId);
-            const userSnapshot = await getDoc(userDocRef);
+  
+  // Add this method to your AuthService class in auth.service.ts
+  async deleteMyItem(productId: string | number) {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        toast.error("User not authenticated", {
+          style: { background: "#ff4d4f", color: "#fff" },
+        });
+        return false;
+      }
 
-            if (!userSnapshot.exists()) {
-                toast.error("User not found", {
-                    style: { background: '#ff4d4f', color: '#fff' },
-                });
-                return;
-            }
+      const userId = currentUser.uid;
+      const userDocRef = doc(db, "nerveaccount", userId);
+      const userSnapshot = await getDoc(userDocRef);
 
-            const currentData = userSnapshot.data();
+      if (!userSnapshot.exists()) {
+        toast.error("User not found", {
+          style: { background: "#ff4d4f", color: "#fff" },
+        });
+        return false;
+      }
 
-            // ✅ Merge only location
-            const updatedLocation = {
-                ...currentData.user.location,
-                ...partialUpdateData,
-            };
+      const userData = userSnapshot.data();
+      const currentMyItems = userData.myItems || [];
 
-            // Save back to Firestore
-            await updateDoc(userDocRef, {
-                "user.location": updatedLocation,
-            });
+      // Find the item to delete
+      const itemToDelete = currentMyItems.find(
+        (item: any) => item.id === productId || item.itemId === productId
+      );
 
-            // console.log("Updated Location:", updatedLocation);
-            // toast.success("Location updated successfully!");
-        } catch (error) {
-            // console.error("Error updating location:", error);
-            toast.error(`Failed to update location: ${error}`);
-        }
+      if (!itemToDelete) {
+        toast.error("Product not found", {
+          style: { background: "#ff4d4f", color: "#fff" },
+        });
+        return false;
+      }
+
+      // Filter out the item to delete
+      const updatedMyItems = currentMyItems.filter(
+        (item: any) => item.id !== productId && item.itemId !== productId
+      );
+
+      // Update Firestore
+      await updateDoc(userDocRef, {
+        myItems: updatedMyItems,
+      });
+
+      toast.success("Product deleted successfully! 🗑️", {
+        style: { background: "#4BB543", color: "#fff" },
+      });
+
+      return true;
+    } catch (error: any) {
+      console.error("Error deleting product:", error);
+      toast.error(`Failed to delete product: ${error.message}`, {
+        style: { background: "#ff4d4f", color: "#fff" },
+      });
+      return false;
     }
+  }
 
+  async updatePrimaryInformation(
+    partialUpdateData: Partial<PrimaryInformation>
+  ) {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        toast.error("User not authenticated", {
+          style: { background: "#ff4d4f", color: "#fff" },
+        });
+        return;
+      }
+
+      const userId = currentUser.uid;
+      const userDocRef = doc(db, "nerveaccount", userId);
+      const userSnapshot = await getDoc(userDocRef);
+
+      if (!userSnapshot.exists()) {
+        toast.error("User not found", {
+          style: { background: "#ff4d4f", color: "#fff" },
+        });
+        return;
+      }
+
+      const currentData = userSnapshot.data();
+
+      // ✅ Merge only primaryInformation
+      const updatedPrimaryInfo = {
+        ...currentData.user.primaryInformation,
+        ...partialUpdateData,
+      };
+
+      // Save back to Firestore
+      await updateDoc(userDocRef, {
+        "user.primaryInformation": updatedPrimaryInfo,
+      });
+
+      // console.log("Updated Primary Info:", updatedPrimaryInfo);
+      // toast.success("Profile updated successfully!");
+    } catch (error) {
+      // console.error("Error updating primary information:", error);
+      toast.error(`Failed to update profile: ${error}`);
+    }
+  }
+  async updateLocation(partialUpdateData: Partial<LocationS>) {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        toast.error("User not authenticated", {
+          style: { background: "#ff4d4f", color: "#fff" },
+        });
+        return;
+      }
+
+      const userId = currentUser.uid;
+      const userDocRef = doc(db, "nerveaccount", userId);
+      const userSnapshot = await getDoc(userDocRef);
+
+      if (!userSnapshot.exists()) {
+        toast.error("User not found", {
+          style: { background: "#ff4d4f", color: "#fff" },
+        });
+        return;
+      }
+
+      const currentData = userSnapshot.data();
+
+      // ✅ Merge only location
+      const updatedLocation = {
+        ...currentData.user.location,
+        ...partialUpdateData,
+      };
+
+      // Save back to Firestore
+      await updateDoc(userDocRef, {
+        "user.location": updatedLocation,
+      });
+
+      // console.log("Updated Location:", updatedLocation);
+      // toast.success("Location updated successfully!");
+    } catch (error) {
+      // console.error("Error updating location:", error);
+      toast.error(`Failed to update location: ${error}`);
+    }
+  }
+
+  async addMyItem(newItem: any) {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        toast.error("User not authenticated", {
+          style: { background: "#ff4d4f", color: "#fff" },
+        });
+        return;
+      }
+
+      const userId = currentUser.uid;
+      const userDocRef = doc(db, "nerveaccount", userId);
+      const userSnapshot = await getDoc(userDocRef);
+
+      if (!userSnapshot.exists()) {
+        toast.error("User not found", {
+          style: { background: "#ff4d4f", color: "#fff" },
+        });
+        return;
+      }
+
+      // ✅ Push item into Firestore array
+      await updateDoc(userDocRef, {
+        myItems: arrayUnion(newItem),
+      });
+
+      toast.success("Item added successfully! 🎉", {
+        style: { background: "#4BB543", color: "#fff" },
+      });
+    } catch (error: any) {
+      toast.error(`Failed to add item: ${error.message}`, {
+        style: { background: "#ff4d4f", color: "#fff" },
+      });
+    }
+  }
 }
 
 export const authService = new AuthService()

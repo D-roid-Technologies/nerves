@@ -190,7 +190,7 @@ const ProductPage = () => {
             <Search size={18} color="#666" />
             <input
               type="text"
-              placeholder="Search products..."
+              placeholder="Search products, then hit enter"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={handleSearchKeyPress}

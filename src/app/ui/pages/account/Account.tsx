@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Star,
   CheckCircle,
@@ -12,12 +12,18 @@ import {
   User,
   Plus,
   CircleCheckBig,
+  Trash2,
+  Eye,
+  Loader, // Added Loader icon
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import styles from "./account.module.css";
 import { useNavigate } from "react-router-dom";
 import OrderStatus from "../orderPages/OrderStatus";
+import { authService } from "../../../redux/configuration/auth.service";
+import { auth } from "../../../firebase";
+import toast from "react-hot-toast";
 
 const mockUser = {
   firstName: "John",
@@ -58,10 +64,21 @@ const mockUser = {
   ],
 };
 
-interface OrderStatusProps {
-  label: string;
-  count: number;
-  Icon: React.ElementType;
+interface UserItem {
+  id: string | number;
+  title?: string;
+  name?: string;
+  price: number;
+  thumbnail?: string;
+  image?: string;
+  category?: string;
+  stock?: number;
+  sellerId?: string;
+  description?: string;
+  discountPercentage?: number;
+  rating?: number;
+  images?: string[];
+  brand?: string;
 }
 
 export default function MyAccountPage() {
@@ -69,10 +86,49 @@ export default function MyAccountPage() {
   const userType = user.primaryInformation?.userType || "both";
   const isSeller = userType === "seller";
   const isBoth = userType === "both";
-  // Show sections for both sellers and regular users
   const showSections = isSeller || isBoth;
   const paidOrders = useSelector((state: RootState) => state.paidOrders);
   const navigate = useNavigate();
+
+  // State for user's items
+  const [userItems, setUserItems] = useState<UserItem[]>([]);
+  const [loadingItems, setLoadingItems] = useState(true);
+  const [itemToDelete, setItemToDelete] = useState<UserItem | null>(null);
+  const [deletingItemId, setDeletingItemId] = useState<string | number | null>(
+    null
+  ); // New state for tracking deletion
+
+  // Fetch user's items
+  useEffect(() => {
+    const fetchUserItems = async () => {
+      try {
+        setLoadingItems(true);
+        const allItems = await authService.fetchAllListedItems();
+        const currentUser = auth.currentUser;
+
+        if (currentUser) {
+          // Filter items owned by current user
+          const myItems = allItems.filter((item: any) => {
+            const itemSellerId =
+              typeof item.sellerId === "object"
+                ? item.sellerId.email
+                : item.sellerId;
+            return itemSellerId === currentUser.email;
+          });
+
+          setUserItems(myItems);
+        }
+      } catch (error) {
+        console.error("Error fetching user items:", error);
+      } finally {
+        setLoadingItems(false);
+      }
+    };
+
+    if (showSections) {
+      fetchUserItems();
+    }
+  }, [showSections]);
 
   const getOrderCountsByStatus = () => {
     const orders = paidOrders.orders;
@@ -106,8 +162,100 @@ export default function MyAccountPage() {
     navigate("/early-bird-registration");
   };
 
+  // Handle item deletion
+  const handleDeleteItem = async (item: UserItem) => {
+    try {
+      setDeletingItemId(item.id); // Start loading for this specific item
+
+      const success = await authService.deleteMyItem(item.id);
+      if (success) {
+        // Remove item from local state
+        setUserItems((prevItems) =>
+          prevItems.filter((prevItem) => prevItem.id !== item.id)
+        );
+
+        // ✅ CRITICAL: Refresh all items to update Redux
+        await authService.fetchAllListedItems();
+
+        setItemToDelete(null);
+        toast.success(`"${item.title || item.name}" deleted successfully!`, {
+          style: { background: "#4BB543", color: "#fff" },
+          duration: 5000,
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting item:", error);
+      toast.error("Failed to delete item. Please try again.", {
+        style: { background: "#ff4d4f", color: "#fff" },
+      });
+    } finally {
+      setDeletingItemId(null); // Stop loading regardless of outcome
+    }
+  };
+
+  // Navigate to item details
+  const navigateToItemDetails = (item: UserItem) => {
+    const slug = (item.title || item.name || `product-${item.id}`)
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9\-]/g, "");
+    navigate(`/shop/${slug}`);
+  };
+
+  // Navigate to edit item
+  const navigateToEditItem = (item: UserItem) => {
+    navigate("/create", { state: { editItem: item } });
+  };
+
+  // Format price
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency: "NGN",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(price);
+  };
+
   return (
     <div className={styles["account-container"]}>
+      {/* Delete Confirmation Modal */}
+      {itemToDelete && (
+        <div className={styles["delete-confirmation-modal"]}>
+          <div className={styles["delete-confirmation-content"]}>
+            <h3>Delete Product</h3>
+            <p>
+              Are you sure you want to delete "
+              {itemToDelete.title || itemToDelete.name}"? This action cannot be
+              undone.
+            </p>
+            <div className={styles["delete-confirmation-actions"]}>
+              <button
+                className={styles["cancel-delete-btn"]}
+                onClick={() => setItemToDelete(null)}
+                disabled={deletingItemId === itemToDelete.id} // Disable while deleting
+              >
+                Cancel
+              </button>
+              <button
+                className={styles["confirm-delete-btn"]}
+                onClick={() => handleDeleteItem(itemToDelete)}
+                disabled={deletingItemId === itemToDelete.id} // Disable while deleting
+              >
+                {deletingItemId === itemToDelete.id ? (
+                  <>
+                    <Loader size={16} className={styles["delete-loader"]} />
+                    Deleting...
+                  </>
+                ) : (
+                  "Yes, Delete"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="settings-header">
         <div
           className="header-content"
@@ -231,7 +379,7 @@ export default function MyAccountPage() {
           />
         </div>
       </div>
-      {showSections &&(
+      {showSections && (
         <div className={styles["account-section"]}>
           <div className={styles["account-profile-header"]}>
             <h2 className={styles["account-h2"]}>My Reviews</h2>
@@ -281,8 +429,7 @@ export default function MyAccountPage() {
         </div>
       )}
 
-      {/* replaace isSeller with showSections to render a section for both a user and seller user type */}
-      {showSections &&(
+      {showSections && (
         <div className={styles["account-section"]}>
           <div className={styles["account-profile-header"]}>
             <h2 className={styles["account-h2"]}>My Sales</h2>
@@ -325,12 +472,12 @@ export default function MyAccountPage() {
           )}
         </div>
       )}
-      {showSections &&(
+
+      {/* Updated Create Items Section */}
+      {showSections && (
         <div className={styles["account-section"]}>
-          <h2 className={styles["account-h2"]}>Create Items</h2>
-          <div className={styles["account-empty-state"]}>
-            <Package className={styles["account-empty-icon"]} />
-            <p>You haven't created any items yet</p>
+          <div className={styles["account-profile-header"]}>
+            <h2 className={styles["account-h2"]}>My Items</h2>
             <button
               className={styles["account-edit-btn"]}
               onClick={() => navigate("/create")}
@@ -339,6 +486,89 @@ export default function MyAccountPage() {
               Create Item
             </button>
           </div>
+
+          {loadingItems ? (
+            <div className={styles["account-empty-state"]}>
+              <div className={styles["account-loading"]}>
+                Loading your items...
+              </div>
+            </div>
+          ) : userItems.length > 0 ? (
+            <div className={styles["account-items-grid"]}>
+              {userItems.map((item) => (
+                <div key={item.id} className={styles["account-item-card"]}>
+                  <div className={styles["account-item-image"]}>
+                    <img
+                      src={
+                        item.thumbnail || item.image || "/placeholder-image.jpg"
+                      }
+                      alt={item.title || item.name}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src =
+                          "https://via.placeholder.com/200x200?text=No+Image";
+                      }}
+                    />
+                  </div>
+                  <div className={styles["account-item-content"]}>
+                    <h3 className={styles["account-item-title"]}>
+                      {item.title || item.name || "Untitled Product"}
+                    </h3>
+                    <p className={styles["account-item-price"]}>
+                      {formatPrice(item.price)}
+                    </p>
+                    <div className={styles["account-item-meta"]}>
+                      <span className={styles["account-item-category"]}>
+                        {item.category || "Uncategorized"}
+                      </span>
+                      <span className={styles["account-item-stock"]}>
+                        Stock: {item.stock || 0}
+                      </span>
+                    </div>
+                  </div>
+                  <div className={styles["account-item-actions"]}>
+                    <button
+                      className={styles["account-item-view-btn"]}
+                      onClick={() => navigateToItemDetails(item)}
+                      title="View Item"
+                    >
+                      <Eye size={16} />
+                    </button>
+                    <button
+                      className={styles["account-item-edit-btn"]}
+                      onClick={() => navigateToEditItem(item)}
+                      title="Edit Item"
+                    >
+                      <Edit size={16} />
+                    </button>
+                    <button
+                      className={styles["account-item-delete-btn"]}
+                      onClick={() => setItemToDelete(item)}
+                      title="Delete Item"
+                      disabled={deletingItemId === item.id} // Disable while deleting
+                    >
+                      {deletingItemId === item.id ? (
+                        <Loader size={16} className={styles["delete-loader"]} />
+                      ) : (
+                        <Trash2 size={16} />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className={styles["account-empty-state"]}>
+              <Package className={styles["account-empty-icon"]} />
+              <p>You haven't created any items yet</p>
+              <button
+                className={styles["account-edit-btn"]}
+                onClick={() => navigate("/create")}
+              >
+                <Plus size={16} style={{ marginRight: "8px" }} />
+                Create Your First Item
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

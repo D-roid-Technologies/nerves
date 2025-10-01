@@ -11,16 +11,19 @@ interface ProductCardProps {
     name: string;
     price: number;
     discountPrice?: number;
+    discountPercentage?: number; // Added this line
     rating: number;
     category: string;
     reviewCount: number;
     image: string;
     isNew?: boolean;
-
-    // Added fields for cart functionality
-    sellerId: string; // required when adding to cart
-    total?: number; // derived field: price * quantity
-    addedAt?: string; // timestamp when added to cart
+    sellerId: string;
+    total?: number;
+    slug?: string;
+    description?: string; // Added for completeness
+    brand?: string; // Added for completeness
+    stock?: number; // Added for completeness
+    images?: string[]; // Added for completeness
   };
 }
 
@@ -35,7 +38,7 @@ const formatPrice = (price: number) => {
   }).format(price);
 };
 
-const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+const ProductCardAlt: React.FC<ProductCardProps> = ({ product }) => {
   const dispatch = useDispatch();
   const [isWishlisted, setIsWishlisted] = React.useState(false);
   const [isHovered, setIsHovered] = React.useState(false);
@@ -52,18 +55,25 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     setIsWishlisted(!isWishlisted);
   };
 
-  const discountPercentage = product.discountPrice
-    ? Math.round(
-        ((product.price - product.discountPrice) / product.price) * 100
-      )
-    : 0;
+  // Use provided discountPercentage or calculate it
+  const discountPercentage =
+    product.discountPercentage ||
+    (product.discountPrice
+      ? Math.round(
+          ((product.price - product.discountPrice) / product.price) * 100
+        )
+      : 0);
+
+  const productSlug =
+    product.slug ||
+    product.name
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9\-]/g, "");
 
   return (
     <Link
-      to={`/products/${product.name
-        .toLowerCase()
-        .replace(/\s+/g, "-")
-        .replace(/[^a-z0-9\-]/g, "")}`}
+      to={`/shop/${productSlug}`}
       className="product-card"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -124,4 +134,4 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   );
 };
 
-export default ProductCard;
+export default ProductCardAlt;

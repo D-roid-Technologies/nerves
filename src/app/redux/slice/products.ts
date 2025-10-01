@@ -1,9 +1,9 @@
 // store/productsSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { ListedItem } from "../configuration/auth.service";
+import { MyItems } from "../configuration/auth.service";
 
 interface ProductsState {
-    listedItems: ListedItem[];
+    listedItems: MyItems[];
 }
 
 const initialState: ProductsState = {
@@ -14,10 +14,11 @@ export const productsSlice = createSlice({
     name: "products",
     initialState,
     reducers: {
-        setListedItems: (state, action: PayloadAction<ListedItem[]>) => {
+        setListedItems: (state, action: PayloadAction<MyItems[]>) => {
             state.listedItems = action.payload;
+            console.log(state.listedItems)
         },
-        addListedItem: (state, action: PayloadAction<ListedItem>) => {
+        addListedItem: (state, action: PayloadAction<MyItems>) => {
             state.listedItems.push(action.payload);
         },
     },

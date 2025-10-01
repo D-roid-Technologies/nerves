@@ -32,6 +32,7 @@ import PrivacyPolicy from "../ui/pages/footerLinksPages/PrivacyPolicy";
 import FAQ from "../ui/pages/footerLinksPages/FAQ";
 import ContactUs from "../ui/pages/footerLinksPages/ContactUs";
 import OrderStatus from "../ui/pages/orderStatus/OrderStatus";
+import ProductDetailsPageAlt from "../ui/components/ProductDetailsPage/ProductDetailsPageAlt";
 // import CheckoutPage from "../ui/components/checkout/Checkoutpage";
 
 const Index: React.FunctionComponent = () => {
@@ -84,6 +85,7 @@ const Index: React.FunctionComponent = () => {
           path="/products/:productTitle"
           element={<ProductDetailsPage />}
         />
+        <Route path="/shop/:productTitle" element={<ProductDetailsPageAlt />} />
         {/* <Route path="/checkout" element={<Checkout />} /> */}
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/notifications" element={<NotificationsPage />} />

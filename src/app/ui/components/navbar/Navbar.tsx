@@ -121,7 +121,7 @@ const Navbar = () => {
           {/* Left Links - Only visible on desktop */}
           <ul className={styles.navLinks}>
             <li>
-              <Link to="/products">Shop</Link>
+              <Link to="/shop">Shop</Link>
             </li>
             <li>
               <Link to="/catergories">catergories</Link>
@@ -411,7 +411,7 @@ const Navbar = () => {
             </div>
             <div className={styles.sidebarContent}>
               <Link
-                to="/products"
+                to="/shop"
                 className={styles.sidebarItem}
                 onClick={closeSidebar}
               >
