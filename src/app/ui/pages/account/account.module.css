@@ -413,3 +413,280 @@
     font-size: 0.8125rem;
   }
 }
+/* My Items Section Styles */
+.account-items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.account-item-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  background: white;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.account-item-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+  border-color: #000;
+}
+
+.account-item-image {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  background: #f9fafb;
+}
+
+.account-item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.account-item-card:hover .account-item-image img {
+  transform: scale(1.05);
+}
+
+.account-item-content {
+  padding: 1.25rem;
+}
+
+.account-item-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.account-item-price {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 0.75rem;
+}
+
+.account-item-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.account-item-category {
+  background: #f3f4f6;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.account-item-stock {
+  font-weight: 500;
+}
+
+.account-item-actions {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  opacity: 0;
+  transform: translateX(10px);
+  transition: all 0.3s ease;
+}
+
+.account-item-card:hover .account-item-actions {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.account-item-view-btn,
+.account-item-edit-btn,
+.account-item-delete-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+
+.account-item-view-btn {
+  background: rgba(59, 130, 246, 0.9);
+  color: white;
+}
+
+.account-item-view-btn:hover {
+  background: #3b82f6;
+  transform: scale(1.1);
+}
+
+.account-item-edit-btn {
+  background: rgba(16, 185, 129, 0.9);
+  color: white;
+}
+
+.account-item-edit-btn:hover {
+  background: #10b981;
+  transform: scale(1.1);
+}
+
+.account-item-delete-btn {
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+}
+
+.account-item-delete-btn:hover {
+  background: #ef4444;
+  transform: scale(1.1);
+}
+
+.account-loading {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Responsive adjustments for items grid */
+@media (max-width: 1024px) {
+  .account-items-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.25rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .account-items-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+
+  .account-item-content {
+    padding: 1rem;
+  }
+
+  .account-item-title {
+    font-size: 1rem;
+  }
+
+  .account-item-price {
+    font-size: 1.125rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .account-items-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .account-item-actions {
+    position: static;
+    opacity: 1;
+    transform: none;
+    flex-direction: row;
+    justify-content: center;
+    padding: 0.75rem;
+    background: #f9fafb;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .account-item-view-btn,
+  .account-item-edit-btn,
+  .account-item-delete-btn {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* Delete Confirmation Modal */
+.delete-confirmation-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.delete-confirmation-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.delete-confirmation-content h3 {
+  margin-bottom: 1rem;
+  color: #1a1a1a;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.delete-confirmation-content p {
+  margin-bottom: 1.5rem;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.delete-confirmation-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.cancel-delete-btn {
+  padding: 0.75rem 1.5rem;
+  background: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.cancel-delete-btn:hover {
+  background: #4b5563;
+}
+
+.confirm-delete-btn {
+  padding: 0.75rem 1.5rem;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.confirm-delete-btn:hover {
+  background: #dc2626;
+}

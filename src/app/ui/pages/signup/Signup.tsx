@@ -17,7 +17,7 @@ const SignUp: React.FunctionComponent = () => {
     confirmPassword: "",
   });
 
-  const [text, setText] = useState<string>("Google")
+  const [text, setText] = useState<string>("Google");
 
   // const [showPassword, setShowPassword] = useState(false);
   // const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -176,10 +176,10 @@ const SignUp: React.FunctionComponent = () => {
         setText("Handshake Successful!");
         setTimeout(() => {
           navigate("/shop");
-        }, 3000)
-      })
-    }, 3000)
-  }
+        }, 3000);
+      });
+    }, 3000);
+  };
 
   const handleLoginRedirect = () => {
     navigate("/login");
@@ -257,7 +257,9 @@ const SignUp: React.FunctionComponent = () => {
             <button
               type="button"
               className="social-button google"
-              onClick={() => { handleGoogleSignIn() }}
+              onClick={() => {
+                handleGoogleSignIn();
+              }}
             >
               <GoogleIcon />
               <span>{text}</span>
@@ -273,7 +275,7 @@ const SignUp: React.FunctionComponent = () => {
             <button
               type="button"
               className="social-button facebook"
-            // onClick={() => handleSocialSignup("Facebook")}
+              // onClick={() => handleSocialSignup("Facebook")}
             >
               <FacebookIcon />
               <span>Facebook</span>
