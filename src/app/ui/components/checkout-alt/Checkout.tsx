@@ -65,9 +65,8 @@ const Checkout = () => {
         lastName: user.primaryInformation.lastName || "",
         email: user.primaryInformation.email || "",
         phone: user.primaryInformation.phone || "",
-        address: `${user.location.streetNumber || ""} ${
-          user.location.streetName || ""
-        }`.trim(),
+        address: `${user.location.streetNumber || ""} ${user.location.streetName || ""
+          }`.trim(),
         city: user.location.city || "",
         state: user.location.state || "",
         zipCode: user.location.postalCode || "",
@@ -190,8 +189,8 @@ const Checkout = () => {
     shippingMethod === "express"
       ? 1599
       : shippingMethod === "overnight"
-      ? 2999
-      : 599;
+        ? 2999
+        : 599;
   const tax = subtotal * 0.08;
   const total = subtotal + shippingCost + tax;
 
@@ -259,8 +258,8 @@ const Checkout = () => {
 
     const payStack = new PayStackPop();
     payStack.newTransaction({
-      key: "pk_test_db0145199289f83c428d57cf70755142bb0b8b28",
-      // key: "pk_live_d2b967eddda456841f504b85549767fc33cc9fd4",
+      // key: "pk_test_db0145199289f83c428d57cf70755142bb0b8b28",
+      key: "pk_live_d2b967eddda456841f504b85549767fc33cc9fd4",
       email: paymentDetails.email,
       amount: Number(paymentDetails.amount) * 100,
       onSuccess: (res) => {
@@ -937,8 +936,8 @@ const Checkout = () => {
                 }
               >
                 {currentStep === 2 &&
-                user.isLoggedIn &&
-                !profileCompletion.isComplete
+                  user.isLoggedIn &&
+                  !profileCompletion.isComplete
                   ? "Complete Profile First"
                   : "Continue"}
               </button>
@@ -973,7 +972,7 @@ const Checkout = () => {
                   <span className="item-price">
                     {formatPrice(
                       (item.product.discountPrice || item.product.price) *
-                        item.quantity
+                      item.quantity
                     )}
                   </span>
                 </div>
