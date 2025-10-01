@@ -690,3 +690,22 @@
 .confirm-delete-btn:hover {
   background: #dc2626;
 }
+
+.delete-loader {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.confirm-delete-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

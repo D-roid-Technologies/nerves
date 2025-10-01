@@ -52,7 +52,7 @@ const ProductPageAlt = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
     category: "",
-    priceRange: [0, 1000],
+    priceRange: [0, 500000000000],
     rating: 0,
   });
   const [isFiltering, setIsFiltering] = useState(false);

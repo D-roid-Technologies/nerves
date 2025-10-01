@@ -14,6 +14,7 @@ import {
   CircleCheckBig,
   Trash2,
   Eye,
+  Loader, // Added Loader icon
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
@@ -93,6 +94,9 @@ export default function MyAccountPage() {
   const [userItems, setUserItems] = useState<UserItem[]>([]);
   const [loadingItems, setLoadingItems] = useState(true);
   const [itemToDelete, setItemToDelete] = useState<UserItem | null>(null);
+  const [deletingItemId, setDeletingItemId] = useState<string | number | null>(
+    null
+  ); // New state for tracking deletion
 
   // Fetch user's items
   useEffect(() => {
@@ -161,6 +165,8 @@ export default function MyAccountPage() {
   // Handle item deletion
   const handleDeleteItem = async (item: UserItem) => {
     try {
+      setDeletingItemId(item.id); // Start loading for this specific item
+
       const success = await authService.deleteMyItem(item.id);
       if (success) {
         // Remove item from local state
@@ -182,6 +188,8 @@ export default function MyAccountPage() {
       toast.error("Failed to delete item. Please try again.", {
         style: { background: "#ff4d4f", color: "#fff" },
       });
+    } finally {
+      setDeletingItemId(null); // Stop loading regardless of outcome
     }
   };
 
@@ -225,14 +233,23 @@ export default function MyAccountPage() {
               <button
                 className={styles["cancel-delete-btn"]}
                 onClick={() => setItemToDelete(null)}
+                disabled={deletingItemId === itemToDelete.id} // Disable while deleting
               >
                 Cancel
               </button>
               <button
                 className={styles["confirm-delete-btn"]}
                 onClick={() => handleDeleteItem(itemToDelete)}
+                disabled={deletingItemId === itemToDelete.id} // Disable while deleting
               >
-                Yes, Delete
+                {deletingItemId === itemToDelete.id ? (
+                  <>
+                    <Loader size={16} className={styles["delete-loader"]} />
+                    Deleting...
+                  </>
+                ) : (
+                  "Yes, Delete"
+                )}
               </button>
             </div>
           </div>
@@ -527,8 +544,13 @@ export default function MyAccountPage() {
                       className={styles["account-item-delete-btn"]}
                       onClick={() => setItemToDelete(item)}
                       title="Delete Item"
+                      disabled={deletingItemId === item.id} // Disable while deleting
                     >
-                      <Trash2 size={16} />
+                      {deletingItemId === item.id ? (
+                        <Loader size={16} className={styles["delete-loader"]} />
+                      ) : (
+                        <Trash2 size={16} />
+                      )}
                     </button>
                   </div>
                 </div>
