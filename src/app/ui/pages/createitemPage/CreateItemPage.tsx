@@ -14,6 +14,15 @@ import {
   Loader,
   Edit,
   Star,
+  Bold,
+  Italic,
+  List,
+  ListOrdered,
+  Quote,
+  Underline,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
 } from "lucide-react";
 import styles from "./CreateItemPage.module.css";
 import { authService } from "../../../redux/configuration/auth.service";
@@ -59,6 +68,7 @@ const CreateItemPage = () => {
   const [uploadMethod, setUploadMethod] = useState<"url" | "file">("url");
   const [showLoadingScreen, setShowLoadingScreen] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 
   const user = useSelector((state: RootState) => state.user.primaryInformation);
 
@@ -101,6 +111,142 @@ const CreateItemPage = () => {
       });
     }
   }, [editItem]);
+
+  // Rich Text Formatting Functions
+  const formatText = (format: string) => {
+    if (!textareaRef.current) return;
+
+    const textarea = textareaRef.current;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = formData.description.substring(start, end);
+    let newText = formData.description;
+    let newCursorPos = end;
+
+    switch (format) {
+      case "bold":
+        newText =
+          formData.description.substring(0, start) +
+          `**${selectedText}**` +
+          formData.description.substring(end);
+        newCursorPos = start + selectedText.length + 4;
+        break;
+
+      case "italic":
+        newText =
+          formData.description.substring(0, start) +
+          `*${selectedText}*` +
+          formData.description.substring(end);
+        newCursorPos = start + selectedText.length + 2;
+        break;
+
+      case "underline":
+        newText =
+          formData.description.substring(0, start) +
+          `<u>${selectedText}</u>` +
+          formData.description.substring(end);
+        newCursorPos = start + selectedText.length + 7;
+        break;
+
+      case "newline":
+        newText =
+          formData.description.substring(0, start) +
+          `\n\n` +
+          formData.description.substring(end);
+        newCursorPos = start + 2;
+        break;
+
+      case "bullet":
+        newText =
+          formData.description.substring(0, start) +
+          `\n• ${selectedText || "List item"}` +
+          formData.description.substring(end);
+        newCursorPos = start + (selectedText ? selectedText.length + 3 : 11);
+        break;
+
+      case "numbered":
+        newText =
+          formData.description.substring(0, start) +
+          `\n1. ${selectedText || "List item"}` +
+          formData.description.substring(end);
+        newCursorPos = start + (selectedText ? selectedText.length + 4 : 12);
+        break;
+
+      case "quote":
+        newText =
+          formData.description.substring(0, start) +
+          `\n> ${selectedText}` +
+          formData.description.substring(end);
+        newCursorPos = start + selectedText.length + 3;
+        break;
+
+      case "alignLeft":
+        newText =
+          formData.description.substring(0, start) +
+          `<div style="text-align: left;">${selectedText}</div>` +
+          formData.description.substring(end);
+        newCursorPos = start + selectedText.length + 36;
+        break;
+
+      case "alignCenter":
+        newText =
+          formData.description.substring(0, start) +
+          `<div style="text-align: center;">${selectedText}</div>` +
+          formData.description.substring(end);
+        newCursorPos = start + selectedText.length + 39;
+        break;
+
+      case "alignRight":
+        newText =
+          formData.description.substring(0, start) +
+          `<div style="text-align: right;">${selectedText}</div>` +
+          formData.description.substring(end);
+        newCursorPos = start + selectedText.length + 37;
+        break;
+
+      default:
+        return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      description: newText,
+    }));
+
+    // Set cursor position after update
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(newCursorPos, newCursorPos);
+      }
+    }, 0);
+  };
+
+  // Function to render formatted text in preview
+  const renderFormattedText = (text: string) => {
+    if (!text) return "No description provided.";
+
+    return text
+      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*(.*?)\*/g, "<em>$1</em>")
+      .replace(/<u>(.*?)<\/u>/g, "<u>$1</u>")
+      .replace(/\n/g, "<br>")
+      .replace(/> (.*?)(?=\n|$)/g, "<blockquote>$1</blockquote>")
+      .replace(/\n• (.*?)(?=\n|$)/g, "<li>$1</li>")
+      .replace(/\n\d\. (.*?)(?=\n|$)/g, "<li>$1</li>")
+      .replace(
+        /<div style="text-align: left;">(.*?)<\/div>/g,
+        '<div style="text-align: left;">$1</div>'
+      )
+      .replace(
+        /<div style="text-align: center;">(.*?)<\/div>/g,
+        '<div style="text-align: center;">$1</div>'
+      )
+      .replace(
+        /<div style="text-align: right;">(.*?)<\/div>/g,
+        '<div style="text-align: right;">$1</div>'
+      );
+  };
 
   const showSuccessToast = (message: string) => {
     toast.success(message, {
@@ -294,13 +440,12 @@ const CreateItemPage = () => {
         category: formData.category,
         thumbnail: formData.thumbnail,
         images: formData.images,
-        sellerId: user?.email, // Make sure this is set correctly
+        sellerId: user?.email,
         reviewCount: 0,
         slug: formData.title
           .toLowerCase()
           .replace(/\s+/g, "-")
           .replace(/[^a-z0-9\-]/g, ""),
-        // Add these fields to match Product interface
         isNew: true,
         isFeatured: false,
       };
@@ -312,7 +457,6 @@ const CreateItemPage = () => {
         await authService.addMyItem(itemData);
       }
 
-      // ✅ CRITICAL: Refresh all items and wait for completion
       await authService.fetchAllListedItems();
 
       showSuccessToast(
@@ -324,7 +468,6 @@ const CreateItemPage = () => {
       if (isEditMode) {
         navigate("/account");
       } else {
-        // Clear form and navigate
         setFormData({
           title: "",
           description: "",
@@ -419,16 +562,109 @@ const CreateItemPage = () => {
 
               <div className={`${styles.formGroup} ${styles.fullWidth}`}>
                 <label htmlFor="description">Description *</label>
+
+                {/* Rich Text Toolbar */}
+                <div className={styles.richTextToolbar}>
+                  <div className={styles.toolbarGroup}>
+                    <button
+                      type="button"
+                      onClick={() => formatText("bold")}
+                      title="Bold"
+                    >
+                      <Bold size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => formatText("italic")}
+                      title="Italic"
+                    >
+                      <Italic size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => formatText("underline")}
+                      title="Underline"
+                    >
+                      <Underline size={16} />
+                    </button>
+                  </div>
+
+                  <div className={styles.toolbarGroup}>
+                    <button
+                      type="button"
+                      onClick={() => formatText("newline")}
+                      title="New Line"
+                    >
+                      ↵
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => formatText("bullet")}
+                      title="Bullet List"
+                    >
+                      <List size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => formatText("numbered")}
+                      title="Numbered List"
+                    >
+                      <ListOrdered size={16} />
+                    </button>
+                  </div>
+
+                  <div className={styles.toolbarGroup}>
+                    <button
+                      type="button"
+                      onClick={() => formatText("quote")}
+                      title="Quote"
+                    >
+                      <Quote size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => formatText("alignLeft")}
+                      title="Align Left"
+                    >
+                      <AlignLeft size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => formatText("alignCenter")}
+                      title="Align Center"
+                    >
+                      <AlignCenter size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => formatText("alignRight")}
+                      title="Align Right"
+                    >
+                      <AlignRight size={16} />
+                    </button>
+                  </div>
+                </div>
+
                 <textarea
+                  ref={textareaRef}
                   id="description"
                   value={formData.description}
                   onChange={(e) =>
                     handleInputChange("description", e.target.value)
                   }
-                  placeholder="Describe your product in detail"
-                  rows={4}
+                  placeholder="Describe your product in detail. Use the toolbar above to format your text."
+                  rows={6}
                   required
+                  className={styles.richTextArea}
                 />
+
+                <div className={styles.formattingHelp}>
+                  <small>
+                    <strong>Formatting Guide:</strong> **Bold** • *Italic* •
+                    &lt;u&gt;Underline&lt;/u&gt; • Use toolbar for lists and
+                    alignment
+                  </small>
+                </div>
               </div>
 
               <div className={styles.formGroup}>
@@ -465,13 +701,7 @@ const CreateItemPage = () => {
                   max="100"
                 />
                 {formData.discountPercentage > 0 && formData.price > 0 && (
-                  <small
-                    style={{
-                      color: "#10B981",
-                      marginTop: "4px",
-                      display: "block",
-                    }}
-                  >
+                  <small className={styles.discountNote}>
                     Discounted price: ₦{calculateDiscountedPrice().toFixed(2)}
                   </small>
                 )}
@@ -543,6 +773,7 @@ const CreateItemPage = () => {
             </div>
           </div>
 
+          {/* Rest of the component remains the same */}
           <div className={styles.section}>
             <div className={styles.sectionHeader}>
               <ImageIcon className={styles.sectionIcon} />
@@ -699,22 +930,10 @@ const CreateItemPage = () => {
                 <p className={styles.previewPrice}>
                   {formData.discountPercentage > 0 ? (
                     <>
-                      <span
-                        style={{
-                          color: "#10B981",
-                          fontSize: "1.5rem",
-                          fontWeight: "bold",
-                        }}
-                      >
+                      <span className={styles.discountedPrice}>
                         ₦{calculateDiscountedPrice().toFixed(2)}
                       </span>
-                      <span
-                        style={{
-                          textDecoration: "line-through",
-                          color: "#999",
-                          marginLeft: "8px",
-                        }}
-                      >
+                      <span className={styles.originalPrice}>
                         ₦{formData.price.toFixed(2)}
                       </span>
                     </>
@@ -755,9 +974,12 @@ const CreateItemPage = () => {
                       formData.category.slice(1).replace("-", " ")
                     : "Not specified"}
                 </p>
-                <p className={styles.previewDescription}>
-                  {formData.description || "No description provided."}
-                </p>
+                <div
+                  className={styles.previewDescription}
+                  dangerouslySetInnerHTML={{
+                    __html: renderFormattedText(formData.description),
+                  }}
+                />
               </div>
             </div>
           </div>

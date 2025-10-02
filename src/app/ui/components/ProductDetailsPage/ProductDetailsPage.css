@@ -285,7 +285,7 @@
 
 .meta-item {
   display: flex;
-  justify-content: space-between;
+  /* justify-content: space-between; */
 }
 
 .meta-label {
@@ -535,4 +535,96 @@ input:focus {
 
 .back-to-products:hover {
   background-color: #555;
+}
+/* Formatted Description Styles */
+.description-content {
+  color: #6b7280;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.description-content strong {
+  color: #1f2937;
+  font-weight: 700;
+}
+
+.description-content em {
+  color: #4b5563;
+  font-style: italic;
+}
+
+.description-content u {
+  text-decoration: underline;
+  color: #374151;
+}
+
+.description-content blockquote {
+  border-left: 4px solid #e5e7eb;
+  padding-left: 1rem;
+  margin: 0.5rem 0;
+  color: #6b7280;
+  font-style: italic;
+  background: #f9fafb;
+  padding: 0.75rem 1rem;
+  border-radius: 0 8px 8px 0;
+}
+
+.description-content ul,
+.description-content ol {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.description-content li {
+  margin: 0.25rem 0;
+  color: #6b7280;
+}
+
+.description-content div[style*="text-align"] {
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+
+.description-content div[style*="text-align: center"] {
+  text-align: center;
+}
+
+.description-content div[style*="text-align: right"] {
+  text-align: right;
+}
+
+.description-content div[style*="text-align: left"] {
+  text-align: left;
+}
+
+/* Price Styling */
+.discounted-price {
+  color: #10B981;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.original-price {
+  text-decoration: line-through;
+  color: #999;
+  margin-left: 8px;
+  font-size: 1.2rem;
+}
+
+.discount-percentage {
+  background: #ef4444;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+.price {
+  color: #1f2937;
+  font-size: 1.5rem;
+  font-weight: bold;
 }
