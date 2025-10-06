@@ -19,16 +19,16 @@ const CartDrawer: React.FunctionComponent = () => {
   );
   const navigate = useNavigate();
 
- const formatPrice = (price: number) => {
-   const hasDecimals = price % 1 !== 0;
+  const formatPrice = (price: number) => {
+    const hasDecimals = price % 1 !== 0;
 
-   return new Intl.NumberFormat("en-NG", {
-     style: "currency",
-     currency: "NGN",
-     minimumFractionDigits: hasDecimals ? 2 : 0,
-     maximumFractionDigits: hasDecimals ? 2 : 0,
-   }).format(price);
- };
+    return new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency: "NGN",
+      minimumFractionDigits: hasDecimals ? 2 : 0,
+      maximumFractionDigits: hasDecimals ? 2 : 0,
+    }).format(price);
+  };
 
   const totalPrice = items.reduce((sum, item) => {
     // Ensure we're working with numbers and handle precision
@@ -67,7 +67,29 @@ const CartDrawer: React.FunctionComponent = () => {
 
           <div className={styles.cartItems}>
             {items.length === 0 ? (
-              <p className={styles.emptyCart}>Your cart is empty</p>
+              <div>
+                <p className={styles.emptyCart}>Your cart is empty</p>
+                <button
+                  className={styles.checkoutButton}
+                  onClick={() => {
+                    if (isUserLoggedIn === true) {
+                      toast.success("Proceeding to Shop", {
+                        style: { background: "#4BB543", color: "#fff" },
+                      });
+                      dispatch(toggleCart());
+                      navigate("/shop");
+                    } else {
+                      toast.error("Please log in to your account.", {
+                        style: { background: "red", color: "#fff" },
+                      });
+                      dispatch(toggleCart());
+                      navigate("/login");
+                    }
+                  }}
+                >
+                  Proceed to Shop
+                </button>
+              </div>
             ) : (
               items.map((item) => (
                 <div key={item.product.id} className={styles.cartItem}>

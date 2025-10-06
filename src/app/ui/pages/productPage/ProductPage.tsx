@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Filter, Search, ChevronDown, ChevronUp, Star, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import ProductCard from "../../components/productCard/ProductCard";
 import Pagination from "../../components/pagination/Pagination";
 import Catergories from "../../components/catergories/Catergories";
@@ -8,22 +8,29 @@ import Review from "../../components/review/Review";
 import Footer from "../../components/footer/Footer";
 
 import "./ProductPage.css";
+import { authService } from "../../../redux/configuration/auth.service";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux/store";
 
-interface Product {
+export interface Product {
   id: number;
   name: string;
   price: number;
   slug?: string;
   discountPrice?: number;
+  discountPercentage?: number;
   rating: number;
-  reviewCount: number;
+  reviewCount?: number;
   description?: string;
   details?: string[];
-  image: string;
   isNew?: boolean;
   isFeatured?: boolean;
   category?: string;
-  sellerId: string; // <- add this
+  sellerId: string;
+  stock: number;
+  brand: string;
+  thumbnail: string;
+  images: string[];
 }
 
 const ProductPage = () => {
@@ -34,46 +41,104 @@ const ProductPage = () => {
   const [sortOption, setSortOption] = useState("featured");
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage] = useState(12);
-  const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({
-    category: "",
-    priceRange: [0, 1000],
-    rating: 0,
-  });
   const [isFiltering, setIsFiltering] = useState(false);
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
+  const listedItems = useSelector(
+    (state: RootState) => state.products.listedItems
+  );
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const allItems =
+        listedItems && listedItems.length > 0
+          ? listedItems
+          : await authService.fetchAllListedItems();
+
+      console.log("🔄 Raw Firestore items count:", allItems.length);
+
+      const transformed: Product[] = allItems.map(
+        (product: any, index: number) => {
+          // Handle sellerId - extract email if it's an object
+          let sellerId = "unknown@example.com";
+          if (product.sellerId) {
+            if (typeof product.sellerId === "object") {
+              sellerId =
+                product.sellerId.email ||
+                product.sellerId.name ||
+                "unknown@example.com";
+            } else {
+              sellerId = product.sellerId;
+            }
+          }
+
+          // Use the actual ID from Firestore, not just the index
+          const productId = product.id || Date.now() + index;
+
+          // Handle images - ensure we have a proper array
+          let images = product.images || [];
+          if (!Array.isArray(images)) {
+            images = [];
+          }
+
+          // Handle thumbnail - use image if thumbnail is not available
+          const thumbnail = product.thumbnail || product.image || "";
+
+          // Handle name/title
+          const name = product.title || product.name || `Product ${productId}`;
+
+          // Generate slug
+          const slug = (product.title || product.name || `product-${productId}`)
+            .toLowerCase()
+            .replace(/\s+/g, "-")
+            .replace(/[^a-z0-9\-]/g, "");
+
+          return {
+            id: productId,
+            name: name,
+            price: product.price ?? 0,
+            discountPrice:
+              product.price && product.discountPercentage
+                ? product.price * (1 - product.discountPercentage / 100)
+                : undefined,
+            discountPercentage: product.discountPercentage || 0,
+            rating: product.rating ?? 0,
+            category: product.category ?? "uncategorized",
+            reviewCount: product.reviewCount || Math.floor(Math.random() * 100),
+            image: thumbnail,
+            isNew: product.isNew || (product.stock ?? 0) > 50,
+            sellerId: sellerId,
+            stock: product.stock ?? 0,
+            brand: product.brand ?? "Unknown",
+            thumbnail: thumbnail,
+            images: images,
+            slug: slug,
+            description: product.description || "",
+          };
+        }
+      );
+
+      console.log("✅ Transformed products count:", transformed.length);
+
+      setProducts(transformed);
+      setFilteredProducts(transformed);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch products on mount and when listedItems or refreshTrigger changes
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await fetch("https://dummyjson.com/products");
-        const data = await response.json();
-
-        const transformed = data.products.map((product: any) => ({
-          id: product.id,
-          name: product.title,
-          price: product.price,
-          discountPrice: product.price * (1 - product.discountPercentage / 100),
-          rating: product.rating,
-          category: product.category,
-          reviewCount: Math.floor(Math.random() * 1000),
-          image: product.thumbnail,
-          isNew: product.stock > 50,
-          isFeatured: Math.random() > 0.7,
-        }));
-
-        setProducts(transformed);
-        setFilteredProducts(transformed);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchProducts();
-  }, []);
+  }, [refreshTrigger, listedItems]);
+
+  const refreshProducts = () => {
+    setRefreshTrigger((prev) => prev + 1);
+  };
 
   const applySearch = () => {
     setIsFiltering(true);
@@ -86,27 +151,12 @@ const ProductPage = () => {
           (product) =>
             product.name.toLowerCase().includes(query) ||
             product.category?.toLowerCase().includes(query) ||
-            product.discountPrice?.toString().includes(query) ||
-            product.price.toString().includes(query)
+            product.brand?.toLowerCase().includes(query) ||
+            product.description?.toLowerCase().includes(query)
         );
         setHasSearched(true);
       } else {
         setHasSearched(false);
-      }
-
-      // Apply other filters
-      if (filters.category) {
-        result = result.filter(
-          (product) => product.category === filters.category
-        );
-      }
-      result = result.filter(
-        (product) =>
-          product.price >= filters.priceRange[0] &&
-          product.price <= filters.priceRange[1]
-      );
-      if (filters.rating > 0) {
-        result = result.filter((product) => product.rating >= filters.rating);
       }
 
       // Apply sorting
@@ -141,18 +191,15 @@ const ProductPage = () => {
 
   useEffect(() => {
     applySearch();
-  }, [products, filters, sortOption]);
+  }, [products, sortOption]);
 
   const handleSearchKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       applySearch();
     }
   };
-  const refreshPage = () => {
-    window.location.reload();
-  };
+
   const clearSearch = () => {
-    refreshPage();
     setSearchQuery("");
     setHasSearched(false);
     applySearch();
@@ -169,15 +216,6 @@ const ProductPage = () => {
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
     window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const handleCategoryFilter = (category: string) => {
-    setIsFiltering(true);
-    setFilters({ ...filters, category });
-  };
-
-  const toggleDropdown = (dropdownName: string) => {
-    setActiveDropdown(activeDropdown === dropdownName ? null : dropdownName);
   };
 
   return (
@@ -205,101 +243,6 @@ const ProductPage = () => {
       </div>
 
       <div className="product-container">
-        {/* Desktop Filters Sidebar */}
-        {/* <div className="product-filters">
-          <div className="filter-section">
-            <h3>
-              Categories
-              {filters.category && (
-                <button onClick={() => handleCategoryFilter("")}>Clear</button>
-              )}
-            </h3>
-            <ul>
-              <li>
-                <button
-                  className={!filters.category ? "active" : ""}
-                  onClick={() => handleCategoryFilter("")}
-                >
-                  All
-                </button>
-              </li>
-              {Array.from(new Set(products.map((p) => p.category))).map(
-                (category) => (
-                  <li key={category}>
-                    <button
-                      className={filters.category === category ? "active" : ""}
-                      onClick={() => handleCategoryFilter(category)}
-                    >
-                      {category.charAt(0).toUpperCase() + category.slice(1)}
-                    </button>
-                  </li>
-                )
-              )}
-            </ul>
-          </div>
-
-          <div className="filter-section">
-            <h3>Price Range</h3>
-            <div className="price-range">
-              <input
-                type="range"
-                min="0"
-                max="1000"
-                value={filters.priceRange[1]}
-                onChange={(e) =>
-                  setFilters({
-                    ...filters,
-                    priceRange: [
-                      filters.priceRange[0],
-                      parseInt(e.target.value),
-                    ],
-                  })
-                }
-              />
-              <div className="price-values">
-                <span>${filters.priceRange[0]}</span>
-                <span>${filters.priceRange[1]}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="filter-section">
-            <h3>
-              Rating
-              {filters.rating > 0 && (
-                <button onClick={() => setFilters({ ...filters, rating: 0 })}>
-                  Clear
-                </button>
-              )}
-            </h3>
-            <div className="rating-filter">
-              {[4, 3, 2, 1].map((rating) => (
-                <button
-                  key={rating}
-                  className={filters.rating === rating ? "active" : ""}
-                  onClick={() =>
-                    setFilters({
-                      ...filters,
-                      rating: filters.rating === rating ? 0 : rating,
-                    })
-                  }
-                >
-                  {Array(5)
-                    .fill(0)
-                    .map((_, i) => (
-                      <Star
-                        key={i}
-                        size={16}
-                        fill={i < rating ? "currentColor" : "none"}
-                      />
-                    ))}
-                  {rating}+
-                </button>
-              ))}
-            </div>
-          </div>
-        </div> */}
-
         <div className="product-listing">
           {hasSearched && searchQuery && (
             <div className="search-results-header">
@@ -312,195 +255,15 @@ const ProductPage = () => {
             </div>
           )}
 
-          {/* Mobile Filter Navbar */}
-          <div className="mobile-filter-nav">
-            <div className="filter-nav-inner">
-              <div className="filter-dropdown">
-                <button
-                  className={`filter-dropdown-toggle ${
-                    activeDropdown === "categories" ? "active" : ""
-                  }`}
-                  onClick={() => toggleDropdown("categories")}
-                >
-                  Categories
-                  <ChevronDown size={16} />
-                </button>
-                {activeDropdown === "categories" && (
-                  <div className="filter-dropdown-menu">
-                    <div className="filter-section">
-                      <h3>Categories</h3>
-                      <ul>
-                        <li>
-                          <button
-                            className={!filters.category ? "active" : ""}
-                            onClick={() => {
-                              handleCategoryFilter("");
-                              setActiveDropdown(null);
-                            }}
-                          >
-                            All
-                          </button>
-                        </li>
-                        {Array.from(
-                          new Set(
-                            products
-                              .map((p) => p.category)
-                              .filter((c): c is string => !!c)
-                          )
-                        ).map((category) => (
-                          <li key={category}>
-                            <button
-                              className={
-                                filters.category === category ? "active" : ""
-                              }
-                              onClick={() => {
-                                handleCategoryFilter(category);
-                                setActiveDropdown(null);
-                              }}
-                            >
-                              {category.charAt(0).toUpperCase() +
-                                category.slice(1)}
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="filter-dropdown">
-                <button
-                  className={`filter-dropdown-toggle ${
-                    activeDropdown === "price" ? "active" : ""
-                  }`}
-                  onClick={() => toggleDropdown("price")}
-                >
-                  Price
-                  <ChevronDown size={16} />
-                </button>
-                {activeDropdown === "price" && (
-                  <div className="filter-dropdown-menu">
-                    <div className="filter-section">
-                      <h3>Price Range</h3>
-                      <div className="price-range">
-                        <input
-                          type="range"
-                          min="0"
-                          max="1000"
-                          value={filters.priceRange[1]}
-                          onChange={(e) =>
-                            setFilters({
-                              ...filters,
-                              priceRange: [
-                                filters.priceRange[0],
-                                parseInt(e.target.value),
-                              ],
-                            })
-                          }
-                        />
-                        <div className="price-values">
-                          <span>₦{filters.priceRange[0]}</span>
-                          <span>₦{filters.priceRange[1]}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="filter-dropdown">
-                <button
-                  className={`filter-dropdown-toggle ${
-                    activeDropdown === "rating" ? "active" : ""
-                  }`}
-                  onClick={() => toggleDropdown("rating")}
-                >
-                  Rating
-                  <ChevronDown size={16} />
-                </button>
-                {activeDropdown === "rating" && (
-                  <div className="filter-dropdown-menu">
-                    <div className="filter-section">
-                      <h3>Rating</h3>
-                      <div className="rating-filter">
-                        {[4, 3, 2, 1].map((rating) => (
-                          <button
-                            key={rating}
-                            className={
-                              filters.rating === rating ? "active" : ""
-                            }
-                            onClick={() => {
-                              setFilters({
-                                ...filters,
-                                rating: filters.rating === rating ? 0 : rating,
-                              });
-                              setActiveDropdown(null);
-                            }}
-                          >
-                            {Array(5)
-                              .fill(0)
-                              .map((_, i) => (
-                                <Star
-                                  key={i}
-                                  size={16}
-                                  fill={i < rating ? "currentColor" : "none"}
-                                />
-                              ))}
-                            {rating}+
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="filter-dropdown">
-                <button
-                  className={`filter-dropdown-toggle ${
-                    activeDropdown === "sort" ? "active" : ""
-                  }`}
-                  onClick={() => toggleDropdown("sort")}
-                >
-                  Sort By
-                  <ChevronDown size={16} />
-                </button>
-                {activeDropdown === "sort" && (
-                  <div className="filter-dropdown-menu">
-                    <h4>Sort Options</h4>
-                    <div className="filter-section">
-                      <ul>
-                        {[
-                          { value: "featured", label: "Featured" },
-                          { value: "price-low", label: "Price: Low to High" },
-                          { value: "price-high", label: "Price: High to Low" },
-                          { value: "rating", label: "Rating" },
-                          { value: "newest", label: "Newest" },
-                        ].map((option) => (
-                          <li key={option.value}>
-                            <button
-                              className={
-                                sortOption === option.value ? "active" : ""
-                              }
-                              onClick={() => {
-                                setSortOption(option.value);
-                                setActiveDropdown(null);
-                              }}
-                            >
-                              {option.label}
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                )}
-              </div>
+          {/* <div className="product-controls">
+            <div className="results-info">
+              <span>
+                Showing {currentProducts.length} of {filteredProducts.length}{" "}
+                products
+                {searchQuery && ` for "${searchQuery}"`}
+              </span>
             </div>
-          </div>
 
-          <div className="product-controls">
             <div className="sort-options">
               <span>Sort by:</span>
               <select
@@ -514,7 +277,7 @@ const ProductPage = () => {
                 <option value="newest">Newest</option>
               </select>
             </div>
-          </div>
+          </div> */}
 
           {loading ? (
             <div className="skeleton-grid">
@@ -554,6 +317,13 @@ const ProductPage = () => {
             <div className="no-results">
               <h3>No products found</h3>
               <p>Try adjusting your search or filters</p>
+              <p>Total products in database: {products.length}</p>
+              <button onClick={clearSearch} className="clear-filters-btn">
+                Clear Search
+              </button>
+              <button onClick={refreshProducts} className="refresh-btn">
+                Refresh Products
+              </button>
             </div>
           ) : (
             <>
@@ -562,9 +332,23 @@ const ProductPage = () => {
                   <ProductCard
                     key={product.id}
                     product={{
-                      ...product,
-                      sellerId: product.sellerId || "000000", 
+                      id: product.id,
+                      name: product.name,
+                      price: product.price,
+                      discountPrice: product.discountPrice,
+                      discountPercentage: product.discountPercentage,
+                      rating: product.rating,
                       category: product.category || "uncategorized",
+                      reviewCount: product.reviewCount ?? 0,
+                      image: product.thumbnail,
+                      isNew: product.isNew ?? false,
+                      sellerId: product.sellerId || "unknown@example.com",
+                      total: product.price,
+                      slug: product.slug,
+                      description: product.description,
+                      brand: product.brand,
+                      stock: product.stock,
+                      images: product.images,
                     }}
                   />
                 ))}

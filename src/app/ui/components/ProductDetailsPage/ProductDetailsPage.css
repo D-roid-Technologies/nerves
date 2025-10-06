@@ -600,11 +600,11 @@ input:focus {
 }
 
 /* Price Styling */
-.discounted-price {
+/* .discounted-price {
   color: #10B981;
   font-size: 1.5rem;
   font-weight: bold;
-}
+} */
 
 .original-price {
   text-decoration: line-through;

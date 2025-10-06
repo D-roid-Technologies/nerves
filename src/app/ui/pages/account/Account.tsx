@@ -8,13 +8,13 @@ import {
   MessageSquare,
   Edit,
   Image as ImageIcon,
-  SettingsIcon,
-  User,
   Plus,
-  CircleCheckBig,
   Trash2,
   Eye,
-  Loader, // Added Loader icon
+  Loader,
+  TrendingUp,
+  DollarSign,
+  User,
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
@@ -22,47 +22,9 @@ import styles from "./account.module.css";
 import { useNavigate } from "react-router-dom";
 import OrderStatus from "../orderPages/OrderStatus";
 import { authService } from "../../../redux/configuration/auth.service";
+import { salesService } from "../../../redux/configuration/sales.service";
 import { auth } from "../../../firebase";
 import toast from "react-hot-toast";
-
-const mockUser = {
-  firstName: "John",
-  lastName: "Doe",
-  email: "john.doe@example.com",
-  phone: "+1 (555) 123-4567",
-  joinDate: "January 2023",
-  reviews: [
-    {
-      id: 1,
-      item: "Wireless Headphones",
-      rating: 4,
-      comment:
-        "Great sound quality! The battery life is impressive and they're very comfortable for long listening sessions.",
-      date: "2 weeks ago",
-    },
-    {
-      id: 2,
-      item: "Bluetooth Speaker",
-      rating: 5,
-      comment: "Excellent bass and clarity. Perfect for outdoor gatherings.",
-      date: "1 month ago",
-    },
-  ],
-  sales: [
-    {
-      id: 1,
-      item: "Used iPhone 12",
-      status: "Sold",
-      price: "$450",
-    },
-    {
-      id: 2,
-      item: "Gaming Laptop",
-      status: "Sold",
-      price: "$1200",
-    },
-  ],
-};
 
 interface UserItem {
   id: string | number;
@@ -81,6 +43,30 @@ interface UserItem {
   brand?: string;
 }
 
+const mockUser = {
+  firstName: "John",
+  lastName: "Doe",
+  email: "john.doe@example.com",
+  phone: "+1 (555) 123-4567",
+  joinDate: "January 2023",
+  reviews: [
+    {
+      id: 1,
+      item: "Wireless Headphones",
+      rating: 4,
+      comment: "Great sound quality! The battery life is impressive.",
+      date: "2 weeks ago",
+    },
+    {
+      id: 2,
+      item: "Bluetooth Speaker",
+      rating: 5,
+      comment: "Excellent bass and clarity. Perfect for outdoor gatherings.",
+      date: "1 month ago",
+    },
+  ],
+};
+
 export default function MyAccountPage() {
   const user = useSelector((state: RootState) => state.user);
   const userType = user.primaryInformation?.userType || "both";
@@ -88,17 +74,28 @@ export default function MyAccountPage() {
   const isBoth = userType === "both";
   const showSections = isSeller || isBoth;
   const paidOrders = useSelector((state: RootState) => state.paidOrders);
+  const sales = useSelector((state: RootState) => state.sales);
   const navigate = useNavigate();
 
-  // State for user's items
   const [userItems, setUserItems] = useState<UserItem[]>([]);
   const [loadingItems, setLoadingItems] = useState(true);
   const [itemToDelete, setItemToDelete] = useState<UserItem | null>(null);
   const [deletingItemId, setDeletingItemId] = useState<string | number | null>(
     null
-  ); // New state for tracking deletion
+  );
+  const [salesLoading, setSalesLoading] = useState(false);
 
-  // Fetch user's items
+  const navigateToPaidOrders = () => navigate("/orders/paid");
+  const navigateToSealedOrders = () => navigate("/orders/sealed");
+  const navigateToDispatchedOrders = () => navigate("/orders/dispatched");
+  const navigateToArrivedOrders = () => navigate("/orders/arrived");
+  const navigateToConfirmedOrders = () => navigate("/orders/confirmed");
+  const navigateToReturnedOrders = () => navigate("/orders/returned");
+  const navigateToReviewedOrders = () => navigate("/orders/reviewed");
+  const navigateToAllOrders = () => navigate("/orders/all");
+  const navigateToAllReviews = () => navigate("/reviews/all");
+  const navigateToAllSales = () => navigate("/sales/all");
+
   useEffect(() => {
     const fetchUserItems = async () => {
       try {
@@ -107,7 +104,6 @@ export default function MyAccountPage() {
         const currentUser = auth.currentUser;
 
         if (currentUser) {
-          // Filter items owned by current user
           const myItems = allItems.filter((item: any) => {
             const itemSellerId =
               typeof item.sellerId === "object"
@@ -115,7 +111,6 @@ export default function MyAccountPage() {
                 : item.sellerId;
             return itemSellerId === currentUser.email;
           });
-
           setUserItems(myItems);
         }
       } catch (error) {
@@ -132,51 +127,80 @@ export default function MyAccountPage() {
 
   const getOrderCountsByStatus = () => {
     const orders = paidOrders.orders;
-
     return {
-      paid: orders.filter((order) => order.status === "paid").length,
-      sealed: orders.filter((order) => order.status === "sealed").length,
-      dispatched: orders.filter((order) => order.status === "dispatched")
+      paid: orders.filter((order: any) => order.status === "paid").length,
+      sealed: orders.filter((order: any) => order.status === "sealed").length,
+      dispatched: orders.filter((order: any) => order.status === "dispatched")
         .length,
-      arrived: orders.filter((order) => order.status === "arrived").length,
-      confirmed: orders.filter((order) => order.status === "confirmed").length,
-      returned: orders.filter((order) => order.status === "returned").length,
-      reviewed: orders.filter((order) => order.status === "reviewed").length,
+      arrived: orders.filter((order: any) => order.status === "arrived").length,
+      confirmed: orders.filter((order: any) => order.status === "confirmed")
+        .length,
+      returned: orders.filter((order: any) => order.status === "returned")
+        .length,
+      reviewed: orders.filter((order: any) => order.status === "reviewed")
+        .length,
       total: orders.length,
     };
   };
 
-  const orderCounts = getOrderCountsByStatus();
-
-  const navigateToPaidOrders = () => navigate("/orders/paid");
-  const navigateToSealedOrders = () => navigate("/orders/sealed");
-  const navigateToDispatchedOrders = () => navigate("/orders/dispatched");
-  const navigateToArrivedOrders = () => navigate("/orders/arrived");
-  const navigateToConfirmedOrders = () => navigate("/orders/confirmed");
-  const navigateToReturnedOrders = () => navigate("/orders/returned");
-  const navigateToReviewedOrders = () => navigate("/orders/reviewed");
-  const navigateToAllOrders = () => navigate("/orders/all");
-  const navigateToAllReviews = () => navigate("/reviews/all");
-  const navigateToAllSales = () => navigate("/sales/all");
-  const earlyBirdReg = () => {
-    navigate("/early-bird-registration");
+  const getUserSales = () => {
+    return salesService.getSalesForCurrentUser();
   };
 
-  // Handle item deletion
+  // const addTestSales = () => {
+  //   setSalesLoading(true);
+  //   try {
+  //     salesService.addTestSales();
+  //     toast.success("Test sales added! Refreshing...");
+  //     // Refresh after a short delay
+  //     setTimeout(() => {
+  //       window.location.reload();
+  //     }, 1500);
+  //   } catch (error) {
+  //     toast.error("Failed to add test sales");
+  //     console.error(error);
+  //   } finally {
+  //     setSalesLoading(false);
+  //   }
+  // };
+
+  const clearSalesData = () => {
+    if (
+      window.confirm(
+        "Are you sure you want to clear all sales data? This cannot be undone."
+      )
+    ) {
+      salesService.clearAllSales();
+      toast.success("Sales data cleared! Refreshing...");
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    }
+  };
+
+  const orderCounts = getOrderCountsByStatus();
+  const userSales = getUserSales();
+  const completedSales = userSales.filter(
+    (sale: any) => sale.status === "completed"
+  );
+  const totalSalesCount = completedSales.reduce(
+    (total: number, sale: any) => total + sale.quantity,
+    0
+  );
+  const totalRevenue = completedSales.reduce(
+    (total: number, sale: any) => total + sale.totalAmount,
+    0
+  );
+
   const handleDeleteItem = async (item: UserItem) => {
     try {
-      setDeletingItemId(item.id); // Start loading for this specific item
-
+      setDeletingItemId(item.id);
       const success = await authService.deleteMyItem(item.id);
       if (success) {
-        // Remove item from local state
         setUserItems((prevItems) =>
           prevItems.filter((prevItem) => prevItem.id !== item.id)
         );
-
-        // ✅ CRITICAL: Refresh all items to update Redux
         await authService.fetchAllListedItems();
-
         setItemToDelete(null);
         toast.success(`"${item.title || item.name}" deleted successfully!`, {
           style: { background: "#4BB543", color: "#fff" },
@@ -189,11 +213,10 @@ export default function MyAccountPage() {
         style: { background: "#ff4d4f", color: "#fff" },
       });
     } finally {
-      setDeletingItemId(null); // Stop loading regardless of outcome
+      setDeletingItemId(null);
     }
   };
 
-  // Navigate to item details
   const navigateToItemDetails = (item: UserItem) => {
     const slug = (item.title || item.name || `product-${item.id}`)
       .toLowerCase()
@@ -202,12 +225,10 @@ export default function MyAccountPage() {
     navigate(`/shop/${slug}`);
   };
 
-  // Navigate to edit item
   const navigateToEditItem = (item: UserItem) => {
     navigate("/create", { state: { editItem: item } });
   };
 
-  // Format price
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-NG", {
       style: "currency",
@@ -219,7 +240,6 @@ export default function MyAccountPage() {
 
   return (
     <div className={styles["account-container"]}>
-      {/* Delete Confirmation Modal */}
       {itemToDelete && (
         <div className={styles["delete-confirmation-modal"]}>
           <div className={styles["delete-confirmation-content"]}>
@@ -233,18 +253,18 @@ export default function MyAccountPage() {
               <button
                 className={styles["cancel-delete-btn"]}
                 onClick={() => setItemToDelete(null)}
-                disabled={deletingItemId === itemToDelete.id} // Disable while deleting
+                disabled={deletingItemId === itemToDelete.id}
               >
                 Cancel
               </button>
               <button
                 className={styles["confirm-delete-btn"]}
                 onClick={() => handleDeleteItem(itemToDelete)}
-                disabled={deletingItemId === itemToDelete.id} // Disable while deleting
+                disabled={deletingItemId === itemToDelete.id}
               >
                 {deletingItemId === itemToDelete.id ? (
                   <>
-                    <Loader size={16} className={styles["delete-loader"]} />
+                    <Loader size={16} className={styles["delete-loader"]} />{" "}
                     Deleting...
                   </>
                 ) : (
@@ -272,6 +292,7 @@ export default function MyAccountPage() {
           </div>
         </div>
       </div>
+
       <div className={styles["account-section"]}>
         <div className={styles["account-profile-header"]}>
           <h2 className={styles["account-h2"]}>Profile Information</h2>
@@ -279,8 +300,7 @@ export default function MyAccountPage() {
             className={styles["account-edit-btn"]}
             onClick={() => navigate("/settings")}
           >
-            <Edit size={16} style={{ marginRight: "8px" }} />
-            Edit Profile
+            <Edit size={16} style={{ marginRight: "8px" }} /> Edit Profile
           </button>
         </div>
         <div className={styles["account-profile-details"]}>
@@ -306,24 +326,23 @@ export default function MyAccountPage() {
           <div className={styles["account-profile-detail"]}>
             <span className={styles["account-detail-label"]}>Member Since</span>
             <span className={styles["account-detail-value"]}>
-              <span className={styles["account-detail-value"]}>
-                {user.primaryInformation?.dateOfCreation
-                  ? new Date(
-                      user.primaryInformation.dateOfCreation
-                        .split(" ")[0]
-                        .split("-")
-                        .reverse()
-                        .join("-")
-                    ).toLocaleDateString("en-US", {
-                      month: "long",
-                      year: "numeric",
-                    })
-                  : "N/A"}
-              </span>
+              {user.primaryInformation?.dateOfCreation
+                ? new Date(
+                    user.primaryInformation.dateOfCreation
+                      .split(" ")[0]
+                      .split("-")
+                      .reverse()
+                      .join("-")
+                  ).toLocaleDateString("en-US", {
+                    month: "long",
+                    year: "numeric",
+                  })
+                : "N/A"}
             </span>
           </div>
         </div>
       </div>
+
       <div className={styles["account-section"]}>
         <div className={styles["account-profile-header"]}>
           <h2 className={styles["account-h2"]}>Order Status</h2>
@@ -379,6 +398,7 @@ export default function MyAccountPage() {
           />
         </div>
       </div>
+
       {showSections && (
         <div className={styles["account-section"]}>
           <div className={styles["account-profile-header"]}>
@@ -433,47 +453,137 @@ export default function MyAccountPage() {
         <div className={styles["account-section"]}>
           <div className={styles["account-profile-header"]}>
             <h2 className={styles["account-h2"]}>My Sales</h2>
-            <button
-              className={styles["account-edit-btn"]}
-              onClick={navigateToAllSales}
-            >
-              View All Sales (6)
-            </button>
+            <div className={styles["sales-stats"]}>
+              <span className={styles["sales-stat"]}>
+                <TrendingUp size={16} /> {totalSalesCount} Sold
+              </span>
+              <span className={styles["sales-stat"]}>
+                {formatPrice(totalRevenue)}
+              </span>
+            </div>
+            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+              {/* <button
+                className={styles["account-edit-btn"]}
+                onClick={addTestSales}
+                disabled={salesLoading}
+                style={{
+                  background: "#f59e0b",
+                  opacity: salesLoading ? 0.6 : 1,
+                }}
+              >
+                {salesLoading ? (
+                  <Loader size={16} className={styles["delete-loader"]} />
+                ) : (
+                  "Add Test Sales"
+                )}
+              </button> */}
+              <button
+                className={styles["account-edit-btn"]}
+                onClick={navigateToAllSales}
+                style={{ background: "#3b82f6" }}
+              >
+                View All Sales ({completedSales.length})
+              </button>
+              {/* {userSales.length > 0 && (
+                <button
+                  className={styles["account-edit-btn"]}
+                  onClick={clearSalesData}
+                  style={{ background: "#ef4444" }}
+                >
+                  Clear Sales
+                </button>
+              )} */}
+            </div>
           </div>
-          {mockUser.sales.length > 0 ? (
+
+          {userSales.length > 0 ? (
             <div className={styles["account-list"]}>
-              {mockUser.sales.slice(0, 3).map((sale) => (
+              {userSales.slice(0, 3).map((sale: any) => (
                 <div
                   key={sale.id}
                   className={`${styles["account-list-item"]} ${styles["account-sale-item"]}`}
                 >
                   <div className={styles["account-sale-info"]}>
                     <div className={styles["account-sale-image"]}>
-                      <ImageIcon size={24} color="#9ca3af" />
+                      {sale.image ? (
+                        <img src={sale.image} alt={sale.title} />
+                      ) : (
+                        <ImageIcon size={24} color="#9ca3af" />
+                      )}
                     </div>
-                    <div>
-                      <div>{sale.item}</div>
-                      <div style={{ fontSize: "0.875rem", color: "#6b7280" }}>
-                        {sale.price}
+                    <div className={styles["account-sale-details"]}>
+                      <div className={styles["account-sale-title"]}>
+                        {sale.title}
+                      </div>
+                      <div className={styles["account-sale-meta"]}>
+                        <span>Qty: {sale.quantity}</span>
+                        <span>{formatPrice(sale.price)} each</span>
+                        <span>Total: {formatPrice(sale.totalAmount)}</span>
+                      </div>
+                      <div className={styles["account-sale-buyer"]}>
+                        Sold to: {sale.buyerEmail}
+                      </div>
+                      <div className={styles["account-sale-date"]}>
+                        {new Date(sale.soldAt).toLocaleDateString()} •
+                        <span
+                          style={{
+                            color:
+                              sale.status === "completed"
+                                ? "#10b981"
+                                : sale.status === "refunded"
+                                ? "#ef4444"
+                                : "#6b7280",
+                            fontWeight: "600",
+                            marginLeft: "8px",
+                          }}
+                        >
+                          {sale.status?.charAt(0).toUpperCase() +
+                            sale.status?.slice(1)}
+                        </span>
                       </div>
                     </div>
                   </div>
-                  <span className={styles["account-sale-status"]}>
-                    {sale.status}
-                  </span>
                 </div>
               ))}
+              {userSales.length > 3 && (
+                <div style={{ textAlign: "center", padding: "16px" }}>
+                  <button
+                    className={styles["account-edit-btn"]}
+                    onClick={navigateToAllSales}
+                    style={{ background: "#3b82f6" }}
+                  >
+                    View All {userSales.length} Sales
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <div className={styles["account-empty-state"]}>
               <Package className={styles["account-empty-icon"]} />
-              <p>You haven't sold any items yet</p>
+              <p>You haven't made any sales yet</p>
+              <p className={styles["account-empty-subtext"]}>
+                When customers purchase your items, they will appear here.
+                {/* <br />
+                <button
+                  onClick={addTestSales}
+                  style={{
+                    background: "#f59e0b",
+                    color: "white",
+                    border: "none",
+                    padding: "8px 16px",
+                    borderRadius: "6px",
+                    marginTop: "12px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Add Test Sales to See How It Works
+                </button> */}
+              </p>
             </div>
           )}
         </div>
       )}
 
-      {/* Updated Create Items Section */}
       {showSections && (
         <div className={styles["account-section"]}>
           <div className={styles["account-profile-header"]}>
@@ -482,8 +592,7 @@ export default function MyAccountPage() {
               className={styles["account-edit-btn"]}
               onClick={() => navigate("/create")}
             >
-              <Plus size={16} style={{ marginRight: "8px" }} />
-              Create Item
+              <Plus size={16} style={{ marginRight: "8px" }} /> Create Item
             </button>
           </div>
 
@@ -544,7 +653,7 @@ export default function MyAccountPage() {
                       className={styles["account-item-delete-btn"]}
                       onClick={() => setItemToDelete(item)}
                       title="Delete Item"
-                      disabled={deletingItemId === item.id} // Disable while deleting
+                      disabled={deletingItemId === item.id}
                     >
                       {deletingItemId === item.id ? (
                         <Loader size={16} className={styles["delete-loader"]} />
@@ -564,8 +673,8 @@ export default function MyAccountPage() {
                 className={styles["account-edit-btn"]}
                 onClick={() => navigate("/create")}
               >
-                <Plus size={16} style={{ marginRight: "8px" }} />
-                Create Your First Item
+                <Plus size={16} style={{ marginRight: "8px" }} /> Create Your
+                First Item
               </button>
             </div>
           )}

@@ -11,16 +11,20 @@ interface ProductCardProps {
     name: string;
     price: number;
     discountPrice?: number;
+    discountPercentage?: number; // Add this line
     rating: number;
     category: string;
     reviewCount: number;
     image: string;
     isNew?: boolean;
-
-    // Added fields for cart functionality
-    sellerId: string; // required when adding to cart
-    total?: number; // derived field: price * quantity
-    addedAt?: string; // timestamp when added to cart
+    sellerId: string;
+    total?: number;
+    addedAt?: string;
+    slug?: string; // Add this line
+    description?: string; // Add this line
+    brand?: string; // Add this line
+    stock?: number; // Add this line
+    images?: string[]; // Add this line
   };
 }
 
@@ -52,18 +56,26 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     setIsWishlisted(!isWishlisted);
   };
 
-  const discountPercentage = product.discountPrice
-    ? Math.round(
-        ((product.price - product.discountPrice) / product.price) * 100
-      )
-    : 0;
+  // Use provided discountPercentage or calculate it
+  const discountPercentage =
+    product.discountPercentage ||
+    (product.discountPrice
+      ? Math.round(
+          ((product.price - product.discountPrice) / product.price) * 100
+        )
+      : 0);
+
+  // Use provided slug or generate from name
+  const productSlug =
+    product.slug ||
+    product.name
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9\-]/g, "");
 
   return (
     <Link
-      to={`/products/${product.name
-        .toLowerCase()
-        .replace(/\s+/g, "-")
-        .replace(/[^a-z0-9\-]/g, "")}`}
+      to={`/shop/${productSlug}`}
       className="product-card"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

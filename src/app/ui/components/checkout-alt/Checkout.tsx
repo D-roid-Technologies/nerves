@@ -1,4 +1,3 @@
-// components/Checkout.tsx
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "../../../redux/store";
@@ -28,6 +27,8 @@ import {
 import "./checkout.css";
 import PayStackPop from "@paystack/inline-js";
 import toast from "react-hot-toast";
+import { processOrderAndCreateSales } from "../../../utils/orderProcessor";
+import { salesService } from "../../../redux/configuration/sales.service";
 
 interface ShippingDetails {
   firstName: string;
@@ -48,6 +49,33 @@ interface PaymentDetails {
   amount: string;
 }
 
+// Extended product interface to include seller information
+interface ExtendedProduct {
+  id: number;
+  name: string;
+  price: number;
+  discountPrice?: number;
+  image?: string;
+  sellerId?: string;
+  sellerEmail?: string;
+  // Add other product properties as needed
+  category?: string;
+  description?: string;
+  rating?: number;
+  reviewCount?: number;
+  isNew?: boolean;
+  slug?: string;
+  stock?: number;
+  brand?: string;
+  thumbnail?: string;
+  images?: string[];
+}
+
+interface CartItem {
+  product: ExtendedProduct;
+  quantity: number;
+}
+
 const Checkout = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -65,8 +93,9 @@ const Checkout = () => {
         lastName: user.primaryInformation.lastName || "",
         email: user.primaryInformation.email || "",
         phone: user.primaryInformation.phone || "",
-        address: `${user.location.streetNumber || ""} ${user.location.streetName || ""
-          }`.trim(),
+        address: `${user.location.streetNumber || ""} ${
+          user.location.streetName || ""
+        }`.trim(),
         city: user.location.city || "",
         state: user.location.state || "",
         zipCode: user.location.postalCode || "",
@@ -139,7 +168,6 @@ const Checkout = () => {
     if (!location.city?.trim()) missingFields.push("City");
     if (!location.state?.trim()) missingFields.push("State");
     if (!location.postalCode?.trim()) missingFields.push("ZIP/Postal Code");
-    // if (!location.country?.trim()) missingFields.push("Country");
 
     return {
       isComplete: missingFields.length === 0,
@@ -164,8 +192,8 @@ const Checkout = () => {
     return new Intl.NumberFormat("en-NG", {
       style: "currency",
       currency: "NGN",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(price);
   };
 
@@ -189,8 +217,8 @@ const Checkout = () => {
     shippingMethod === "express"
       ? 1599
       : shippingMethod === "overnight"
-        ? 2999
-        : 599;
+      ? 2999
+      : 599;
   const tax = subtotal * 0.08;
   const total = subtotal + shippingCost + tax;
 
@@ -258,11 +286,10 @@ const Checkout = () => {
 
     const payStack = new PayStackPop();
     payStack.newTransaction({
-      // key: "pk_test_db0145199289f83c428d57cf70755142bb0b8b28",
-      key: "pk_live_d2b967eddda456841f504b85549767fc33cc9fd4",
+      key: "pk_test_db0145199289f83c428d57cf70755142bb0b8b28",
       email: paymentDetails.email,
       amount: Number(paymentDetails.amount) * 100,
-      onSuccess: (res) => {
+      onSuccess: async (res) => {
         setIsProcessing(false);
 
         // Generate unique order ID
@@ -279,6 +306,9 @@ const Checkout = () => {
           quantity: item.quantity,
           total:
             (item.product.discountPrice || item.product.price) * item.quantity,
+          // Add seller information if available - use type assertion to avoid TypeScript errors
+          sellerId: (item.product as any).sellerId,
+          sellerEmail: (item.product as any).sellerEmail,
         }));
 
         // Create paid order object
@@ -304,6 +334,26 @@ const Checkout = () => {
 
         // Add to paid orders slice
         dispatch(addPaidOrder(paidOrder));
+
+        // 🆕 CREATE SALES RECORDS FOR SELLERS
+        try {
+          await processOrderAndCreateSales(paidOrder);
+          console.log("✅ Sales records created for order:", orderId);
+
+          // Show success message for sellers
+          toast.success("Sales records created for sellers!", {
+            duration: 3000,
+          });
+        } catch (error) {
+          console.error("❌ Failed to create sales records:", error);
+          // Don't block the user flow if sales creation fails
+          toast.error(
+            "Failed to create sales records, but your order was successful",
+            {
+              duration: 3000,
+            }
+          );
+        }
 
         // Create success notification for the entire order
         dispatch(
@@ -331,9 +381,6 @@ const Checkout = () => {
           },
           replace: true,
         });
-
-        // Alternative: Navigate with URL parameters
-        // navigate(`/order-status?status=success&orderId=${orderId}&amount=${total}&email=${encodeURIComponent(paymentDetails.email)}&ref=${res.reference}`, { replace: true });
       },
       onCancel: () => {
         setIsProcessing(false);
@@ -353,7 +400,7 @@ const Checkout = () => {
         navigate("/order-status", {
           state: {
             status: "cancelled",
-            orderId: generateOrderId(), // Generate ID for tracking even cancelled orders
+            orderId: generateOrderId(),
             amount: total,
             email: paymentDetails.email,
           },
@@ -388,7 +435,7 @@ const Checkout = () => {
         navigate("/order-status", {
           state: {
             status: "failed",
-            orderId: generateOrderId(), // Generate ID for tracking failed attempts
+            orderId: generateOrderId(),
             amount: total,
             email: paymentDetails.email,
             error: error.message,
@@ -408,6 +455,7 @@ const Checkout = () => {
       },
     });
   };
+
   const nextStep = () => {
     // Check profile completion when trying to proceed from step 2
     if (currentStep === 2 && user.isLoggedIn && !profileCompletion.isComplete) {
@@ -424,6 +472,34 @@ const Checkout = () => {
     setCurrentStep(currentStep - 1);
   };
 
+  // Add temporary test sales button (remove in production)
+  const addTestSales = () => {
+    salesService.addTestSales();
+    toast.success("Test sales added! Check your sales page.");
+  };
+
+  // Helper function to safely get seller information
+  const getSellerInfo = (product: ExtendedProduct) => {
+    const sellerId = (product as any).sellerId;
+    const sellerEmail = (product as any).sellerEmail;
+
+    if (sellerId || sellerEmail) {
+      return {
+        sellerId,
+        sellerEmail,
+        displayName: sellerEmail
+          ? sellerEmail.split("@")[0]
+          : sellerId || "Unknown Seller",
+      };
+    }
+    return null;
+  };
+
+  // Count unique sellers in the cart
+  const uniqueSellersCount = new Set(
+    items.map((item) => getSellerInfo(item.product)?.sellerId).filter(Boolean)
+  ).size;
+
   if (items.length === 0) {
     return (
       <div className="checkout-container">
@@ -434,6 +510,42 @@ const Checkout = () => {
           <button className="btn btn-primary" onClick={() => navigate("/")}>
             Start Shopping
           </button>
+
+          {/* Temporary test button - remove in production */}
+          <div
+            style={{
+              marginTop: "20px",
+              padding: "10px",
+              background: "#f3f4f6",
+              borderRadius: "8px",
+            }}
+          >
+            <p
+              style={{
+                fontSize: "14px",
+                color: "#6b7280",
+                marginBottom: "10px",
+              }}
+            >
+              <strong>Developer Note:</strong> Sales tracking is now integrated.
+              When customers purchase items, sales will automatically be created
+              for sellers.
+            </p>
+            <button
+              onClick={addTestSales}
+              style={{
+                padding: "8px 16px",
+                background: "#f59e0b",
+                color: "white",
+                border: "none",
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontSize: "14px",
+              }}
+            >
+              Add Test Sales Data
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -482,53 +594,86 @@ const Checkout = () => {
                   </div>
 
                   <div className="cart-items-list">
-                    {items.map((item) => (
-                      <div key={item.product.id} className="cart-item">
-                        <img
-                          src={item.product.image || "/placeholder.svg"}
-                          alt={item.product.name}
-                          className="cart-item-image"
-                        />
-                        <div className="cart-item-details">
-                          <h3>{item.product.name}</h3>
-                          <p className="item-price">
-                            {formatPrice(
-                              item.product.discountPrice || item.product.price
+                    {items.map((item) => {
+                      const sellerInfo = getSellerInfo(item.product);
+                      return (
+                        <div key={item.product.id} className="cart-item">
+                          <img
+                            src={item.product.image || "/placeholder.svg"}
+                            alt={item.product.name}
+                            className="cart-item-image"
+                          />
+                          <div className="cart-item-details">
+                            <h3>{item.product.name}</h3>
+                            <p className="item-price">
+                              {formatPrice(
+                                item.product.discountPrice || item.product.price
+                              )}
+                            </p>
+                            {sellerInfo && (
+                              <p
+                                className="item-seller"
+                                style={{ fontSize: "12px", color: "#6b7280" }}
+                              >
+                                Sold by: {sellerInfo.displayName}
+                              </p>
                             )}
-                          </p>
-                          <div className="quantity-controls">
-                            <button
-                              onClick={() =>
-                                handleQuantityChange(
-                                  item.product.id,
-                                  item.quantity - 1
-                                )
-                              }
-                              disabled={item.quantity <= 1}
-                            >
-                              -
-                            </button>
-                            <span>{item.quantity}</span>
-                            <button
-                              onClick={() =>
-                                handleQuantityChange(
-                                  item.product.id,
-                                  item.quantity + 1
-                                )
-                              }
-                            >
-                              +
-                            </button>
+                            <div className="quantity-controls">
+                              <button
+                                onClick={() =>
+                                  handleQuantityChange(
+                                    item.product.id,
+                                    item.quantity - 1
+                                  )
+                                }
+                                disabled={item.quantity <= 1}
+                              >
+                                -
+                              </button>
+                              <span>{item.quantity}</span>
+                              <button
+                                onClick={() =>
+                                  handleQuantityChange(
+                                    item.product.id,
+                                    item.quantity + 1
+                                  )
+                                }
+                              >
+                                +
+                              </button>
+                            </div>
                           </div>
+                          <button
+                            className="remove-button"
+                            onClick={() =>
+                              handleRemoveFromCart(item.product.id)
+                            }
+                          >
+                            ×
+                          </button>
                         </div>
-                        <button
-                          className="remove-button"
-                          onClick={() => handleRemoveFromCart(item.product.id)}
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
+                      );
+                    })}
+                  </div>
+
+                  {/* Sales Integration Notice */}
+                  <div className="integration-notice">
+                    <div className="notice-content">
+                      <h4>🎯 Sales Tracking Enabled</h4>
+                      <p>
+                        When you complete this purchase, sales records will
+                        automatically be created for each seller. Sellers can
+                        view their sales in the "My Sales" section of their
+                        account.
+                      </p>
+                      {uniqueSellersCount > 0 && (
+                        <p className="sellers-count">
+                          This order contains items from{" "}
+                          <strong>{uniqueSellersCount}</strong> unique seller
+                          {uniqueSellersCount !== 1 ? "s" : ""}.
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}
@@ -543,6 +688,7 @@ const Checkout = () => {
                     <Truck className="section-icon" />
                     <h2>Shipping Information</h2>
                   </div>
+
                   {/* Show profile completion warning for logged in users with incomplete profiles */}
                   {user.isLoggedIn && !profileCompletion.isComplete && (
                     <div className="profile-warning">
@@ -579,6 +725,7 @@ const Checkout = () => {
                       </div>
                     </div>
                   )}
+
                   <form className="shipping-form">
                     <div className="form-row">
                       <div className="form-group">
@@ -842,18 +989,24 @@ const Checkout = () => {
                       <div className="input-wrapper">
                         <CreditCard className="input-icon" />
                         <input
-                          type="number"
+                          type="text"
                           id="amount"
                           value={formatPrice(total)}
-                          onChange={(e) =>
-                            handlePaymentChange("amount", e.target.value)
-                          }
-                          placeholder={total.toFixed(2)}
-                          min="1"
-                          required
                           readOnly
+                          className="readonly-input"
                         />
                       </div>
+                    </div>
+
+                    <div className="payment-security">
+                      <div className="security-badge">
+                        <Lock size={16} />
+                        <span>Secure Payment</span>
+                      </div>
+                      <p className="security-note">
+                        Your payment is processed securely through Paystack. We
+                        do not store your payment details.
+                      </p>
                     </div>
                   </form>
                 </div>
@@ -906,6 +1059,25 @@ const Checkout = () => {
                           "Overnight Shipping (Next business day)"}
                       </p>
                     </div>
+
+                    <div className="sales-notice">
+                      <div className="notice-icon">🎯</div>
+                      <div className="notice-text">
+                        <h4>Sales Tracking</h4>
+                        <p>
+                          After payment, sales records will be automatically
+                          created for each seller. Sellers will be able to track
+                          their sales in their account dashboard.
+                        </p>
+                        {uniqueSellersCount > 0 && (
+                          <p className="sellers-count-review">
+                            This order will create sales records for{" "}
+                            <strong>{uniqueSellersCount}</strong> seller
+                            {uniqueSellersCount !== 1 ? "s" : ""}.
+                          </p>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
@@ -936,8 +1108,8 @@ const Checkout = () => {
                 }
               >
                 {currentStep === 2 &&
-                  user.isLoggedIn &&
-                  !profileCompletion.isComplete
+                user.isLoggedIn &&
+                !profileCompletion.isComplete
                   ? "Complete Profile First"
                   : "Continue"}
               </button>
@@ -948,7 +1120,7 @@ const Checkout = () => {
                 onClick={handlePlaceOrder}
                 disabled={isProcessing}
               >
-                {isProcessing ? "Processing..." : "Place Order"}
+                {isProcessing ? <>Processing...</> : "Place Order & Pay"}
               </button>
             )}
           </div>
@@ -959,24 +1131,34 @@ const Checkout = () => {
             <h3>Order Summary</h3>
 
             <div className="summary-items">
-              {items.map((item) => (
-                <div key={item.product.id} className="summary-item">
-                  <img
-                    src={item.product.image || "/placeholder.svg"}
-                    alt={item.product.name}
-                  />
-                  <div className="item-details">
-                    <span className="item-name">{item.product.name}</span>
-                    <span className="item-quantity">Qty: {item.quantity}</span>
+              {items.map((item) => {
+                const sellerInfo = getSellerInfo(item.product);
+                return (
+                  <div key={item.product.id} className="summary-item">
+                    <img
+                      src={item.product.image || "/placeholder.svg"}
+                      alt={item.product.name}
+                    />
+                    <div className="item-details">
+                      <span className="item-name">{item.product.name}</span>
+                      <span className="item-quantity">
+                        Qty: {item.quantity}
+                      </span>
+                      {sellerInfo && (
+                        <span className="item-seller">
+                          Seller: {sellerInfo.displayName}
+                        </span>
+                      )}
+                    </div>
+                    <span className="item-price">
+                      {formatPrice(
+                        (item.product.discountPrice || item.product.price) *
+                          item.quantity
+                      )}
+                    </span>
                   </div>
-                  <span className="item-price">
-                    {formatPrice(
-                      (item.product.discountPrice || item.product.price) *
-                      item.quantity
-                    )}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="summary-totals">
@@ -996,6 +1178,31 @@ const Checkout = () => {
                 <span>Total:</span>
                 <span>{formatPrice(total)}</span>
               </div>
+            </div>
+
+            <div className="sales-integration-info">
+              <div className="integration-badge">
+                <span>🎯 Sales Tracking Active</span>
+              </div>
+              <p className="integration-description">
+                This purchase will create sales records for{" "}
+                <strong>{uniqueSellersCount}</strong> seller
+                {uniqueSellersCount !== 1 ? "s" : ""}
+              </p>
+            </div>
+          </div>
+
+          {/* Temporary test section - remove in production */}
+          <div className="test-section">
+            <div className="test-card">
+              <h4>🧪 Developer Tools</h4>
+              <p>Test the sales tracking system:</p>
+              <button onClick={addTestSales} className="btn-test-sales">
+                Add Test Sales Data
+              </button>
+              <p className="test-note">
+                This adds sample sales data to see how the sales tracking works.
+              </p>
             </div>
           </div>
         </div>
