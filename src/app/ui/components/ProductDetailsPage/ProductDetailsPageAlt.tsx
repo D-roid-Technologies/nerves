@@ -39,19 +39,45 @@ const ProductDetailsPageAlt = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
-//   const [isOwner, setIsOwner] = useState(false);
+  //   const [isOwner, setIsOwner] = useState(false);
 
-//   useEffect(() => {
-//     const checkOwnership = async () => {
-//       const currentUser = auth.currentUser;
-//       if (currentUser && product) {
-//         const userEmail = currentUser.email;
-//         setIsOwner(product.sellerId === userEmail);
-//       }
-//     };
+  // Function to render formatted text
+  const renderFormattedText = (text: string) => {
+    if (!text) return "No description available.";
 
-//     checkOwnership();
-//   }, [product]);
+    return text
+      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*(.*?)\*/g, "<em>$1</em>")
+      .replace(/<u>(.*?)<\/u>/g, "<u>$1</u>")
+      .replace(/\n/g, "<br>")
+      .replace(/> (.*?)(?=\n|$)/g, "<blockquote>$1</blockquote>")
+      .replace(/\n• (.*?)(?=\n|$)/g, "<li>$1</li>")
+      .replace(/\n\d\. (.*?)(?=\n|$)/g, "<li>$1</li>")
+      .replace(
+        /<div style="text-align: left;">(.*?)<\/div>/g,
+        '<div style="text-align: left;">$1</div>'
+      )
+      .replace(
+        /<div style="text-align: center;">(.*?)<\/div>/g,
+        '<div style="text-align: center;">$1</div>'
+      )
+      .replace(
+        /<div style="text-align: right;">(.*?)<\/div>/g,
+        '<div style="text-align: right;">$1</div>'
+      );
+  };
+
+  //   useEffect(() => {
+  //     const checkOwnership = async () => {
+  //       const currentUser = auth.currentUser;
+  //       if (currentUser && product) {
+  //         const userEmail = currentUser.email;
+  //         setIsOwner(product.sellerId === userEmail);
+  //       }
+  //     };
+
+  //     checkOwnership();
+  //   }, [product]);
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -281,20 +307,6 @@ const ProductDetailsPageAlt = () => {
     <div className="product-details-page">
       <Toaster position="top-center" reverseOrder={false} />
 
-      {/* Debug info - remove in production */}
-      {/* <div
-        style={{
-          padding: "8px 16px",
-          backgroundColor: "#e3f2fd",
-          color: "#1565c0",
-          borderRadius: "4px",
-          marginBottom: "16px",
-          fontSize: "12px",
-          display: "inline-block",
-        }}
-      >
-      </div> */}
-
       <button
         className="back-button"
         onClick={() => navigate(`/shop`)}
@@ -303,14 +315,7 @@ const ProductDetailsPageAlt = () => {
         <ChevronLeft size={20} />
         Back to Products
       </button>
-{/* 
-      {isOwner && (
-        <DeleteProductButton
-          productId={product.id}
-          productName={product.name}
-          onDeleteSuccess={() => navigate("/shop")}
-        />F
-      )} */}
+
       <div className="product-container">
         {/* Product Images Gallery */}
         <div className="product-images">
@@ -420,7 +425,12 @@ const ProductDetailsPageAlt = () => {
 
           <div className="product-description">
             <h2>Description</h2>
-            <p>{product.description}</p>
+            <div
+              className="description-content"
+              dangerouslySetInnerHTML={{
+                __html: renderFormattedText(product.description || ""),
+              }}
+            />
           </div>
 
           <div className="product-details">
@@ -430,6 +440,12 @@ const ProductDetailsPageAlt = () => {
                 <li key={index}>{detail}</li>
               ))}
             </ul>
+            {product.sellerId && product.sellerId !== "Unknown Seller" && (
+              <div className="meta-item">
+                <span className="meta-label">Seller:</span> &nbsp;&nbsp;
+                <span className="meta-value">{product.sellerId}</span>
+              </div>
+            )}
           </div>
 
           <div className="product-actions">
@@ -461,7 +477,7 @@ const ProductDetailsPageAlt = () => {
             </button>
           </div>
 
-          <div className="product-meta">
+          {/* <div className="product-meta">
             <div className="meta-item">
               <span className="meta-label">Category:</span>
               <span className="meta-value">{product.category}</span>
@@ -480,7 +496,7 @@ const ProductDetailsPageAlt = () => {
                 <span className="meta-value">{product.sellerId}</span>
               </div>
             )}
-          </div>
+          </div> */}
         </div>
       </div>
 

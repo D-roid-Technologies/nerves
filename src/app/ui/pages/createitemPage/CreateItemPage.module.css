@@ -632,3 +632,161 @@
     width: 100%;
   }
 }
+
+
+/* Rich Text Editor Styles */
+.richTextToolbar {
+  display: flex;
+  gap: 1rem;
+  padding: 12px;
+  background: #f8f9fa;
+  border: 1px solid #e5e7eb;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  flex-wrap: wrap;
+}
+
+.toolbarGroup {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.toolbarGroup button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+}
+
+.toolbarGroup button:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.toolbarGroup button:active {
+  background: #e5e7eb;
+}
+
+.richTextArea {
+  border-radius: 0 0 8px 8px !important;
+  border-top: none !important;
+  min-height: 150px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.formattingHelp {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 6px;
+  color: #0369a1;
+}
+
+.formattingHelp small {
+  font-size: 12px;
+}
+
+.discountNote {
+  color: #10B981;
+  margin-top: 4px;
+  display: block;
+}
+
+/* Preview Styles for Formatted Text */
+.previewDescription {
+  color: #6b7280;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.previewDescription strong {
+  color: #1f2937;
+  font-weight: 700;
+}
+
+.previewDescription em {
+  color: #4b5563;
+  font-style: italic;
+}
+
+.previewDescription u {
+  text-decoration: underline;
+  color: #374151;
+}
+
+.previewDescription blockquote {
+  border-left: 4px solid #e5e7eb;
+  padding-left: 1rem;
+  margin: 0.5rem 0;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.previewDescription ul,
+.previewDescription ol {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.previewDescription li {
+  margin: 0.25rem 0;
+}
+
+.previewDescription div[style*="text-align"] {
+  margin: 0.5rem 0;
+}
+
+/* Price Styling */
+.discountedPrice {
+  color: #10B981;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.originalPrice {
+  text-decoration: line-through;
+  color: #999;
+  margin-left: 8px;
+  font-size: 1.2rem;
+}
+
+.previewDiscount {
+  color: #ef4444;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .richTextToolbar {
+    gap: 0.5rem;
+  }
+  
+  .toolbarGroup {
+    gap: 2px;
+  }
+  
+  .toolbarGroup button {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .discountedPrice {
+    font-size: 1.3rem;
+  }
+  
+  .originalPrice {
+    font-size: 1rem;
+  }
+}
