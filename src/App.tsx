@@ -9,11 +9,13 @@ import CartDrawer from "./app/ui/components/cartDrawer/CartDrawer";
 import NotificationDrawer from "./app/ui/components/notificationDrawer/NotificationDrawer";
 import Overlay from "./app/ui/components/Overlay/Overlay";
 import UserManager from "./app/components/UserManager";
+import SalesInitializer from "./app/utils/SalesInitializer";
 
 function App() {
   return (
     <Provider store={store}>
       <BrowserRouter>
+        <SalesInitializer />
         <UserManager />
         <Navbar />
         <Index />

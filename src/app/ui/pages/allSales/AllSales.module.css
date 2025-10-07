@@ -1,4 +1,6 @@
-    /* Container */
+/* AllSales.module.css */
+
+/* Container */
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -168,23 +170,23 @@
   border: 1px solid #e5e7eb;
 }
 
-.searchBar {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
+.searchBox {
   margin-bottom: 1.5rem;
 }
 
 .searchInput {
-  flex: 1;
-  border: none;
-  background: none;
+  width: 95%;
+  padding: 12px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.searchInput:focus {
   outline: none;
-  font-size: 0.875rem;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .filters {
@@ -243,6 +245,7 @@
   font-size: 0.8125rem;
   cursor: pointer;
   outline: none;
+  transition: border-color 0.2s ease;
 }
 
 .sortSelect:focus {
@@ -288,6 +291,14 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.saleImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
 }
 
 .saleContent {
@@ -332,6 +343,7 @@
   gap: 1rem;
   font-size: 0.8125rem;
   color: #6b7280;
+  margin-bottom: 0.5rem;
 }
 
 .saleCategory {
@@ -341,14 +353,23 @@
   font-weight: 500;
 }
 
-.saleViews {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
+.saleBuyer {
+  font-size: 0.875rem;
+  color: #6b7280;
 }
 
 .saleDate {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
   color: #9ca3af;
+}
+
+.saleTotal {
+  font-weight: 600;
+  color: #059669;
+  margin-top: 0.5rem;
+  font-size: 1rem;
 }
 
 .saleActions {
@@ -356,6 +377,7 @@
   flex-direction: column;
   gap: 1rem;
   align-items: flex-end;
+  min-width: 120px;
 }
 
 .saleStatus {
@@ -390,6 +412,16 @@
   color: #000;
 }
 
+.deleteBtn {
+  color: #ef4444;
+}
+
+.deleteBtn:hover {
+  background-color: #fef2f2;
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
 /* Empty State */
 .emptyState {
   display: flex;
@@ -416,6 +448,57 @@
 .emptyState p {
   margin: 0;
   font-size: 0.875rem;
+}
+
+/* Loading State */
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+  color: #6b7280;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Status Colors */
+.status-completed {
+  background-color: rgba(34, 197, 94, 0.1);
+  color: #16a34a;
+}
+
+.status-refunded {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+.status-cancelled {
+  background-color: rgba(107, 114, 128, 0.1);
+  color: #6b7280;
+}
+
+.status-active {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
+}
+
+.status-sold {
+  background-color: rgba(34, 197, 94, 0.1);
+  color: #16a34a;
 }
 
 /* Responsive Design */
@@ -458,6 +541,10 @@
     flex-wrap: wrap;
   }
 
+  .statusFilters {
+    flex-wrap: wrap;
+  }
+
   .saleCard {
     flex-direction: column;
     gap: 1rem;
@@ -482,6 +569,13 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
+    min-width: auto;
+  }
+
+  .saleMeta {
+    flex-direction: column;
+    gap: 0.5rem;
   }
 }
 
@@ -494,10 +588,6 @@
 
   .saleCard {
     padding: 1rem;
-  }
-
-  .statusFilters {
-    flex-wrap: wrap;
   }
 
   .statCard {
@@ -513,8 +603,44 @@
     font-size: 1.25rem;
   }
 
-  .saleMeta {
-    flex-direction: column;
-    gap: 0.5rem;
+  .saleTitle {
+    font-size: 1rem;
   }
+
+  .salePrice {
+    font-size: 1.125rem;
+  }
+
+  .actionButtons {
+    gap: 0.25rem;
+  }
+
+  .actionBtn {
+    padding: 0.375rem;
+  }
+}
+
+/* Additional Utility Classes */
+.textSuccess {
+  color: #10b981;
+}
+
+.textDanger {
+  color: #ef4444;
+}
+
+.textMuted {
+  color: #6b7280;
+}
+
+.bgSuccess {
+  background-color: #10b981;
+}
+
+.bgDanger {
+  background-color: #ef4444;
+}
+
+.bgMuted {
+  background-color: #6b7280;
 }

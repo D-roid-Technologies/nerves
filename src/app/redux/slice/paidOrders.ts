@@ -8,6 +8,7 @@ export interface PaidOrderItem {
   image?: string;
   quantity: number;
   total: number;
+  sellerId?: string;
 }
 
 export interface PaidOrder {
@@ -65,7 +66,7 @@ const paidOrdersSlice = createSlice({
   initialState,
   reducers: {
     addPaidOrder: (state, action: PayloadAction<PaidOrder>) => {
-      state.orders.unshift(action.payload); // Add to beginning for newest first
+      state.orders.unshift(action.payload);
       state.totalOrders += 1;
     },
 
@@ -75,7 +76,7 @@ const paidOrdersSlice = createSlice({
     ) => {
       const { orderId, status } = action.payload;
       const orderIndex = state.orders.findIndex(
-        (order) => order.orderId === orderId
+        (order: PaidOrder) => order.orderId === orderId
       );
 
       if (orderIndex !== -1) {
@@ -91,7 +92,9 @@ const paidOrdersSlice = createSlice({
 
     removePaidOrder: (state, action: PayloadAction<string>) => {
       const orderId = action.payload;
-      state.orders = state.orders.filter((order) => order.orderId !== orderId);
+      state.orders = state.orders.filter(
+        (order: PaidOrder) => order.orderId !== orderId
+      );
       state.totalOrders = Math.max(0, state.totalOrders - 1);
     },
   },

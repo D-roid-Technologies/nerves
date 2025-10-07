@@ -709,3 +709,148 @@
   align-items: center;
   gap: 8px;
 }
+
+/* Sales Section Redesign */
+.sales-stats {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.sales-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #000;
+  color: white;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.account-sale-item {
+  display: flex;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.account-sale-item:hover {
+  border-color: #667eea;
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15);
+  transform: translateY(-2px);
+}
+
+.account-sale-info {
+  display: flex;
+  gap: 1.5rem;
+  flex: 1;
+}
+
+.account-sale-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f3f4f6;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.account-sale-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.account-sale-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.account-sale-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 0.25rem;
+}
+
+.account-sale-meta {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.account-sale-meta span {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.account-sale-buyer {
+  font-size: 0.875rem;
+  color: #4b5563;
+  padding: 0.25rem 0.75rem;
+  background: #f3f4f6;
+  border-radius: 6px;
+  display: inline-block;
+  width: fit-content;
+}
+
+.account-sale-date {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.account-sale-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.875rem;
+  border-radius: 20px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.account-empty-subtext {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  margin-top: 0.5rem;
+  line-height: 1.6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .sales-stats {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .account-sale-item {
+    flex-direction: column;
+  }
+
+  .account-sale-info {
+    flex-direction: column;
+  }
+
+  .account-sale-image {
+    width: 100%;
+    height: 120px;
+  }
+}
