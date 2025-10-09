@@ -628,3 +628,162 @@ input:focus {
   font-size: 1.5rem;
   font-weight: bold;
 }
+
+/* No Reviews State Styles */
+.no-reviews-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 3rem 2rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 2px dashed #e0e0e0;
+  margin: 2rem 0;
+}
+
+.no-reviews-icon {
+  color: #6c757d;
+  margin-bottom: 1.5rem;
+  opacity: 0.7;
+}
+
+.no-reviews-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #343a40;
+  margin-bottom: 1rem;
+}
+
+.no-reviews-message {
+  font-size: 1rem;
+  color: #6c757d;
+  line-height: 1.6;
+  max-width: 500px;
+  margin-bottom: 2rem;
+}
+
+.no-reviews-actions {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.write-review-btn {
+  background: #2196F3;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.write-review-btn:hover {
+  background: #1976D2;
+  transform: translateY(-1px);
+}
+
+.share-experience-btn {
+  background: transparent;
+  color: #2196F3;
+  border: 2px solid #2196F3;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.share-experience-btn:hover {
+  background: #2196F3;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.no-reviews-benefits {
+  text-align: left;
+  max-width: 500px;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.no-reviews-benefits h4 {
+  color: #343a40;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.no-reviews-benefits ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.no-reviews-benefits li {
+  color: #495057;
+  padding: 0.5rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+  line-height: 1.5;
+}
+
+.no-reviews-benefits li:before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: #28a745;
+  font-weight: bold;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .no-reviews-container {
+    padding: 2rem 1rem;
+  }
+  
+  .no-reviews-actions {
+    flex-direction: column;
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .write-review-btn,
+  .share-experience-btn {
+    width: 100%;
+  }
+  
+  .no-reviews-benefits {
+    text-align: center;
+  }
+  
+  .no-reviews-benefits li {
+    padding-left: 0;
+    text-align: left;
+  }
+  
+  .no-reviews-benefits li:before {
+    position: static;
+    margin-right: 0.5rem;
+  }
+}
+
+/* Product Reviews Section Base Styles */
+.product-reviews {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.product-reviews h2 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #343a40;
+  margin-bottom: 1.5rem;
+}

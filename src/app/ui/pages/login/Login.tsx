@@ -129,14 +129,14 @@ const Login: React.FunctionComponent = () => {
               <AppleIcon />
               <span>Apple</span>
             </button> */}
-            <button
+            {/* <button
               type="button"
               className="social-button facebook"
               onClick={() => handleSocialLogin("Facebook")}
             >
               <FacebookIcon />
               <span>Facebook</span>
-            </button>
+            </button> */}
             {/* <button
               type="button"
               className="social-button github"
