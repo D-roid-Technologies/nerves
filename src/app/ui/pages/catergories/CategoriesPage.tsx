@@ -14,6 +14,9 @@ import {
 } from "lucide-react";
 import styles from "./categories.module.css";
 import { useNavigate } from "react-router-dom";
+import { authService } from "../../../redux/configuration/auth.service";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux/store";
 
 interface Product {
   id: number;
@@ -27,6 +30,8 @@ interface Product {
   category: string;
   thumbnail: string;
   images: string[];
+  name?: string;
+  sellerId: string;
 }
 
 interface CategoryData {
@@ -48,6 +53,10 @@ const CategoriesPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const navigate = useNavigate();
 
+  const listedItems = useSelector(
+    (state: RootState) => state.products.listedItems
+  );
+
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -55,14 +64,85 @@ const CategoriesPage: React.FC = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await fetch("https://dummyjson.com/products?limit=100");
-      if (!response.ok) {
-        throw new Error("Failed to fetch products");
-      }
-      const data = await response.json();
-      setProducts(data.products);
+
+      // Use Redux listedItems or fetch from Firestore
+      const allItems =
+        listedItems && listedItems.length > 0
+          ? listedItems
+          : await authService.fetchAllListedItems();
+
+      console.log(
+        "🔄 Raw Firestore items count for categories:",
+        allItems.length
+      );
+
+      // Transform Firestore data to match Product interface
+      const transformedProducts: Product[] = allItems.map(
+        (product: any, index: number) => {
+          // Handle sellerId
+          let sellerId = "unknown@example.com";
+          if (product.sellerId) {
+            if (typeof product.sellerId === "object") {
+              sellerId =
+                product.sellerId.email ||
+                product.sellerId.name ||
+                "unknown@example.com";
+            } else {
+              sellerId = product.sellerId;
+            }
+          }
+
+          // Use actual ID from Firestore or generate one
+          const productId = product.id || Date.now() + index;
+
+          // Handle images
+          let images = product.images || [];
+          if (!Array.isArray(images)) {
+            images = [];
+          }
+
+          // Handle thumbnail - use image if thumbnail is not available
+          const thumbnail =
+            product.thumbnail || product.image || "/placeholder.svg";
+
+          // Handle name/title - use title for compatibility with existing interface
+          const title = product.title || product.name || `Product ${productId}`;
+          const name = product.name || title;
+
+          // Handle category - ensure it exists and is properly formatted
+          const category = product.category?.toLowerCase() || "uncategorized";
+
+          return {
+            id: productId,
+            title: title,
+            name: name,
+            description:
+              product.description || `High-quality ${category} product`,
+            price: product.price ?? 0,
+            discountPercentage: product.discountPercentage || 0,
+            rating: product.rating ?? 0,
+            stock: product.stock ?? 0,
+            brand: product.brand ?? "Unknown",
+            category: category,
+            thumbnail: thumbnail,
+            images: images,
+            sellerId: sellerId,
+          };
+        }
+      );
+
+      console.log(
+        "✅ Transformed products for categories:",
+        transformedProducts.length
+      );
+      setProducts(transformedProducts);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      console.error("Error fetching products for categories:", err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "An error occurred while fetching categories"
+      );
     } finally {
       setLoading(false);
     }
@@ -73,6 +153,8 @@ const CategoriesPage: React.FC = () => {
 
     products.forEach((product) => {
       const categoryName = product.category;
+      if (!categoryName || categoryName === "uncategorized") return;
+
       if (!categoryMap.has(categoryName)) {
         categoryMap.set(categoryName, {
           name: categoryName,
@@ -88,29 +170,42 @@ const CategoriesPage: React.FC = () => {
       const category = categoryMap.get(categoryName)!;
       category.count++;
       category.products.push(product);
+
+      // Update category image with the first product's thumbnail if not set
+      if (!category.image || category.image === "/placeholder.svg") {
+        category.image = product.thumbnail;
+      }
     });
 
     // Calculate additional data for each category
     categoryMap.forEach((category) => {
       // Calculate average price
-      const totalPrice = category.products.reduce(
-        (sum, product) => sum + product.price,
-        0
-      );
-      category.averagePrice = totalPrice / category.products.length;
+      if (category.products.length > 0) {
+        const totalPrice = category.products.reduce(
+          (sum, product) => sum + product.price,
+          0
+        );
+        category.averagePrice = totalPrice / category.products.length;
+      }
 
       // Get top brands
       const brandCounts = new Map<string, number>();
       category.products.forEach((product) => {
-        brandCounts.set(
-          product.brand,
-          (brandCounts.get(product.brand) || 0) + 1
-        );
+        if (product.brand && product.brand !== "Unknown") {
+          brandCounts.set(
+            product.brand,
+            (brandCounts.get(product.brand) || 0) + 1
+          );
+        }
       });
+
       category.topBrands = Array.from(brandCounts.entries())
         .sort((a, b) => b[1] - a[1])
         .slice(0, 3)
         .map(([brand]) => brand);
+
+      // Update description with actual count
+      category.description = `Explore ${category.count} high-quality ${category.name} products`;
     });
 
     return Array.from(categoryMap.values());
@@ -205,10 +300,58 @@ const CategoriesPage: React.FC = () => {
               categories
             </p>
           </div>
-        
         </div>
       </div>
 
+      {/* Search and Filter Controls */}
+      {/* <div className={styles.controls}>
+        <div className={styles.searchContainer}>
+          <Search className={styles.searchIcon} />
+          <input
+            type="text"
+            placeholder="Search categories..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className={styles.searchInput}
+          />
+        </div>
+
+        <div className={styles.filterControls}>
+          <div className={styles.viewToggle}>
+            <button
+              className={`${styles.viewButton} ${
+                viewMode === "grid" ? styles.active : ""
+              }`}
+              onClick={() => setViewMode("grid")}
+            >
+              <Grid size={18} />
+            </button>
+            <button
+              className={`${styles.viewButton} ${
+                viewMode === "list" ? styles.active : ""
+              }`}
+              onClick={() => setViewMode("list")}
+            >
+              <List size={18} />
+            </button>
+          </div>
+
+          <div className={styles.sortContainer}>
+            <select
+              value={sortBy}
+              onChange={(e) =>
+                setSortBy(e.target.value as "name" | "count" | "price")
+              }
+              className={styles.sortSelect}
+            >
+              <option value="name">Sort by Name</option>
+              <option value="count">Sort by Product Count</option>
+              <option value="price">Sort by Average Price</option>
+            </select>
+            <ChevronDown className={styles.chevronIcon} />
+          </div>
+        </div>
+      </div> */}
 
       {/* Categories Grid/List */}
       <div
@@ -220,16 +363,15 @@ const CategoriesPage: React.FC = () => {
           <div
             key={category.name}
             className={styles.categoryCard}
-            onClick={() =>
-              navigate(
-                `/products`
-              )
-            }
+            onClick={() => navigate(`/shop`)}
           >
             <div className={styles.categoryImage}>
               <img
                 src={category.image || "/placeholder.svg"}
                 alt={category.name}
+                onError={(e) => {
+                  e.currentTarget.src = "/placeholder.svg";
+                }}
               />
               <div className={styles.categoryOverlay}>
                 <Eye className={styles.overlayIcon} />
@@ -245,7 +387,8 @@ const CategoriesPage: React.FC = () => {
                 <div className={styles.categoryTitle}>
                   <h3>{formatCategoryName(category.name)}</h3>
                   <span className={styles.productCount}>
-                    {category.count} products
+                    {category.count}{" "}
+                    {category.count === 1 ? "product" : "products"}
                   </span>
                 </div>
               </div>
@@ -253,45 +396,45 @@ const CategoriesPage: React.FC = () => {
               <p className={styles.categoryDescription}>
                 {category.description}
               </p>
-{/* 
+
               <div className={styles.categoryStats}>
                 <div className={styles.statItem}>
-                  <TrendingUp className={styles.statItemIcon} />
-                  <span>Avg. ${category.averagePrice.toFixed(0)}</span>
+                  <TrendingUp className={styles.statIcon} />
+                  <span>Avg. ${category.averagePrice.toFixed(2)}</span>
                 </div>
                 <div className={styles.statItem}>
-                  <Star className={styles.statItemIcon} />
+                  <Star className={styles.statIcon} />
                   <span>
-                    {(
-                      category.products.reduce(
-                        (sum, product) => sum + product.rating,
-                        0
-                      ) / category.products.length
-                    ).toFixed(1)}
+                    {category.products.length > 0
+                      ? (
+                          category.products.reduce(
+                            (sum, product) => sum + product.rating,
+                            0
+                          ) / category.products.length
+                        ).toFixed(1)
+                      : "0.0"}
                   </span>
                 </div>
-              </div> */}
+              </div>
 
-              {/* {category.topBrands.length > 0 && (
+              {category.topBrands.length > 0 && (
                 <div className={styles.topBrands}>
                   <span className={styles.brandsLabel}>Top Brands:</span>
                   <div className={styles.brandsList}>
-                    {category.topBrands.map((brand, index) => (
+                    {category.topBrands.map((brand) => (
                       <span key={brand} className={styles.brandTag}>
                         {brand}
                       </span>
                     ))}
                   </div>
                 </div>
-              )} */}
+              )}
 
               <button
                 className={styles.exploreButton}
                 onClick={(e) => {
                   e.stopPropagation();
-                  navigate(
-                    `/products`
-                  );
+                  navigate(`/shop`);
                 }}
               >
                 <ShoppingCart className={styles.buttonIcon} />
@@ -307,6 +450,11 @@ const CategoriesPage: React.FC = () => {
           <Search className={styles.emptyIcon} />
           <h3>No categories found</h3>
           <p>Try adjusting your search terms or filters</p>
+          {products.length === 0 && (
+            <button onClick={fetchProducts} className={styles.retryButton}>
+              Reload Products
+            </button>
+          )}
         </div>
       )}
     </div>

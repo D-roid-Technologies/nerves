@@ -272,14 +272,14 @@ const SignUp: React.FunctionComponent = () => {
               <AppleIcon />
               <span>Apple</span>
             </button> */}
-            <button
+            {/* <button
               type="button"
               className="social-button facebook"
-              // onClick={() => handleSocialSignup("Facebook")}
+              onClick={() => handleSocialSignup("Facebook")}
             >
               <FacebookIcon />
-              <span>Facebook</span>
-            </button>
+              <span>Facebook</span>''
+            </button> */}
             {/* <button
               type="button"
               className="social-button github"

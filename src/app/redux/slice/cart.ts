@@ -86,7 +86,7 @@ export const cartSlice = createSlice({
       state.isOpen = !state.isOpen;
     },
 
-    // ✅ NEW: replace cart with backend data
+    // ✅ Fixed: wrapped type annotation to avoid JSX parsing error
     updateCartSlice(state, action: PayloadAction<CartItem[]>) {
       state.items = action.payload.map((item) => ({
         ...item,

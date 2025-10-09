@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Star, ChevronLeft, Heart, ShoppingCart } from "lucide-react";
+import {
+  Star,
+  ChevronLeft,
+  Heart,
+  ShoppingCart,
+  MessageCircle,
+} from "lucide-react";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../../../redux/slice/cart";
 import "./ProductDetailsPage.css";
@@ -373,7 +379,7 @@ const ProductDetailsPageAlt = () => {
               <Heart size={20} fill={isWishlisted ? "currentColor" : "none"} />
             </button>
           </div>
-
+{/* 
           <div className="product-rating">
             <div
               className="stars"
@@ -399,7 +405,7 @@ const ProductDetailsPageAlt = () => {
                 New
               </span>
             )}
-          </div>
+          </div> */}
 
           <div className="product-pricing">
             {product.discountPrice ? (
@@ -476,132 +482,61 @@ const ProductDetailsPageAlt = () => {
               Add to Cart
             </button>
           </div>
-
-          {/* <div className="product-meta">
-            <div className="meta-item">
-              <span className="meta-label">Category:</span>
-              <span className="meta-value">{product.category}</span>
-            </div>
-            <div className="meta-item">
-              <span className="meta-label">Availability:</span>
-              <span className="meta-value in-stock">
-                {product.stock && product.stock > 0
-                  ? `In Stock (${product.stock} items)`
-                  : "Out of Stock"}
-              </span>
-            </div>
-            {product.sellerId && product.sellerId !== "Unknown Seller" && (
-              <div className="meta-item">
-                <span className="meta-label">Seller:</span>
-                <span className="meta-value">{product.sellerId}</span>
-              </div>
-            )}
-          </div> */}
         </div>
       </div>
 
-      {/* Product Reviews Section */}
+      {/* Product Reviews Section - No Reviews State */}
       <section className="product-reviews" aria-labelledby="reviews-heading">
         <h2 id="reviews-heading">Customer Reviews</h2>
-        <div className="reviews-summary">
-          <div className="average-rating">
-            <span className="average-score">{product.rating.toFixed(1)}</span>
-            <div className="stars">
-              {Array(5)
-                .fill(0)
-                .map((_, i) => (
-                  <Star
-                    key={i}
-                    size={20}
-                    fill={
-                      i < Math.floor(product.rating) ? "currentColor" : "none"
-                    }
-                  />
-                ))}
-            </div>
-            <span className="review-count">{product.reviewCount} reviews</span>
+
+        <div className="no-reviews-container">
+          <div className="no-reviews-icon">
+            <MessageCircle size={48} />
           </div>
-          <div className="rating-bars">
-            {[5, 4, 3, 2, 1].map((stars) => (
-              <div key={stars} className="rating-bar">
-                <span className="star-count">{stars} star</span>
-                <div className="bar-container">
-                  <div
-                    className="bar"
-                    style={{
-                      width: `${(stars / 5) * 100}%`,
-                    }}
-                    aria-hidden="true"
-                  ></div>
-                </div>
-                <span className="review-count">
-                  {Math.floor((stars / 5) * product.reviewCount)}
-                </span>
-              </div>
-            ))}
+
+          <h3 className="no-reviews-title">No Reviews Yet</h3>
+
+          <p className="no-reviews-message">
+            This product doesn't have any reviews yet. Be the first to share
+            your experience!
+          </p>
+
+          <div className="no-reviews-actions">
+            <button
+              className="write-review-btn"
+              onClick={() => {
+                // You can implement a review modal or redirect to review page
+                toast.success("Review feature coming soon!", {
+                  style: { background: "#2196F3", color: "#fff" },
+                });
+              }}
+            >
+              Write First Review
+            </button>
+
+            <button
+              className="share-experience-btn"
+              onClick={() => {
+                // You can implement a share experience feature
+                toast.success("Share your experience after purchase!", {
+                  style: { background: "#4CAF50", color: "#fff" },
+                });
+              }}
+            >
+              Share Your Experience
+            </button>
+          </div>
+
+          <div className="no-reviews-benefits">
+            <h4>Why leave a review?</h4>
+            <ul>
+              <li>Help other customers make informed decisions</li>
+              <li>Share your experience with the product quality</li>
+              <li>Provide feedback to the seller</li>
+              <li>Build trust in the community</li>
+            </ul>
           </div>
         </div>
-
-        {/* Mock Reviews */}
-        <div className="review-list">
-          <article className="review">
-            <header className="review-header">
-              <span className="reviewer">John D.</span>
-              <div
-                className="review-rating"
-                aria-label="Rated 4 out of 5 stars"
-              >
-                {Array(5)
-                  .fill(0)
-                  .map((_, i) => (
-                    <Star
-                      key={i}
-                      size={16}
-                      fill={i < 4 ? "currentColor" : "none"}
-                    />
-                  ))}
-              </div>
-            </header>
-            <h3 className="review-title">Great Product!</h3>
-            <div className="review-body">
-              <p>
-                This product exceeded my expectations. The quality is amazing
-                and it's very comfortable to use. Highly recommend!
-              </p>
-            </div>
-            <footer className="review-date">Posted on March 15, 2023</footer>
-          </article>
-
-          <article className="review">
-            <header className="review-header">
-              <span className="reviewer">Sarah M.</span>
-              <div
-                className="review-rating"
-                aria-label="Rated 5 out of 5 stars"
-              >
-                {Array(5)
-                  .fill(0)
-                  .map((_, i) => (
-                    <Star
-                      key={i}
-                      size={16}
-                      fill={i < 5 ? "currentColor" : "none"}
-                    />
-                  ))}
-              </div>
-            </header>
-            <h3 className="review-title">Perfect!</h3>
-            <div className="review-body">
-              <p>
-                Exactly what I was looking for. The shipping was fast and the
-                product arrived in perfect condition.
-              </p>
-            </div>
-            <footer className="review-date">Posted on February 28, 2023</footer>
-          </article>
-        </div>
-
-        <button className="view-all-reviews">View All Reviews</button>
       </section>
     </div>
   );
