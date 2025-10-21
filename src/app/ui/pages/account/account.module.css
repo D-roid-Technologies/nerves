@@ -854,3 +854,68 @@
     height: 120px;
   }
 }
+
+/* Add to your CSS files */
+.review-subsection {
+  margin-bottom: 24px;
+}
+
+.review-subtitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #374151;
+}
+
+.subsection-empty {
+  text-align: center;
+  padding: 20px;
+  color: #6b7280;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.review-written {
+  border-left: 4px solid #3b82f6;
+}
+
+.review-received {
+  border-left: 4px solid #10b981;
+}
+
+.review-type-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  background: #f3f4f6;
+  color: #374151;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  margin-top: 8px;
+}
+
+.reviewer-info {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.review-type-filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.review-type-btn {
+  padding: 8px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.review-type-btn.active {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}

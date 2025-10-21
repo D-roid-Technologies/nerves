@@ -25,6 +25,12 @@ import { authService } from "../../../redux/configuration/auth.service";
 import { salesService } from "../../../redux/configuration/sales.service";
 import { auth } from "../../../firebase";
 import toast from "react-hot-toast";
+import {
+  selectAllUserRelatedReviews,
+  selectReviewsWrittenByUser,
+  selectReviewsOnUserProducts,
+  Review,
+} from "../../../redux/slice/reviewSlice";
 
 interface UserItem {
   id: string | number;
@@ -43,31 +49,7 @@ interface UserItem {
   brand?: string;
 }
 
-const mockUser = {
-  firstName: "John",
-  lastName: "Doe",
-  email: "john.doe@example.com",
-  phone: "+1 (555) 123-4567",
-  joinDate: "January 2023",
-  reviews: [
-    {
-      id: 1,
-      item: "Wireless Headphones",
-      rating: 4,
-      comment: "Great sound quality! The battery life is impressive.",
-      date: "2 weeks ago",
-    },
-    {
-      id: 2,
-      item: "Bluetooth Speaker",
-      rating: 5,
-      comment: "Excellent bass and clarity. Perfect for outdoor gatherings.",
-      date: "1 month ago",
-    },
-  ],
-};
-
-export default function MyAccountPage() {
+const MyAccountPage = () => {
   const user = useSelector((state: RootState) => state.user);
   const userType = user.primaryInformation?.userType || "both";
   const isSeller = userType === "seller";
@@ -84,6 +66,21 @@ export default function MyAccountPage() {
     null
   );
   const [salesLoading, setSalesLoading] = useState(false);
+
+  const userEmail = user.primaryInformation?.email || "";
+
+  // Review selectors - get both types of reviews
+  const userRelatedReviews = useSelector((state: RootState) =>
+    selectAllUserRelatedReviews(state, userEmail, userItems)
+  );
+
+  const reviewsWrittenByUser = useSelector((state: RootState) =>
+    selectReviewsWrittenByUser(state, userEmail)
+  );
+
+  const reviewsOnUserProducts = useSelector((state: RootState) =>
+    selectReviewsOnUserProducts(state, userEmail, userItems)
+  );
 
   const navigateToPaidOrders = () => navigate("/orders/paid");
   const navigateToSealedOrders = () => navigate("/orders/sealed");
@@ -146,23 +143,6 @@ export default function MyAccountPage() {
   const getUserSales = () => {
     return salesService.getSalesForCurrentUser();
   };
-
-  // const addTestSales = () => {
-  //   setSalesLoading(true);
-  //   try {
-  //     salesService.addTestSales();
-  //     toast.success("Test sales added! Refreshing...");
-  //     // Refresh after a short delay
-  //     setTimeout(() => {
-  //       window.location.reload();
-  //     }, 1500);
-  //   } catch (error) {
-  //     toast.error("Failed to add test sales");
-  //     console.error(error);
-  //   } finally {
-  //     setSalesLoading(false);
-  //   }
-  // };
 
   const clearSalesData = () => {
     if (
@@ -407,45 +387,112 @@ export default function MyAccountPage() {
               className={styles["account-edit-btn"]}
               onClick={navigateToAllReviews}
             >
-              View All Reviews (6)
+              View All Reviews ({userRelatedReviews.allReviews.length})
             </button>
           </div>
-          {mockUser.reviews.length > 0 ? (
-            <div className={styles["account-list"]}>
-              {mockUser.reviews.slice(0, 3).map((review) => (
-                <div
-                  key={review.id}
-                  className={`${styles["account-list-item"]} ${styles["account-review-item"]}`}
-                >
-                  <div className={styles["account-review-header"]}>
-                    <h3 className={styles["account-review-title"]}>
-                      {review.item}
-                    </h3>
-                    <span className={styles["account-review-date"]}>
-                      {review.date}
-                    </span>
+
+          {/* Reviews Written By User */}
+          <div className={styles["review-subsection"]}>
+            <h3 className={styles["review-subtitle"]}>Reviews I've Written</h3>
+            {reviewsWrittenByUser.length > 0 ? (
+              <div className={styles["account-list"]}>
+                {reviewsWrittenByUser.slice(0, 2).map((review: Review) => (
+                  <div
+                    key={review.id}
+                    className={`${styles["account-list-item"]} ${styles["account-review-item"]} ${styles["review-written"]}`}
+                  >
+                    <div className={styles["account-review-header"]}>
+                      <h3 className={styles["account-review-title"]}>
+                        {review.productName}
+                      </h3>
+                      <span className={styles["account-review-date"]}>
+                        {new Date(review.date).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className={styles["account-review-stars"]}>
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={styles["account-review-star"]}
+                          fill={i < review.rating ? "currentColor" : "none"}
+                        />
+                      ))}
+                    </div>
+                    {review.title && (
+                      <h4 className={styles["account-review-subtitle"]}>
+                        {review.title}
+                      </h4>
+                    )}
+                    <p className={styles["account-review-comment"]}>
+                      {review.comment}
+                    </p>
+                    <div className={styles["review-type-badge"]}>
+                      You reviewed this product
+                    </div>
                   </div>
-                  <div className={styles["account-review-stars"]}>
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={styles["account-review-star"]}
-                        fill={i < review.rating ? "currentColor" : "none"}
-                      />
-                    ))}
+                ))}
+              </div>
+            ) : (
+              <div className={styles["subsection-empty"]}>
+                <MessageSquare size={20} />
+                <p>You haven't written any reviews yet</p>
+              </div>
+            )}
+          </div>
+
+          {/* Reviews On User's Products */}
+          <div className={styles["review-subsection"]}>
+            <h3 className={styles["review-subtitle"]}>
+              Reviews On My Products
+            </h3>
+            {reviewsOnUserProducts.length > 0 ? (
+              <div className={styles["account-list"]}>
+                {reviewsOnUserProducts.slice(0, 2).map((review: Review) => (
+                  <div
+                    key={review.id}
+                    className={`${styles["account-list-item"]} ${styles["account-review-item"]} ${styles["review-received"]}`}
+                  >
+                    <div className={styles["account-review-header"]}>
+                      <h3 className={styles["account-review-title"]}>
+                        {review.productName}
+                      </h3>
+                      <span className={styles["account-review-date"]}>
+                        {new Date(review.date).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className={styles["account-review-stars"]}>
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={styles["account-review-star"]}
+                          fill={i < review.rating ? "currentColor" : "none"}
+                        />
+                      ))}
+                    </div>
+                    {review.title && (
+                      <h4 className={styles["account-review-subtitle"]}>
+                        {review.title}
+                      </h4>
+                    )}
+                    <p className={styles["account-review-comment"]}>
+                      {review.comment}
+                    </p>
+                    <div className={styles["reviewer-info"]}>
+                      By: {review.userName}
+                    </div>
+                    <div className={styles["review-type-badge"]}>
+                      Review on your product
+                    </div>
                   </div>
-                  <p className={styles["account-review-comment"]}>
-                    {review.comment}
-                  </p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className={styles["account-empty-state"]}>
-              <MessageSquare className={styles["account-empty-icon"]} />
-              <p>You haven't reviewed any products yet</p>
-            </div>
-          )}
+                ))}
+              </div>
+            ) : (
+              <div className={styles["subsection-empty"]}>
+                <MessageSquare size={20} />
+                <p>No reviews on your products yet</p>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -462,21 +509,6 @@ export default function MyAccountPage() {
               </span>
             </div>
             <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-              {/* <button
-                className={styles["account-edit-btn"]}
-                onClick={addTestSales}
-                disabled={salesLoading}
-                style={{
-                  background: "#f59e0b",
-                  opacity: salesLoading ? 0.6 : 1,
-                }}
-              >
-                {salesLoading ? (
-                  <Loader size={16} className={styles["delete-loader"]} />
-                ) : (
-                  "Add Test Sales"
-                )}
-              </button> */}
               <button
                 className={styles["account-edit-btn"]}
                 onClick={navigateToAllSales}
@@ -484,7 +516,7 @@ export default function MyAccountPage() {
               >
                 View All Sales ({completedSales.length})
               </button>
-              {/* {userSales.length > 0 && (
+              {userSales.length > 0 && (
                 <button
                   className={styles["account-edit-btn"]}
                   onClick={clearSalesData}
@@ -492,7 +524,7 @@ export default function MyAccountPage() {
                 >
                   Clear Sales
                 </button>
-              )} */}
+              )}
             </div>
           </div>
 
@@ -563,21 +595,6 @@ export default function MyAccountPage() {
               <p>You haven't made any sales yet</p>
               <p className={styles["account-empty-subtext"]}>
                 When customers purchase your items, they will appear here.
-                {/* <br />
-                <button
-                  onClick={addTestSales}
-                  style={{
-                    background: "#f59e0b",
-                    color: "white",
-                    border: "none",
-                    padding: "8px 16px",
-                    borderRadius: "6px",
-                    marginTop: "12px",
-                    cursor: "pointer",
-                  }}
-                >
-                  Add Test Sales to See How It Works
-                </button> */}
               </p>
             </div>
           )}
@@ -682,4 +699,6 @@ export default function MyAccountPage() {
       )}
     </div>
   );
-}
+};
+
+export default MyAccountPage;
