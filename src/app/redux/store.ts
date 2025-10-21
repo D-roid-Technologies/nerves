@@ -6,6 +6,7 @@ import { locationSlice } from "./slice/location";
 import notificationReducer from "./slice/notification";
 import paidOrdersReducer from "./slice/paidOrders";
 import salesReducer from "./slice/sales";
+import reviewReducer from "./slice/reviewSlice";
 
 export const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
     notification: notificationReducer,
     paidOrders: paidOrdersReducer,
     sales: salesReducer,
+    reviews: reviewReducer,
   },
 });
 
