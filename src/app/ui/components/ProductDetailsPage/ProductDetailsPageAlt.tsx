@@ -7,13 +7,18 @@ import {
   ShoppingCart,
   MessageCircle,
 } from "lucide-react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../../../redux/slice/cart";
 import "./ProductDetailsPage.css";
 import toast, { Toaster } from "react-hot-toast";
 import { authService } from "../../../redux/configuration/auth.service";
 import DeleteProductButton from "../deleteProductButton/DeleteProductButton";
-// import { auth } from "../../../firebase";
+import { RootState } from "../../../redux/store";
+import {
+  selectReviewsByProduct,
+  selectProductRatingStats,
+} from "../../../redux/slice/reviewSlice";
+import ReviewModal from "../../components/reviewModal/ReviewModal";
 
 interface Product {
   id: number;
@@ -45,7 +50,7 @@ const ProductDetailsPageAlt = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
-  //   const [isOwner, setIsOwner] = useState(false);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   // Function to render formatted text
   const renderFormattedText = (text: string) => {
@@ -73,17 +78,6 @@ const ProductDetailsPageAlt = () => {
       );
   };
 
-  //   useEffect(() => {
-  //     const checkOwnership = async () => {
-  //       const currentUser = auth.currentUser;
-  //       if (currentUser && product) {
-  //         const userEmail = currentUser.email;
-  //         setIsOwner(product.sellerId === userEmail);
-  //       }
-  //     };
-
-  //     checkOwnership();
-  //   }, [product]);
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -243,6 +237,17 @@ const ProductDetailsPageAlt = () => {
     fetchProduct();
   }, [productTitle, navigate]);
 
+  // Review selectors
+  const reviews = useSelector((state: RootState) =>
+    product ? selectReviewsByProduct(state, product.id.toString()) : []
+  );
+
+  const ratingStats = useSelector((state: RootState) =>
+    product
+      ? selectProductRatingStats(state, product.id.toString())
+      : { average: 0, count: 0, distribution: [0, 0, 0, 0, 0] }
+  );
+
   const productImages = product?.images?.length
     ? product.images
     : product?.image
@@ -379,33 +384,6 @@ const ProductDetailsPageAlt = () => {
               <Heart size={20} fill={isWishlisted ? "currentColor" : "none"} />
             </button>
           </div>
-{/* 
-          <div className="product-rating">
-            <div
-              className="stars"
-              aria-label={`Rating: ${product.rating} out of 5`}
-            >
-              {Array(5)
-                .fill(0)
-                .map((_, i) => (
-                  <Star
-                    key={i}
-                    size={18}
-                    fill={
-                      i < Math.floor(product.rating) ? "currentColor" : "none"
-                    }
-                  />
-                ))}
-            </div>
-            <span className="review-count">
-              ({product.reviewCount} customer reviews)
-            </span>
-            {product.isNew && (
-              <span className="new-badge" aria-label="New product">
-                New
-              </span>
-            )}
-          </div> */}
 
           <div className="product-pricing">
             {product.discountPrice ? (
@@ -485,58 +463,151 @@ const ProductDetailsPageAlt = () => {
         </div>
       </div>
 
-      {/* Product Reviews Section - No Reviews State */}
+      {/* Product Reviews Section */}
       <section className="product-reviews" aria-labelledby="reviews-heading">
         <h2 id="reviews-heading">Customer Reviews</h2>
 
-        <div className="no-reviews-container">
-          <div className="no-reviews-icon">
-            <MessageCircle size={48} />
+        {reviews.length > 0 ? (
+          <div className="reviews-container">
+            {/* Rating Summary */}
+            <div className="rating-summary">
+              <div className="average-rating">
+                <span className="rating-number">{ratingStats.average}</span>
+                <div className="rating-stars">
+                  {Array(5)
+                    .fill(0)
+                    .map((_, i) => (
+                      <Star
+                        key={i}
+                        size={20}
+                        fill={
+                          i < Math.floor(ratingStats.average)
+                            ? "currentColor"
+                            : "none"
+                        }
+                      />
+                    ))}
+                </div>
+                <span className="rating-count">
+                  ({ratingStats.count} reviews)
+                </span>
+              </div>
+
+              <div className="rating-distribution">
+                {[5, 4, 3, 2, 1].map((rating) => (
+                  <div key={rating} className="rating-bar">
+                    <span className="rating-label">{rating} stars</span>
+                    <div className="bar-container">
+                      <div
+                        className="bar-fill"
+                        style={{
+                          width: `${
+                            ratingStats.count > 0
+                              ? (ratingStats.distribution[rating - 1] /
+                                  ratingStats.count) *
+                                100
+                              : 0
+                          }%`,
+                        }}
+                      />
+                    </div>
+                    <span className="rating-percentage">
+                      {ratingStats.count > 0
+                        ? Math.round(
+                            (ratingStats.distribution[rating - 1] /
+                              ratingStats.count) *
+                              100
+                          )
+                        : 0}
+                      %
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Reviews List */}
+            <div className="reviews-list">
+              {reviews.map((review: any) => (
+                <div key={review.id} className="review-item">
+                  <div className="review-header">
+                    <div className="reviewer-info">
+                      <span className="reviewer-name">{review.userName}</span>
+                      <div className="review-rating">
+                        {Array(5)
+                          .fill(0)
+                          .map((_, i) => (
+                            <Star
+                              key={i}
+                              size={16}
+                              fill={i < review.rating ? "currentColor" : "none"}
+                            />
+                          ))}
+                      </div>
+                    </div>
+                    <span className="review-date">
+                      {new Date(review.date).toLocaleDateString()}
+                    </span>
+                  </div>
+
+                  {review.title && (
+                    <h4 className="review-title">{review.title}</h4>
+                  )}
+
+                  <p className="review-comment">{review.comment}</p>
+
+                  {review.verifiedPurchase && (
+                    <div className="verified-purchase">✓ Verified Purchase</div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
+        ) : (
+          <div className="no-reviews-container">
+            <div className="no-reviews-icon">
+              <MessageCircle size={48} />
+            </div>
 
-          <h3 className="no-reviews-title">No Reviews Yet</h3>
+            <h3 className="no-reviews-title">No Reviews Yet</h3>
 
-          <p className="no-reviews-message">
-            This product doesn't have any reviews yet. Be the first to share
-            your experience!
-          </p>
+            <p className="no-reviews-message">
+              This product doesn't have any reviews yet. Be the first to share
+              your experience!
+            </p>
 
-          <div className="no-reviews-actions">
-            <button
-              className="write-review-btn"
-              onClick={() => {
-                // You can implement a review modal or redirect to review page
-                toast.success("Review feature coming soon!", {
-                  style: { background: "#2196F3", color: "#fff" },
-                });
-              }}
-            >
-              Write First Review
-            </button>
+            <div className="no-reviews-actions">
+              <button
+                className="write-review-btn"
+                onClick={() => setIsReviewModalOpen(true)}
+              >
+                Write First Review
+              </button>
+            </div>
 
-            <button
-              className="share-experience-btn"
-              onClick={() => {
-                // You can implement a share experience feature
-                toast.success("Share your experience after purchase!", {
-                  style: { background: "#4CAF50", color: "#fff" },
-                });
-              }}
-            >
-              Share Your Experience
-            </button>
+            <div className="no-reviews-benefits">
+              <h4>Why leave a review?</h4>
+              <ul>
+                <li>Help other customers make informed decisions</li>
+                <li>Share your experience with the product quality</li>
+                <li>Provide feedback to the seller</li>
+                <li>Build trust in the community</li>
+              </ul>
+            </div>
           </div>
+        )}
 
-          <div className="no-reviews-benefits">
-            <h4>Why leave a review?</h4>
-            <ul>
-              <li>Help other customers make informed decisions</li>
-              <li>Share your experience with the product quality</li>
-              <li>Provide feedback to the seller</li>
-              <li>Build trust in the community</li>
-            </ul>
-          </div>
-        </div>
+        {/* Add Review Modal */}
+        {product && (
+          <ReviewModal
+            isOpen={isReviewModalOpen}
+            onClose={() => setIsReviewModalOpen(false)}
+            product={{
+              id: product.id.toString(),
+              name: product.name,
+            }}
+          />
+        )}
       </section>
     </div>
   );
